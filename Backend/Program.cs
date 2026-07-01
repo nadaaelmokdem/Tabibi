@@ -42,21 +42,19 @@ namespace Tabibi
             builder.Services.AddSwaggerGen();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: "React Frontend",
-        policy =>
-        {
-            policy
-                .WithOrigins(
-                    "http://localhost:5173",
-                    "http://localhost:5174",
-                    "http://127.0.0.1:5500"
-                )
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
-        });
-});
+            {
+                options.AddPolicy(name: "React Frontend",
+                                  policy =>
+                                  {
+                                      policy
+                                             .WithOrigins("http://localhost:5173")
+                                            .WithOrigins("http://127.0.0.1:5500")
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod()
+                                            .AllowCredentials();
+                                  });
+            });
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
