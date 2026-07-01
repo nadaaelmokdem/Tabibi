@@ -55,7 +55,7 @@ namespace Tabibi.Services
                 return ServiceResult<LoginDTO?>.Success(new LoginDTO
                 {
                     User = userResponse,
-                    Token = authUtils.GenerateJwtToken(user),
+Token = authUtils.GenerateJwtToken(user, roles),
                     RefreshToken = refreshToken
                 });
             }
@@ -113,7 +113,7 @@ namespace Tabibi.Services
                 return ServiceResult<LoginDTO?>.Success(new LoginDTO
                 {
                     User = userResponse,
-                    Token = authUtils.GenerateJwtToken(user),
+                    Token = authUtils.GenerateJwtToken(user , roles),
                     RefreshToken = refreshToken,
                 });
             }
