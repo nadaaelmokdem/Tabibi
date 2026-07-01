@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import Navbar from "../Navbar";
+import Navbar from "../navbar";
 
 /**
  * Layout wrapper that renders the Navbar above routed content.
