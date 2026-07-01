@@ -97,8 +97,13 @@ export default function TabibiLogin({
                 navigate("/");
               }
             } catch (err) {
-              setDisplayError(`Failed to register as a ${requiredRole}.`);
-            }
+  const message = err instanceof Error ? err.message : "Failed to switch roles.";
+  Swal.fire({
+    icon: "error",
+    title: "Something went wrong",
+    text: message,
+  });
+}
           } else {
             logout();
             navigate(`/${requiredRole === "Doctor" ? "login" : "doctor-login"}`);
