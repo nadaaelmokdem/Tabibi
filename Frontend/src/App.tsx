@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { LangProvider } from "./context/LangContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import ConsultationChat from "./pages/ConsultationChat";
 import MainLayout from "./components/Layout/MainLayout";
 import { USER_AUTH_CONFIG, DOCTOR_AUTH_CONFIG } from "./config/authConfig";
 import HomePage from "./pages/HomePage";
@@ -75,6 +76,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+      path="/consultation/:sessionId"
+      element={
+        <ProtectedRoute allowedUserTypes={["user", "doctor"]}>
+          <ConsultationChat />
+        </ProtectedRoute>
+      }
+    />
             </Route>
           </Routes>
         </LangProvider>

@@ -8,6 +8,7 @@ using Tabibi.Data;
 using Tabibi.Models;
 using Tabibi.Services;
 using Tabibi.Shared;
+using Tabibi.Hubs;
 
 namespace Tabibi
 {
@@ -40,6 +41,8 @@ namespace Tabibi
             builder.Services.AddOpenApi();
             builder.Services.AddSwaggerGen();
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddSignalR();
+            builder.Services.AddScoped<ChatService>();
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(name: "React Frontend",
@@ -59,20 +62,39 @@ namespace Tabibi
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-                .AddJwtBearer(options =>
+
+                 .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["JwtSettings:ValidIssuer"],
+            ValidAudience = builder.Configuration["JwtSettings:ValidAudience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
+        };
+ 
+        // NEW: allow SignalR to authenticate via ?access_token=... on the
+        // /hubs path, since it can't always send a normal Authorization header.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+ 
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["JwtSettings:ValidIssuer"],
-                        ValidAudience = builder.Configuration["JwtSettings:ValidAudience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
-                    };
-                });
+                    context.Token = accessToken;
+                }
+ 
+                return Task.CompletedTask;
+            }
+        };
+    });
 
             var app = builder.Build();
 
@@ -90,6 +112,8 @@ namespace Tabibi
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.MapControllers();
+            app.MapHub<ChatHub>("/hubs/chat");
 
             app.MapControllers();
 
