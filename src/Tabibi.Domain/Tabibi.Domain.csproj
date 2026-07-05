@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Tabibi.Domain</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    INTENTIONALLY NO PACKAGE REFERENCES.
+    The Domain layer is the center of the onion: it must not depend on EF Core,
+    ASP.NET Identity, or any other infrastructure concern. Every other project
+    depends on this one; this one depends on nothing.
+  -->
+
+</Project>

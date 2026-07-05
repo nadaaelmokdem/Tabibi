@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Tabibi.Domain/Tabibi.Domain.csproj" />
+    <Project Path="src/Tabibi.Application/Tabibi.Application.csproj" />
+    <Project Path="src/Tabibi.Infrastructure/Tabibi.Infrastructure.csproj" />
+    <Project Path="src/Tabibi.Api/Tabibi.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Tabibi.UnitTests/Tabibi.UnitTests.csproj" />
+    <Project Path="tests/Tabibi.IntegrationTests/Tabibi.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Tabibi.Application</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Lightweight DI abstraction only - not the ASP.NET Core container itself -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tabibi.Domain\Tabibi.Domain.csproj" />
+  </ItemGroup>
+
+  <!--
+    Application depends only on Domain. It defines *what* the system does
+    (use cases / services) in terms of abstractions (ports) that Infrastructure
+    implements. No EF Core, no ASP.NET Identity, no HTTP concerns here.
+  -->
+
+</Project>
