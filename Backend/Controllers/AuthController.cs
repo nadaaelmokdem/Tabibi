@@ -4,6 +4,9 @@ using Tabibi.Extensions;
 using Tabibi.Services;
 using LoginRequest = Tabibi.DTOs.LoginRequest;
 
+using Microsoft.AspNetCore.Authorization;
+using Tabibi.Shared;
+
 namespace Tabibi.Controllers
 {
     [Route("api/[controller]")]
@@ -21,11 +24,11 @@ namespace Tabibi.Controllers
                 return BadRequest(res.ErrorMessage);
 
             Response.Cookies.SetRefreshTokenCookie(res.Data!.RefreshToken);
+            Response.Cookies.SetAccessTokenCookie(res.Data!.Token);
 
             return Ok(new
             {
-                user = res.Data.User,
-                token = res.Data.Token
+                user = res.Data.User
             });
         }
 
@@ -50,10 +53,10 @@ namespace Tabibi.Controllers
                 return NotFound("Invalid Email Or Password");
 
             Response.Cookies.SetRefreshTokenCookie(res.Data!.RefreshToken);
+            Response.Cookies.SetAccessTokenCookie(res.Data!.Token);
 
             return Ok(new { 
-                user = res.Data.User,
-                token = res.Data.Token
+                user = res.Data.User
             });
 
         }
@@ -66,6 +69,7 @@ namespace Tabibi.Controllers
             {
                 Request.Cookies.TryGetValue("X-Refresh-Token", out var token);
                 Response.Cookies.DeleteRefreshTokenCookie();
+                Response.Cookies.DeleteAccessTokenCookie();
                 var res = await authService.Logout(token ?? "");
                 return Ok("Logged out successfully");
             }
@@ -94,8 +98,9 @@ namespace Tabibi.Controllers
             };
 
             Response.Cookies.Append("X-Refresh-Token", result.NewRefreshToken, cookieOptions);
+            Response.Cookies.SetAccessTokenCookie(result.JwtToken);
 
-            return Ok(new { token = result.JwtToken });
+            return Ok();
         }
     }
 }

@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 // import DoctorService from '../services/doctorService';
 import { AxiosError } from "axios";
 import type DoctorFormData from "../types/doctorRegisterForm";
+import ErrorBanner from "../components/Auth/ErrorBanner";
 
 export default function DoctorAdditionalData() {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ export default function DoctorAdditionalData() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [globalError, setGlobalError] = useState("");
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -113,6 +115,7 @@ export default function DoctorAdditionalData() {
   };
 
   const handleSaveAndContinue = async () => {
+    setGlobalError("");
     if (!validateForm()) return;
 
     try {
@@ -155,10 +158,29 @@ export default function DoctorAdditionalData() {
       ) {
         const errorData = error.response.data;
         if (Array.isArray(errorData) && errorData.length > 0) {
-          console.log(errorData[0].description);
+          let hasMappedError = false;
+          const backendErrors: Record<string, string> = {};
+          
+          errorData.forEach((errItem: any) => {
+             const desc = errItem.description || "";
+             const descLower = desc.toLowerCase();
+             if (descLower.includes("national id")) { backendErrors.nationalIdNumber = desc; hasMappedError = true; }
+             else if (descLower.includes("license number")) { backendErrors.licenseNumber = desc; hasMappedError = true; }
+             else if (descLower.includes("expiry")) { backendErrors.licenseExpiryDate = desc; hasMappedError = true; }
+             else if (descLower.includes("experience")) { backendErrors.yearsOfExperience = desc; hasMappedError = true; }
+             else if (descLower.includes("license proof")) { backendErrors.licenseProof = desc; hasMappedError = true; }
+          });
+          
+          if (hasMappedError) {
+             setErrors(prev => ({ ...prev, ...backendErrors }));
+          } else {
+             setGlobalError(errorData[0].description);
+          }
+        } else if (typeof errorData === "string") {
+          setGlobalError(errorData);
         }
       } else if (error instanceof AxiosError) {
-        console.log(error.message);
+        setGlobalError(error.message);
       }
       setIsLoading(false);
     }
@@ -214,6 +236,7 @@ export default function DoctorAdditionalData() {
                 noValidate
                 onSubmit={(e) => e.preventDefault()}
               >
+                {globalError && <ErrorBanner message={globalError} />}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* National ID */}
                   <div>

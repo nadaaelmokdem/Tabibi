@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Tabibi.DTOs;
 using Tabibi.Services;
 using Tabibi.Extensions;
+using Tabibi.Shared;
 
 namespace Tabibi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = UserRoles.Patient)]
     public class PatientController(PatientService patientService) : ControllerBase
     {
         [HttpPut("change-patient-data")]
@@ -75,6 +76,25 @@ namespace Tabibi.Controllers
             }
             return NotFound("User does not exist!");
         }
+    
+        [HttpGet("dashboard-summary")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            var userId = User.GetId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not authenticated");
+            }
+ 
+            var dashboard = await patientService.GetDashboard(userId);
+            if (dashboard is null)
+            {
+                return NotFound("User does not exist!");
+            }
+ 
+            return Ok(dashboard);
+        }
+ 
 
 
     }

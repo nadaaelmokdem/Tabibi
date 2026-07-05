@@ -19,30 +19,35 @@ namespace Tabibi.Services
             return Convert.ToBase64String(randomNumber);
         }
 
-        public string GenerateJwtToken(AppUser user)
-        {
-            var secret = configuration["JwtSettings:Secret"];
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret ?? ""));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+       public string GenerateJwtToken(AppUser user, IList<string> roles)
+{
+    var secret = configuration["JwtSettings:Secret"];
+    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret ?? ""));
+    var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
-            {
-                new Claim("sub", user.Id),
-                new Claim("email", user.Email ?? ""),
-                new Claim("name", user.FullName!),
-                new Claim("phone", user.PhoneNumber ?? "")
-            };
+    var claims = new List<Claim>
+    {
+        new Claim("sub", user.Id),
+        new Claim("email", user.Email ?? ""),
+        new Claim("name", user.FullName!),
+        new Claim("phone", user.PhoneNumber ?? "")
+    };
 
-            var token = new JwtSecurityToken(
-                issuer: configuration["JwtSettings:ValidIssuer"],
-                audience: configuration["JwtSettings:ValidAudience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    int.Parse(configuration["JwtSettings:DurationInMinutes"] ?? "60")),
-                signingCredentials: credentials
-            );
+    foreach (var role in roles)
+    {
+        claims.Add(new Claim(ClaimTypes.Role, role));
+    }
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+    var token = new JwtSecurityToken(
+        issuer: configuration["JwtSettings:ValidIssuer"],
+        audience: configuration["JwtSettings:ValidAudience"],
+        claims: claims,
+        expires: DateTime.UtcNow.AddMinutes(
+            int.Parse(configuration["JwtSettings:DurationInMinutes"] ?? "60")),
+        signingCredentials: credentials
+    );
+
+    return new JwtSecurityTokenHandler().WriteToken(token);
+}
     }
 }

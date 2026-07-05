@@ -34,12 +34,16 @@ export default function TabibiLogin({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [displayError, setDisplayError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setEmail(value);
 
+    if (errors.email) {
+      setErrors((prev) => ({ ...prev, email: "" }));
+    }
     if (displayError && EMAIL_REGEX.test(value)) {
       setDisplayError("");
     }
@@ -49,6 +53,9 @@ export default function TabibiLogin({
     const value = e.target.value;
     setPassword(value);
     
+    if (errors.password) {
+      setErrors((prev) => ({ ...prev, password: "" }));
+    }
     if (displayError && value) {
       setDisplayError("");
     }
@@ -57,19 +64,21 @@ export default function TabibiLogin({
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setDisplayError("");
+    
+    const newErrors: Record<string, string> = {};
 
     if (!email.trim()) {
-      setDisplayError("Email address is required.");
-      return;
-    }
-
-    if (!EMAIL_REGEX.test(email)) {
-      setDisplayError("Please enter a valid email address.");
-      return;
+      newErrors.email = "Email address is required.";
+    } else if (!EMAIL_REGEX.test(email)) {
+      newErrors.email = "Please enter a valid email address.";
     }
 
     if (!password) {
-      setDisplayError("Password is required.");
+      newErrors.password = "Password is required.";
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
       return;
     }
 
@@ -89,7 +98,6 @@ export default function TabibiLogin({
           if (result.isConfirmed) {
             try {
               await addToRole(email, requiredRole);
-              // Re-authenticate to fetch the updated user object with the new role
               await login(email, password);
               if (additionalLink) {
                 navigate(`/${additionalLink}`);
@@ -97,8 +105,13 @@ export default function TabibiLogin({
                 navigate("/");
               }
             } catch (err) {
-              setDisplayError(`Failed to register as a ${requiredRole}.`);
-            }
+            const message = err instanceof Error ? err.message : "Failed to switch roles.";
+            Swal.fire({
+              icon: "error",
+              title: "Something went wrong",
+              text: message,
+            });
+          }
           } else {
             logout();
             navigate(`/${requiredRole === "Doctor" ? "login" : "doctor-login"}`);
@@ -173,7 +186,8 @@ export default function TabibiLogin({
           value={email}
           onChange={handleEmailChange}
           disabled={isLoading}
-          borderClass={getInputBorderClass(!!displayError)}
+          borderClass={getInputBorderClass(!!displayError || !!errors.email)}
+          error={errors.email}
         />
 
         <PasswordField
@@ -184,7 +198,8 @@ export default function TabibiLogin({
           showPassword={showPassword}
           togglePassword={() => setShowPassword(!showPassword)}
           disabled={isLoading}
-          borderClass={getInputBorderClass(!!displayError)}
+          borderClass={getInputBorderClass(!!displayError || !!errors.password)}
+          error={errors.password}
         />
 
         <button

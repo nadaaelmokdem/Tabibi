@@ -65,5 +65,25 @@ namespace Tabibi.Services
         {
             return Task.FromResult(_tokens.TryRemove(token, out _));
         }
+
+        public Task CleanupExpiredTokensAsync()
+        {
+            var now = DateTimeOffset.UtcNow;
+            foreach (var kvp in _tokens)
+            {
+                if (kvp.Value.ExpiresAt <= now)
+                {
+                    _tokens.TryRemove(kvp.Key, out _);
+                }
+            }
+            foreach (var kvp in _replacements)
+            {
+                if (kvp.Value.ExpiresAt <= now)
+                {
+                    _replacements.TryRemove(kvp.Key, out _);
+                }
+            }
+            return Task.CompletedTask;
+        }
     }
 }

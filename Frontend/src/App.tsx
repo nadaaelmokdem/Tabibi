@@ -14,6 +14,8 @@ import PatientProfilePage from "./pages/PatientProfile";
 import DoctorProfilePage from "./pages/DoctorProfile";
 import PatientAdditionalData from "./pages/PatientAdditionalData";
 import DoctorAdditionalData from "./pages/DoctorAdditionalData";
+import PatientDashboard from "./pages/PatientDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
@@ -44,6 +46,9 @@ function App() {
             {/* Main Layout Routes (with Navbar) */}
             <Route element={<MainLayout />}>
               <Route path="/" element={<HomePage />} />
+              <Route path="/appointments" element={<HomePage />} />
+              <Route path="/messages" element={<HomePage />} />
+              <Route path="/doctors" element={<HomePage />} />
               <Route
                 path="/ai-chat"
                 element={
@@ -53,9 +58,9 @@ function App() {
                 }
               />
               <Route
-                path="/find-doctor"
+                path="/doctor-dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["Doctor"]}>
                     <DoctorDashboard />
                   </ProtectedRoute>
                 }
@@ -77,6 +82,7 @@ function App() {
                 }
               />
               <Route
+<<<<<<< HEAD
       path="/consultation/:sessionId"
       element={
         <ProtectedRoute allowedUserTypes={["user", "doctor"]}>
@@ -84,6 +90,23 @@ function App() {
         </ProtectedRoute>
       }
     />
+=======
+                path="/patient-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["User"]}>
+                    <PatientDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["Admin"]}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+>>>>>>> master
             </Route>
           </Routes>
         </LangProvider>

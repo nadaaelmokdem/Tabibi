@@ -15,8 +15,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(
     () => authService.getUser() || null,
   );
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(
+    () => !!authService.getUser()
+  );
   const [error, setError] = useState<string | null>(null);
   const initializingRef = useRef(false);
 
@@ -26,27 +27,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (initializingRef.current) return;
     initializingRef.current = true;
 
-    const initializeAuth = async () => {
-      try {
-        const storedUser = authService.getUser();
-        if (storedUser) {
-          setUser(storedUser);
-          const accessToken = await authService.refreshToken();
-
-          if (accessToken?.token) {
-            setToken(accessToken.token);
-          }
-        }
-      } catch {
-        // Only logout if we had a stored user
-        const storedUser = authService.getUser();
-        if (storedUser) {
-          setUser(null);
-          setToken(null);
-        }
-      } finally {
-        setIsLoading(false);
+    const initializeAuth = () => {
+      const storedUser = authService.getUser();
+      if (storedUser) {
+        setUser(storedUser);
       }
+      setIsLoading(false);
     };
 
     initializeAuth();
@@ -61,9 +47,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const response = await authService.login({ email, password });
-      if (response.user && response.token) {
+      if (response.user) {
         setUser(response.user);
-        setToken(response.token);
         return response.user;
       }
     } catch (err) {
@@ -81,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: string,
       password: string,
       phoneNumber: string,
-      userType?: "user" | "doctor",
+      role?: "patient" | "doctor",
     ) => {
       setIsLoading(true);
       setError(null);
@@ -91,11 +76,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email,
           password,
           phoneNumber,
-          userType,
+          role,
         });
-        if (response.user && response.token) {
+        if (response.user) {
           setUser(response.user);
-          setToken(response.token);
         }
       } catch (err) {
         const errorMessage =
@@ -110,13 +94,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     setIsLoading(true);
     try {
-      authService.logout();
+      await authService.logout();
       setUser(null);
-      setToken(null);
       setError(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Logout failed";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -124,8 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value: AuthContextType = {
     user,
-    token,
-    isAuthenticated: !!token || !!user,
+    isAuthenticated: !!user,
     isLoading,
     error,
     login,

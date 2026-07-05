@@ -27,15 +27,11 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Refresh the token
-        const response = await authService.refreshToken();
+        // Refresh the token (this sets the HTTP-only cookie automatically)
+        await authService.refreshToken();
 
-        if (response.token) {
-          // Update the authorization header with the new token
-          originalRequest.headers["Authorization"] = `Bearer ${response.token}`;
-          // Retry the original request with the new token
-          return api(originalRequest);
-        }
+        // Retry the original request with the new cookie
+        return api(originalRequest);
       } catch (refreshError) {
         // If refresh fails, reject the promise
         return Promise.reject(refreshError);

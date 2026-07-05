@@ -119,7 +119,32 @@ export default function SignUp({
       if (error instanceof AxiosError && error.response?.data) {
         const errorData = error.response.data;
         if (Array.isArray(errorData) && errorData.length > 0) {
-          setLocalError(errorData[0].description);
+          let hasMappedError = false;
+          const backendErrors: Record<string, string> = {};
+          
+          errorData.forEach((errItem: any) => {
+            const desc = errItem.description || "";
+            const descLower = desc.toLowerCase();
+            
+            if (descLower.includes("email") || descLower.includes("username")) {
+              backendErrors.email = desc;
+              hasMappedError = true;
+            } else if (descLower.includes("password")) {
+              backendErrors.password = desc;
+              hasMappedError = true;
+            } else if (descLower.includes("phone")) {
+              backendErrors.phoneNumber = desc;
+              hasMappedError = true;
+            }
+          });
+
+          if (hasMappedError) {
+            setErrors((prev) => ({ ...prev, ...backendErrors }));
+          } else {
+            setLocalError(errorData[0].description);
+          }
+        } else if (typeof errorData === "string") {
+          setLocalError(errorData);
         }
       } else if (error instanceof AxiosError) {
         setLocalError(error.message);

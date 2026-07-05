@@ -4,11 +4,12 @@ using Tabibi.Shared;
 using Tabibi.Extensions;
 using Tabibi.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Tabibi.Data;
 
 namespace Tabibi.Services
 {
     public class AuthService(ITokenStore tokenStore, SignInManager<AppUser> signInManager,
-        UserManager<AppUser> userManager, AuthUtils authUtils)
+        UserManager<AppUser> userManager, AuthUtils authUtils, AppDbContext dbContext)
     {
         public record TokenRefreshResult(string NewRefreshToken, string JwtToken);
 
@@ -55,7 +56,7 @@ namespace Tabibi.Services
                 return ServiceResult<LoginDTO?>.Success(new LoginDTO
                 {
                     User = userResponse,
-                    Token = authUtils.GenerateJwtToken(user),
+Token = authUtils.GenerateJwtToken(user, roles),
                     RefreshToken = refreshToken
                 });
             }
@@ -84,40 +85,52 @@ namespace Tabibi.Services
             };
 
             var res = await userManager.CreateAsync(user, signupRequest.Password);
-            if (signupRequest.Role.Equals(UserRoles.Doctor, StringComparison.CurrentCultureIgnoreCase))
+            if (!res.Succeeded)
             {
-                user.DoctorProfile = new();
-                await userManager.AddToRoleAsync(user, UserRoles.Doctor);
-                await userManager.UpdateAsync(user);
-            }
-            else if (signupRequest.Role.Equals(UserRoles.Patient, StringComparison.CurrentCultureIgnoreCase))
-            {
-                user.PatientProfile = new();
-                await userManager.AddToRoleAsync(user, UserRoles.Patient);
-                await userManager.UpdateAsync(user);
-            }
-            else
-            {
-                return ServiceResult<LoginDTO?>.Failure("Incorrect role, valid options: (doctor, user) or keep the parameter empty!");
+                return ServiceResult<LoginDTO?>.Failure(string.Join(", ", res.Errors.Select(e => e.Description)));
             }
 
-            if (res.Succeeded)
+            using var transaction = await dbContext.Database.BeginTransactionAsync();
+            try
             {
-                var roles = await userManager.GetRolesAsync(user);
-                var userResponse = user.ToResponse();
-                userResponse.Roles = roles.ToList();
-
-                var refreshToken = authUtils.GenerateRefreshToken();
-                TimeSpan tokenLifetime = TimeSpan.FromDays(7);
-                await tokenStore.StoreTokenAsync(refreshToken, user.Id, tokenLifetime);
-                return ServiceResult<LoginDTO?>.Success(new LoginDTO
+                if (signupRequest.Role.Equals(UserRoles.Doctor, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    User = userResponse,
-                    Token = authUtils.GenerateJwtToken(user),
-                    RefreshToken = refreshToken,
-                });
+                    await userManager.AddToRoleAsync(user, UserRoles.Doctor);
+                    dbContext.DoctorProfiles.Add(new DoctorProfile { UserId = user.Id });
+                }
+                else if (signupRequest.Role.Equals(UserRoles.Patient, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    await userManager.AddToRoleAsync(user, UserRoles.Patient);
+                    dbContext.PatientProfiles.Add(new PatientProfile { UserId = user.Id });
+                }
+                else
+                {
+                    await transaction.RollbackAsync();
+                    return ServiceResult<LoginDTO?>.Failure("Incorrect role, valid options: (doctor, user) or keep the parameter empty!");
+                }
+
+                await dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
-            return ServiceResult<LoginDTO?>.Failure(string.Join(", ", res.Errors.Select(e => e.Description)));
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
+            var roles = await userManager.GetRolesAsync(user);
+            var userResponse = user.ToResponse();
+            userResponse.Roles = roles.ToList();
+
+            var refreshToken = authUtils.GenerateRefreshToken();
+            TimeSpan tokenLifetime = TimeSpan.FromDays(7);
+            await tokenStore.StoreTokenAsync(refreshToken, user.Id, tokenLifetime);
+            return ServiceResult<LoginDTO?>.Success(new LoginDTO
+            {
+                User = userResponse,
+                Token = authUtils.GenerateJwtToken(user , roles),
+                RefreshToken = refreshToken,
+            });
         }
 
         public async Task<ServiceResult> AddToRole(string email, string role)
@@ -126,30 +139,50 @@ namespace Tabibi.Services
             if (user is null)
                 return ServiceResult.Failure("User doesn't exist!");
 
-            IdentityResult? res;
+            IdentityResult? res = null;
 
-            if (role.Equals(UserRoles.Doctor, StringComparison.CurrentCultureIgnoreCase))
+            using var transaction = await dbContext.Database.BeginTransactionAsync();
+            try
             {
-                user.DoctorProfile = new();
-                res = await userManager.AddToRoleAsync(user, UserRoles.Doctor);
-                await userManager.UpdateAsync(user);
-            }
-            else if (role.Equals(UserRoles.Patient, StringComparison.CurrentCultureIgnoreCase))
-            {
-                user.PatientProfile = new();
-                res = await userManager.AddToRoleAsync(user, UserRoles.Patient);
-                await userManager.UpdateAsync(user);
-            }
-            else
-            {
-                return ServiceResult.Failure("Incorrect role, valid options: (doctor, user) or keep the parameter empty!");
-            }
+                if (role.Equals(UserRoles.Doctor, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    res = await userManager.AddToRoleAsync(user, UserRoles.Doctor);
+                    if (res.Succeeded && !dbContext.DoctorProfiles.Any(p => p.UserId == user.Id))
+                    {
+                        dbContext.DoctorProfiles.Add(new DoctorProfile { UserId = user.Id });
+                    }
+                }
+                else if (role.Equals(UserRoles.Patient, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    res = await userManager.AddToRoleAsync(user, UserRoles.Patient);
+                    if (res.Succeeded && !dbContext.PatientProfiles.Any(p => p.UserId == user.Id))
+                    {
+                        dbContext.PatientProfiles.Add(new PatientProfile { UserId = user.Id });
+                    }
+                }
+                else
+                {
+                    await transaction.RollbackAsync();
+                    return ServiceResult.Failure("Incorrect role, valid options: (doctor, user) or keep the parameter empty!");
+                }
 
-            if (res.Succeeded)
-            {
-                return ServiceResult.Success();
+                if (res != null && res.Succeeded)
+                {
+                    await dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return ServiceResult.Success();
+                }
+                else
+                {
+                    await transaction.RollbackAsync();
+                    return ServiceResult.Failure(res != null ? string.Join(", ", res.Errors.Select(e => e.Description)) : "Role assignment failed");
+                }
             }
-            return ServiceResult.Failure(string.Join(", ", res.Errors.Select(e => e.Description)));
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
 
         }
     }

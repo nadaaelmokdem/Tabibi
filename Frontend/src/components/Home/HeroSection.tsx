@@ -1,22 +1,17 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
 import {
   MdSmartToy,
   MdCheckCircle,
   MdHealthAndSafety,
-  MdDashboard,
-  MdArrowForward,
   MdLock,
   MdBolt,
 } from "react-icons/md";
 
 /**
  * Hero section of the home page.
- * Shows different CTAs depending on authentication state.
  */
 export default function HeroSection() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
 
   return (
     <section className="relative pt-4 pb-8 lg:pt-8 lg:pb-12 px-4 md:px-8 overflow-hidden">
@@ -41,12 +36,8 @@ export default function HeroSection() {
             {/* CTA Area */}
             <div className="pt-2 relative flex flex-col items-center md:items-start w-full">
               <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-primary-light rounded-full mix-blend-multiply filter blur-3xl opacity-30 -z-10 animate-blob animation-delay-2000" />
-
-              {isAuthenticated ? (
-                <AuthenticatedCTAs navigate={navigate} />
-              ) : (
                 <GuestCTAs navigate={navigate} />
-              )}
+
             </div>
           </div>
 
@@ -83,48 +74,6 @@ export default function HeroSection() {
 }
 
 /* ─── Sub-components ─── */
-
-function AuthenticatedCTAs({
-  navigate,
-}: {
-  navigate: ReturnType<typeof useNavigate>;
-}) {
-  return (
-    <div className="flex flex-col gap-4 max-w-xl w-full mx-auto md:mx-0">
-      <button
-        className="w-full cursor-pointer bg-gradient-to-r from-primary to-primary-dark text-white px-6 py-3.5 sm:py-4 rounded-full font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-between group overflow-hidden relative"
-        onClick={() => navigate("/find-doctor")}
-      >
-        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
-        <div className="relative z-10 flex items-center gap-2.5">
-          <div className="bg-white/20 p-1.5 rounded-full">
-            <MdDashboard className="text-xl" />
-          </div>
-          <span className="text-base md:text-xl">Open Dashboard</span>
-        </div>
-        <MdArrowForward className="text-xl relative z-10 transition-transform group-hover:translate-x-1" />
-      </button>
-
-      <div className="flex flex-col sm:flex-row gap-3 justify-center w-full">
-        <button
-          className="flex-1 cursor-pointer bg-surface text-primary-dark border border-surface-variant px-5 py-2.5 sm:py-3 rounded-full font-bold hover:bg-primary/5 hover:border-primary/30 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm group text-sm md:text-base"
-          onClick={() => navigate("/ai-chat")}
-        >
-          <MdSmartToy className="text-xl text-primary transition-transform group-hover:scale-110" />
-          AI Chat
-        </button>
-
-        <button
-          className="flex-1 cursor-pointer bg-surface text-primary-dark border border-surface-variant px-5 py-2.5 sm:py-3 rounded-full font-bold hover:bg-primary/5 hover:border-primary/30 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm group text-sm md:text-base"
-          onClick={() => navigate("/doctors")}
-        >
-          <MdHealthAndSafety className="text-xl text-primary transition-transform group-hover:scale-110" />
-          Browse Doctors
-        </button>
-      </div>
-    </div>
-  );
-}
 
 function GuestCTAs({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
   return (

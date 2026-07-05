@@ -13,7 +13,6 @@ namespace Tabibi.Models
             [Required]
             public string UserId { get; set; } = "";
 
-            // Mandatory Fields
             [Required]
             public string LicenseNumber { get; set; } = "";
 
@@ -29,7 +28,6 @@ namespace Tabibi.Models
             [Required]
             public string LicenseProofUrl { get; set; } = "";
 
-            [Required]
             public DateTime? LicenseExpiryDate { get; set; } = null;
 
             public int YearsOfExperience { get; set; }

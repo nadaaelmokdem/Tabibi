@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { EditableDetailItemProps } from "../../types/profilePageProps";
 import { FiCheck, FiEdit2, FiX } from "react-icons/fi";
+import { AxiosError } from "axios";
 
 
 export const EditableDetailItem: React.FC<EditableDetailItemProps> = ({
@@ -41,8 +42,19 @@ export const EditableDetailItem: React.FC<EditableDetailItemProps> = ({
     try {
       await Promise.resolve(onSave(val));
     } catch (err: unknown) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Failed to save changes";
+      let errorMsg = "Failed to save changes";
+      if (err instanceof AxiosError && err.response?.data) {
+        const errorData = err.response.data;
+        if (Array.isArray(errorData) && errorData.length > 0) {
+          errorMsg = errorData[0].description || errorMsg;
+        } else if (typeof errorData === "string") {
+          errorMsg = errorData;
+        } else if (errorData.message) {
+          errorMsg = errorData.message;
+        }
+      } else if (err instanceof Error) {
+        errorMsg = err.message;
+      }
       setError(errorMsg);
     } finally {
       setIsSaving(false);

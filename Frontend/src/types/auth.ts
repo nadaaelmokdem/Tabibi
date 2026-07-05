@@ -7,13 +7,11 @@ export interface AppUser {
   profilePictureUrl?: string;
   isActive: boolean;
   createdAt: string;
-  userType?: "user" | "doctor" | "admin";
   roles?: string[];
 }
 
 export interface AuthContextType {
   user: AppUser | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -23,7 +21,7 @@ export interface AuthContextType {
     email: string,
     password: string,
     phoneNumber: string,
-    userType?: "user" | "doctor",
+    role?: "patient" | "doctor",
   ) => Promise<void>;
   logout: () => void;
   clearError: () => void;
@@ -39,14 +37,13 @@ export interface SignupRequest {
   email: string;
   password: string;
   phoneNumber: string;
-  userType?: "user" | "doctor";
+  role?: "patient" | "doctor";
 }
 
 export interface AuthResponse {
   success: boolean;
   message: string;
   user?: AppUser;
-  token?: string;
 }
 
 export interface ForgotPasswordRequest {

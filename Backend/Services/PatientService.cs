@@ -181,5 +181,56 @@ namespace Tabibi.Services
                 Address = user.Address
             };
         }
+
+        public async Task<PatientDashboardDTO?> GetDashboard(string userId)
+        {
+            var patient = await dbContext.PatientProfiles
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (patient == null) return null;
+
+            var upcomingAppointments = await dbContext.Appointments
+                .Include(a => a.Doctor).ThenInclude(d => d.User)
+                .Where(a => a.PatientId == patient.PatientId && a.ScheduledAt >= DateTime.UtcNow)
+                .OrderBy(a => a.ScheduledAt)
+                .Take(5)
+                .Select(a => new UpcomingAppointmentDTO
+                {
+                    AppointmentId = a.AppointmentId,
+                    DoctorName = a.Doctor.User.FullName,
+                    ScheduledAt = a.ScheduledAt,
+                    ConsultationType = a.ConsultationType.ToString(),
+                    Status = a.Status.ToString()
+                })
+                .ToListAsync();
+
+            var recentPrescriptions = await dbContext.Prescriptions
+                .Include(p => p.Appointment).ThenInclude(a => a.Doctor).ThenInclude(d => d.User)
+                .Where(p => p.Appointment.PatientId == patient.PatientId)
+                .OrderByDescending(p => p.IssuedAt)
+                .Take(5)
+                .Select(p => new RecentPrescriptionDTO
+                {
+                    PrescriptionId = p.PrescriptionId,
+                    DoctorName = p.Appointment.Doctor.User.FullName,
+                    IssuedAt = p.IssuedAt,
+                    Diagnosis = p.Diagnosis
+                })
+                .ToListAsync();
+
+            var pendingChatSessionsCount = await dbContext.ChatSessions
+                .CountAsync(cs => cs.PatientId == patient.PatientId && cs.DoctorAccepted == null);
+
+            return new PatientDashboardDTO
+            {
+                FullName = patient.User.FullName,
+                UpcomingAppointmentsCount = upcomingAppointments.Count,
+                PendingChatSessionsCount = pendingChatSessionsCount,
+                UpcomingAppointments = upcomingAppointments,
+                RecentPrescriptions = recentPrescriptions
+            };
+        }
+
     }
 }

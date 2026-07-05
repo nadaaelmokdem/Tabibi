@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Tabibi.DTOs;
 using Tabibi.Services;
 using Tabibi.Extensions;
+using Tabibi.Shared;
 
 namespace Tabibi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = UserRoles.Doctor)]
     public class DoctorController(DoctorService doctorService) : ControllerBase
     {
         [HttpPatch("profile-field")]
@@ -51,6 +52,24 @@ namespace Tabibi.Controllers
                 return Ok(profile);
             }
             return NotFound("Doctor does not exist!");
+        }
+           
+        [HttpGet("dashboard-summary")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            var userId = User.GetId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User not authenticated");
+            }
+ 
+            var dashboard = await doctorService.GetDashboard(userId);
+            if (dashboard is null)
+            {
+                return NotFound("Doctor does not exist!");
+            }
+ 
+            return Ok(dashboard);
         }
     }
 }

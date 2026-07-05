@@ -3,28 +3,28 @@
   "WorkspaceRootPath": "C:\\My Files\\Tabibi\\Backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\controllers\\patientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:controllers\\patientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\My Files\\Tabibi\\Backend\\Migrations\\20260701194105_nullableDate2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Migrations\\20260701194105_nullableDate2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\models\\doctorprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:models\\doctorprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\My Files\\Tabibi\\Backend\\Migrations\\20260701193916_nullableDate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Migrations\\20260701193916_nullableDate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\controllers\\doctorauthcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:controllers\\doctorauthcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\controllers\\patientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:controllers\\patientcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\dtos\\serviceresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:dtos\\serviceresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\services\\aidoctor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:services\\aidoctor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\extensions\\appuserextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:extensions\\appuserextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,7 +34,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,80 +42,80 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "AuthController.cs",
-              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Controllers\\AuthController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
-              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Controllers\\AuthController.cs",
-              "RelativeToolTip": "Controllers\\AuthController.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAAswDcAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "20260701194105_nullableDate2.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Migrations\\20260701194105_nullableDate2.cs",
+              "RelativeDocumentMoniker": "Migrations\\20260701194105_nullableDate2.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Migrations\\20260701194105_nullableDate2.cs",
+              "RelativeToolTip": "Migrations\\20260701194105_nullableDate2.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T12:17:26.404Z",
+              "WhenOpened": "2026-07-01T19:41:06.162Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "PatientController.cs",
-              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Controllers\\PatientController.cs",
-              "RelativeDocumentMoniker": "Controllers\\PatientController.cs",
-              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Controllers\\PatientController.cs",
-              "RelativeToolTip": "Controllers\\PatientController.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAAqwE8AAAAFAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "DoctorProfile.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Models\\DoctorProfile.cs",
+              "RelativeDocumentMoniker": "Models\\DoctorProfile.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Models\\DoctorProfile.cs",
+              "RelativeToolTip": "Models\\DoctorProfile.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwA8AAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T12:06:35.54Z",
+              "WhenOpened": "2026-07-01T19:40:16.333Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "DoctorAuthController.cs",
-              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Controllers\\DoctorAuthController.cs",
-              "RelativeDocumentMoniker": "Controllers\\DoctorAuthController.cs",
-              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Controllers\\DoctorAuthController.cs",
-              "RelativeToolTip": "Controllers\\DoctorAuthController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Title": "20260701193916_nullableDate.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Migrations\\20260701193916_nullableDate.cs",
+              "RelativeDocumentMoniker": "Migrations\\20260701193916_nullableDate.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Migrations\\20260701193916_nullableDate.cs",
+              "RelativeToolTip": "Migrations\\20260701193916_nullableDate.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T12:06:34.228Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ServiceResult.cs",
-              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\DTOs\\ServiceResult.cs",
-              "RelativeDocumentMoniker": "DTOs\\ServiceResult.cs",
-              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\DTOs\\ServiceResult.cs",
-              "RelativeToolTip": "DTOs\\ServiceResult.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T11:43:11.375Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "AIDoctor.cs",
-              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Services\\AIDoctor.cs",
-              "RelativeDocumentMoniker": "Services\\AIDoctor.cs",
-              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Services\\AIDoctor.cs",
-              "RelativeToolTip": "Services\\AIDoctor.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T11:40:41.622Z",
+              "WhenOpened": "2026-07-01T19:39:16.588Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "AppDbContext.cs",
-              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Data\\AppDbContext.cs",
-              "RelativeDocumentMoniker": "Data\\AppDbContext.cs",
-              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Data\\AppDbContext.cs",
-              "RelativeToolTip": "Data\\AppDbContext.cs",
-              "ViewState": "AgIAAHwAAAAAAAAAAAAqwI0AAAA0AAAAAAAAAA==",
+              "Title": "AppUserExtensions.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Extensions\\AppUserExtensions.cs",
+              "RelativeDocumentMoniker": "Extensions\\AppUserExtensions.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Extensions\\AppUserExtensions.cs",
+              "RelativeToolTip": "Extensions\\AppUserExtensions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-25T11:29:23.903Z",
+              "WhenOpened": "2026-07-01T15:02:17.38Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-01T14:59:52.465Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PatientController.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Controllers\\PatientController.cs",
+              "RelativeDocumentMoniker": "Controllers\\PatientController.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Controllers\\PatientController.cs",
+              "RelativeToolTip": "Controllers\\PatientController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-01T14:50:34.815Z",
               "EditorCaption": ""
             }
           ]

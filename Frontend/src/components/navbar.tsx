@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MdMedicalServices,
   MdMenu,
@@ -18,8 +18,11 @@ const Navbar = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, isAuthenticated, isLoading, logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    navigate("/", { state: { loggingOut: true } });
+    await logout();
     setIsUserMenuOpen(false);
     setIsOpen(false);
   };
@@ -62,8 +65,18 @@ const Navbar = () => {
         {/* Left Section: Logo + Navigation Links */}
         <div className="flex items-center gap-8">
           <Link
-            to="/"
-            className="text-2xl font-heading font-extrabold text-primary tracking-tight flex items-center gap-2 mr-5"
+            to={
+              isAuthenticated
+                ? hasBoth
+                  ? profileMode === "doctor"
+                    ? "/doctor-dashboard"
+                    : "/patient-dashboard"
+                  : isDoctor
+                    ? "/doctor-dashboard"
+                    : "/patient-dashboard"
+                : "/"
+            }
+            className="text-2xl font-heading font-extrabold text-primary tracking-tight flex items-center gap-2 mr-5 hover:opacity-80 transition-opacity"
           >
             <MdMedicalServices className="text-primary-light text-3xl" />
             Tabibi
@@ -72,7 +85,15 @@ const Navbar = () => {
           <div className="hidden md:flex gap-6 items-center">
             {isAuthenticated && (
               <Link
-                to="/dashboard"
+                to={
+                  hasBoth
+                    ? profileMode === "doctor"
+                      ? "/doctor-dashboard"
+                      : "/patient-dashboard"
+                    : isDoctor
+                      ? "/doctor-dashboard"
+                      : "/patient-dashboard"
+                }
                 className="text-text-muted hover:text-primary transition-colors duration-200"
               >
                 Dashboard
@@ -85,7 +106,7 @@ const Navbar = () => {
               Chat with AI
             </Link>
             <Link
-              to="/find-doctor"
+              to="/doctors"
               className="text-text-muted hover:text-primary transition-colors duration-200"
             >
               Find a Doctor
@@ -275,14 +296,22 @@ const Navbar = () => {
               </div>
 
               <Link
-                to="/dashboard"
+                to={
+                  hasBoth
+                    ? profileMode === "doctor"
+                      ? "/doctor-dashboard"
+                      : "/patient-dashboard"
+                    : isDoctor
+                      ? "/doctor-dashboard"
+                      : "/patient-dashboard"
+                }
                 onClick={() => setIsOpen(false)}
                 className="text-text-main font-medium hover:text-primary flex items-center gap-3 bg-surface-variant/30 py-2 px-3 rounded-lg"
               >
                 <MdDashboard className="text-primary text-lg" /> Dashboard
               </Link>
               <Link
-                to="/find-doctor"
+                to="/doctors"
                 onClick={() => setIsOpen(false)}
                 className="text-text-main font-medium hover:text-primary px-3"
               >

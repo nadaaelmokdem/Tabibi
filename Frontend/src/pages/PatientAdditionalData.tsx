@@ -5,6 +5,7 @@ import type patientExtraData from "../types/extraDataPatient";
 import { useAuth } from "../context/AuthContext";
 import PatientService from "../services/patientService";
 import { AxiosError } from "axios";
+import ErrorBanner from "../components/Auth/ErrorBanner";
 
 export default function ContinueData() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function ContinueData() {
 
   // Error States
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [globalError, setGlobalError] = useState("");
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -83,6 +85,7 @@ export default function ContinueData() {
   };
 
   const handleSaveAndContinue = async () => {
+    setGlobalError("");
     if (!validateForm()) return;
 
     try {
@@ -99,11 +102,30 @@ export default function ContinueData() {
       ) {
         const errorData = error.response.data;
         if (Array.isArray(errorData) && errorData.length > 0) {
-          const errorMessage = errorData[0].description;
-          console.log(errorMessage);
+          let hasMappedError = false;
+          const backendErrors: Record<string, string> = {};
+          
+          errorData.forEach((errItem: any) => {
+            const desc = errItem.description || "";
+            const descLower = desc.toLowerCase();
+            if (descLower.includes("address")) { backendErrors.address = desc; hasMappedError = true; }
+            else if (descLower.includes("age")) { backendErrors.age = desc; hasMappedError = true; }
+            else if (descLower.includes("gender")) { backendErrors.gender = desc; hasMappedError = true; }
+            else if (descLower.includes("weight")) { backendErrors.weight = desc; hasMappedError = true; }
+            else if (descLower.includes("height")) { backendErrors.height = desc; hasMappedError = true; }
+            else if (descLower.includes("phone") || descLower.includes("emergency")) { backendErrors.emergencyPhone = desc; hasMappedError = true; }
+          });
+          
+          if (hasMappedError) {
+             setErrors(prev => ({ ...prev, ...backendErrors }));
+          } else {
+             setGlobalError(errorData[0].description);
+          }
+        } else if (typeof errorData === "string") {
+          setGlobalError(errorData);
         }
       } else if (error instanceof AxiosError) {
-        console.log(error.message);
+        setGlobalError(error.message);
       }
       setIsLoading(false);
     }
@@ -158,6 +180,7 @@ export default function ContinueData() {
 
               {/* Secure HTML Form Area */}
               <form className="space-y-5" noValidate>
+                {globalError && <ErrorBanner message={globalError} />}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Address Module */}
                   <div className="md:col-span-2">

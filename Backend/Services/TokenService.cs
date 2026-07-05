@@ -7,13 +7,14 @@ namespace Tabibi.Services
     public class TokenService(ITokenStore _tokenStore, UserManager<AppUser> userManager,  AuthUtils authUtils)
     {
         private async Task<TokenRefreshResult?> GenerateResultAsync(string userId, string refreshToken)
-        {
-            var user = await userManager.FindByIdAsync(userId);
-            if (user is null) return null;
+{
+    var user = await userManager.FindByIdAsync(userId);
+    if (user is null) return null;
 
-            var jwtToken = authUtils.GenerateJwtToken(user);
-            return new TokenRefreshResult(refreshToken, jwtToken);
-        }
+    var roles = await userManager.GetRolesAsync(user);
+    var jwtToken = authUtils.GenerateJwtToken(user, roles);
+    return new TokenRefreshResult(refreshToken, jwtToken);
+}
 
         public async Task<TokenRefreshResult?> RefreshTokenAsync(string oldRefreshToken)
         {

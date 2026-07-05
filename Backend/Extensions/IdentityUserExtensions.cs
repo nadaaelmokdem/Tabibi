@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 
 namespace Tabibi.Extensions
 {
@@ -6,7 +6,8 @@ namespace Tabibi.Extensions
     {
         public static string? GetId(this ClaimsPrincipal user)
         {
-            return user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            return user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? 
+                   user.FindFirst("sub")?.Value;
         }
     }
 }

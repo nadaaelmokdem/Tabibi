@@ -1,4 +1,5 @@
 import { isAxiosError } from "axios";
+import type { DoctorDashboardData } from "../types/dashboard";
 import api from "./api";
 import type { DoctorProfileData } from "../types/profilePageProps";
 
@@ -31,6 +32,10 @@ export default class DoctorService {
 
   static async getProfile(): Promise<DoctorProfileData> {
     const response = await api.get("doctor/profile");
+    return response.data;
+  }
+   static async getDashboard(): Promise<DoctorDashboardData> {
+    const response = await api.get("doctor/dashboard-summary");
     return response.data;
   }
 }

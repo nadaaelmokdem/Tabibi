@@ -234,10 +234,18 @@ namespace Tabibi.Services
                 switch (fieldName.ToLower())
                 {
                     case "licensenumber":
-                        doctor.LicenseNumber = value;
+                        if (doctor.LicenseNumber != value)
+                        {
+                            doctor.LicenseNumber = value;
+                            doctor.IsVerified = false;
+                        }
                         break;
                     case "nationalidnumber":
-                        doctor.NationalIdNumber = value;
+                        if (doctor.NationalIdNumber != value)
+                        {
+                            doctor.NationalIdNumber = value;
+                            doctor.IsVerified = false;
+                        }
                         break;
                     case "cliniclocation":
                         doctor.ClinicLocation = value;
@@ -272,5 +280,63 @@ namespace Tabibi.Services
                 return ServiceResult.Failure(ex.Message);
             }
         }
+         public async Task<DoctorDashboardDTO?> GetDashboard(string userId)
+        {
+            var doctor = await dbContext.DoctorProfiles
+                .Include(d => d.User)
+                .FirstOrDefaultAsync(d => d.UserId == userId);
+
+            if (doctor == null) return null;
+
+            var pendingChatRequests = await dbContext.ChatSessions
+                .Include(cs => cs.Patient).ThenInclude(p => p.User)
+                .Include(cs => cs.SymptomAnalysis)
+                .Where(cs => cs.DoctorId == doctor.DoctorId && cs.DoctorAccepted == null)
+                .OrderBy(cs => cs.StartedAt)
+                .Take(10)
+                .Select(cs => new PendingChatRequestDTO
+                {
+                    SessionId = cs.SessionId,
+                    PatientName = cs.Patient.User.FullName,
+                    SessionSummary = cs.SessionSummary,
+                    StartedAt = cs.StartedAt
+                })
+                .ToListAsync();
+
+            var todayStart = DateTime.UtcNow.Date;
+            var todayEnd = todayStart.AddDays(1);
+
+            var todaysAppointments = await dbContext.Appointments
+                .Where(a => a.DoctorId == doctor.DoctorId && a.ScheduledAt >= todayStart && a.ScheduledAt < todayEnd)
+                .OrderBy(a => a.ScheduledAt)
+                .Select(a => new UpcomingAppointmentDTO
+                {
+                    AppointmentId = a.AppointmentId,
+                    DoctorName = doctor.User.FullName,
+                    ScheduledAt = a.ScheduledAt,
+                    ConsultationType = a.ConsultationType.ToString(),
+                    Status = a.Status.ToString()
+                })
+                .ToListAsync();
+
+            var totalPatientsSeen = await dbContext.Appointments
+                .Where(a => a.DoctorId == doctor.DoctorId && a.Status == AppointmentStatus.Completed)
+                .Select(a => a.PatientId)
+                .Distinct()
+                .CountAsync();
+
+            return new DoctorDashboardDTO
+            {
+                FullName = doctor.User.FullName,
+                IsVerified = doctor.IsVerified,
+                PendingChatRequestsCount = pendingChatRequests.Count,
+                TodaysAppointmentsCount = todaysAppointments.Count,
+                TotalPatientsSeen = totalPatientsSeen,
+                PendingChatRequests = pendingChatRequests,
+                TodaysAppointments = todaysAppointments
+            };
+        }
+
+
     }
 }

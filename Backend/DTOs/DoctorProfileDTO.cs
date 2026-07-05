@@ -14,7 +14,7 @@ namespace Tabibi.DTOs
         public string ClinicLocation { get; set; } = "";
         public string ClinicPhoneNumber { get; set; } = "";
         public string LicenseProofUrl { get; set; } = "";
-        public DateTime LicenseExpiryDate { get; set; }
+        public DateTime? LicenseExpiryDate { get; set; }
         public int YearsOfExperience { get; set; }
         public string? Bio { get; set; }
         public string? ProfilePictureUrl { get; set; }
