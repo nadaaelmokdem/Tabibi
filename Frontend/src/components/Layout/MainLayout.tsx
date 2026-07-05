@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, Link } from "react-router-dom";
-import Navbar from "../Navbar";
+import Navbar from "../navbar";
 import Sidebar from "../DashboardSidebar";
 import { useAuth } from "../../context/AuthContext";
 import { LuMenu } from "react-icons/lu";
@@ -14,6 +14,8 @@ export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const isDoctor = user?.roles?.some((r) => r.toLowerCase() === "doctor") || user?.userType?.toLowerCase() === "doctor";
+  const isAdmin = user?.roles?.some((r) => r.toLowerCase() === "admin") || user?.userType?.toLowerCase() === "admin";
+  const homePath = isAdmin ? "/admin-dashboard" : isDoctor ? "/doctor-dashboard" : "/patient-dashboard";
 
   return (
     <div className={`flex min-h-screen ${isAuthenticated ? 'bg-gray-50' : ''}`}>
@@ -32,8 +34,8 @@ export default function MainLayout() {
             >
               <LuMenu className="text-2xl" />
             </button>
-            <Link 
-              to={isDoctor ? "/doctor-dashboard" : "/patient-dashboard"}
+            <Link
+              to={homePath}
               className="ml-3 font-bold text-primary text-lg flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <MdMedicalServices className="text-primary-light text-xl" />

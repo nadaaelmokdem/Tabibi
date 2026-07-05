@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { MdClose, MdAccessTime, MdDelete } from "react-icons/md";
-import DashboardSidebar from "../DashboardSidebar";
 
 import type { CalendarModalProps } from "../../types/dashboardProps";
 import type { ScheduleItem } from "../../types/DoctorDashboard";
@@ -78,7 +77,6 @@ export default function CalendarModal({
 
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#2A2455]/60 backdrop-blur-sm p-4">
-      <DashboardSidebar />
       <div className="bg-white rounded-[2rem] w-full max-w-4xl flex flex-col md:flex-row overflow-hidden shadow-2xl animate-in zoom-in duration-200">
         <div className="flex-1 p-8">
           <div className="flex justify-between items-center mb-8">

@@ -31,6 +31,8 @@ export interface PendingChatRequest {
 export interface DoctorDashboardData {
   fullName: string;
   isVerified: boolean;
+  verificationStatus: "Pending" | "Approved" | "Rejected" | "NeedsChanges";
+  adminComment?: string;
   pendingChatRequestsCount: number;
   todaysAppointmentsCount: number;
   totalPatientsSeen: number;
@@ -44,6 +46,7 @@ export interface PendingDoctor {
   fullName: string;
   licenseNumber: string;
   clinicLocation: string;
+  verificationStatus: string;
 }
 
 export interface AdminDashboardData {

@@ -21,8 +21,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const navigate = useNavigate();
   
   const isDoctor = user?.roles?.some((r) => r.toLowerCase() === "doctor");
-  
-  const navItems = isDoctor ? [
+  const isAdmin = user?.roles?.some((r) => r.toLowerCase() === "admin");
+
+  const homePath = isAdmin ? "/admin-dashboard" : isDoctor ? "/doctor-dashboard" : "/patient-dashboard";
+
+  const navItems = isAdmin ? [
+    { name: "Admin Dashboard", icon: LuLayoutDashboard, path: "/admin-dashboard" },
+  ] : isDoctor ? [
     { name: "Doctor Dashboard", icon: LuLayoutDashboard, path: "/doctor-dashboard" },
     { name: "Appointments", icon: LuCalendarDays, path: "/appointments" },
     { name: "Patients", icon: LuFolderHeart, path: "/patients" },
@@ -52,9 +57,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between lg:hidden mb-4">
-               <Link 
-                 to={isDoctor ? "/doctor-dashboard" : "/patient-dashboard"} 
-                 onClick={onClose} 
+               <Link
+                 to={homePath}
+                 onClick={onClose}
                  className="text-xl font-bold text-primary flex items-center gap-2 hover:opacity-80 transition-opacity"
                >
                  <MdMedicalServices className="text-primary-light" />
@@ -81,7 +86,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   {user?.fullName || "User Portal"}
                 </h2>
                 <p className="text-xs text-text-muted font-normal truncate">
-                  {isDoctor ? "Doctor Portal" : "Patient Portal"}
+                  {isAdmin ? "Admin Portal" : isDoctor ? "Doctor Portal" : "Patient Portal"}
                 </p>
               </div>
             </div>
@@ -111,20 +116,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Bottom Section */}
           <div className="mt-auto space-y-4 pt-4 border-t border-surface-variant">
             <div className="space-y-1">
-              <NavLink
-                to={isDoctor ? "/doctor-profile" : "/profile"}
-                onClick={() => onClose()}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out active:scale-95 ${
-                    isActive
-                      ? "bg-surface-variant text-primary border-r-4 border-primary"
-                      : "text-text-muted hover:bg-surface-variant/50 hover:text-text-main"
-                  }`
-                }
-              >
-                <LuSettings className="text-lg" />
-                <span>Profile Settings</span>
-              </NavLink>
+              {!isAdmin && (
+                <NavLink
+                  to={isDoctor ? "/doctor-profile" : "/profile"}
+                  onClick={() => onClose()}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out active:scale-95 ${
+                      isActive
+                        ? "bg-surface-variant text-primary border-r-4 border-primary"
+                        : "text-text-muted hover:bg-surface-variant/50 hover:text-text-main"
+                    }`
+                  }
+                >
+                  <LuSettings className="text-lg" />
+                  <span>Profile Settings</span>
+                </NavLink>
+              )}
               <a
                 className="flex items-center gap-3 px-4 py-2 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 ease-in-out active:scale-95 cursor-pointer"
                 onClick={async () => {

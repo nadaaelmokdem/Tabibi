@@ -14,9 +14,10 @@ export default function HomePage() {
   const location = useLocation();
 
   if (isAuthenticated && location.pathname === "/" && !location.state?.loggingOut) {
-    const isDoctor =
-      user?.roles?.some((r) => r.toLowerCase() === "doctor")
-    return <Navigate to={isDoctor ? "/doctor-dashboard" : "/patient-dashboard"} replace />;
+    const isAdmin = user?.roles?.some((r) => r.toLowerCase() === "admin");
+    const isDoctor = user?.roles?.some((r) => r.toLowerCase() === "doctor");
+    const target = isAdmin ? "/admin-dashboard" : isDoctor ? "/doctor-dashboard" : "/patient-dashboard";
+    return <Navigate to={target} replace />;
   }
   return (
     <>

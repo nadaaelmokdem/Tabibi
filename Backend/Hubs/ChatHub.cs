@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using Tabibi.DTOs;
 using Tabibi.Services;
+using Tabibi.Shared;
 
 namespace Tabibi.Hubs
 {
@@ -14,6 +15,16 @@ namespace Tabibi.Hubs
         private string? GetUserId() =>
             Context.User?.FindFirstValue(ClaimTypes.NameIdentifier)
             ?? Context.User?.FindFirstValue("sub");
+
+        // Lets an admin watch a session's messages live without being a participant -
+        // read-only, never validated against ValidateAccess (which only allows the
+        // patient/doctor pair), and admins never call SendMessage.
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task JoinAsObserver(int sessionId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(sessionId));
+            await Clients.Caller.SendAsync("JoinedSession", new { sessionId, role = "Observer" });
+        }
 
         // Client calls this right after the connection starts, once it
         // knows which session it wants to chat in.

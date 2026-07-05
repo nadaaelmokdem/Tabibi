@@ -59,6 +59,13 @@ export async function joinSession(sessionId: number): Promise<void> {
   await conn.invoke("JoinSession", sessionId);
 }
 
+// Admin-only: joins the session's group to watch messages arrive live,
+// without being validated as a patient/doctor participant. Never sends.
+export async function joinAsObserver(sessionId: number): Promise<void> {
+  const conn = await startConnection();
+  await conn.invoke("JoinAsObserver", sessionId);
+}
+
 export async function leaveSession(sessionId: number): Promise<void> {
   if (!connection) return;
   await connection.invoke("LeaveSession", sessionId);

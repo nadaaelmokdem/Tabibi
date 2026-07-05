@@ -7,6 +7,7 @@ export interface AppUser {
   profilePictureUrl?: string;
   isActive: boolean;
   createdAt: string;
+  userType?: "user" | "doctor" | "admin";
   roles?: string[];
 }
 
@@ -21,7 +22,7 @@ export interface AuthContextType {
     email: string,
     password: string,
     phoneNumber: string,
-    role?: "patient" | "doctor",
+    role?: "user" | "doctor",
   ) => Promise<void>;
   logout: () => void;
   clearError: () => void;
@@ -37,7 +38,7 @@ export interface SignupRequest {
   email: string;
   password: string;
   phoneNumber: string;
-  role?: "patient" | "doctor";
+  role?: "user" | "doctor";
 }
 
 export interface AuthResponse {

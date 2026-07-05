@@ -6,7 +6,7 @@ namespace Tabibi.Extensions
 {
     public static class AppUserExtensions
     {
-        public static UserResponse ToResponse(this AppUser user)
+        public static UserResponse ToResponse(this AppUser user, string userType = "user")
         {
             return new UserResponse
             {
@@ -15,7 +15,8 @@ namespace Tabibi.Extensions
                 FullName = user.FullName!,
                 PhoneNumber = user.PhoneNumber!,
                 IsActive = user.IsActive,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                UserType = userType
             };
         }
     }

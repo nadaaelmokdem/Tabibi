@@ -38,7 +38,13 @@ namespace Tabibi.Models
             [Column(TypeName = "decimal(3,2)")]
             public decimal AverageRating { get; set; } = 0;
 
-            public bool IsVerified { get; set; } = false;
+            public DoctorVerificationStatus VerificationStatus { get; set; } = DoctorVerificationStatus.Pending;
+            public string? AdminComment { get; set; }
+            public DateTime? ReviewedAt { get; set; }
+
+            [NotMapped]
+            public bool IsVerified => VerificationStatus == DoctorVerificationStatus.Approved;
+
             public bool IsAvailableNow { get; set; } = false;
 
             // Navigation

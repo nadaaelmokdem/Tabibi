@@ -201,6 +201,8 @@ namespace Tabibi.Services
                 ProfilePictureUrl = doctor.ProfilePictureUrl,
                 AverageRating = doctor.AverageRating,
                 IsVerified = doctor.IsVerified,
+                VerificationStatus = doctor.VerificationStatus.ToString(),
+                AdminComment = doctor.AdminComment,
                 IsAvailableNow = doctor.IsAvailableNow,
                 Specialties = doctor.DoctorSpecialties
                     .Select(ConvertToSpecialtyPriceDTO)
@@ -234,18 +236,10 @@ namespace Tabibi.Services
                 switch (fieldName.ToLower())
                 {
                     case "licensenumber":
-                        if (doctor.LicenseNumber != value)
-                        {
-                            doctor.LicenseNumber = value;
-                            doctor.IsVerified = false;
-                        }
+                        doctor.LicenseNumber = value;
                         break;
                     case "nationalidnumber":
-                        if (doctor.NationalIdNumber != value)
-                        {
-                            doctor.NationalIdNumber = value;
-                            doctor.IsVerified = false;
-                        }
+                        doctor.NationalIdNumber = value;
                         break;
                     case "cliniclocation":
                         doctor.ClinicLocation = value;
@@ -270,6 +264,13 @@ namespace Tabibi.Services
                         break;
                     default:
                         return ServiceResult.Failure("Field doesn't exist or cannot be updated via this endpoint!");
+                }
+
+                // Editing a rejected/changes-requested profile counts as a resubmission -
+                // send it back to the front of the admin's review queue.
+                if (doctor.VerificationStatus is DoctorVerificationStatus.Rejected or DoctorVerificationStatus.NeedsChanges)
+                {
+                    doctor.VerificationStatus = DoctorVerificationStatus.Pending;
                 }
 
                 await dbContext.SaveChangesAsync();

@@ -23,6 +23,8 @@ export interface DoctorProfileData {
   clinicPhoneNumber: string;
   bio: string;
   specialties: string;
+  verificationStatus?: "Pending" | "Approved" | "Rejected" | "NeedsChanges";
+  adminComment?: string;
 }
 
 export interface EditableHeaderFieldProps {

@@ -20,6 +20,8 @@ namespace Tabibi.DTOs
         public string? ProfilePictureUrl { get; set; }
         public decimal AverageRating { get; set; }
         public bool IsVerified { get; set; }
+        public string VerificationStatus { get; set; } = "Pending";
+        public string? AdminComment { get; set; }
         public bool IsAvailableNow { get; set; }
 
         /// <summary>

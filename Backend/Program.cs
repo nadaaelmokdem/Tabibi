@@ -71,40 +71,8 @@ namespace Tabibi
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
 
-                 .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["JwtSettings:ValidIssuer"],
-            ValidAudience = builder.Configuration["JwtSettings:ValidAudience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]))
-        };
- 
-        // NEW: allow SignalR to authenticate via ?access_token=... on the
-        // /hubs path, since it can't always send a normal Authorization header.
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                var accessToken = context.Request.Query["access_token"];
-                var path = context.HttpContext.Request.Path;
- 
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                .AddJwtBearer(options =>
                 {
-<<<<<<< HEAD
-                    context.Token = accessToken;
-                }
- 
-                return Task.CompletedTask;
-            }
-        };
-    });
-=======
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -115,19 +83,29 @@ namespace Tabibi
                         ValidAudience = builder.Configuration["JwtSettings:ValidAudience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
                     };
+
+                    // Allow SignalR to authenticate via ?access_token=... on the /hubs path,
+                    // since browsers can't attach a normal Authorization header to a WebSocket handshake.
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>
                         {
-                            if (context.Request.Cookies.ContainsKey("X-Access-Token"))
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                            {
+                                context.Token = accessToken;
+                            }
+                            else if (context.Request.Cookies.ContainsKey("X-Access-Token"))
                             {
                                 context.Token = context.Request.Cookies["X-Access-Token"];
                             }
+
                             return Task.CompletedTask;
                         }
                     };
                 });
->>>>>>> master
 
             var app = builder.Build();
 
@@ -148,8 +126,6 @@ namespace Tabibi
             app.MapControllers();
             app.MapHub<ChatHub>("/hubs/chat");
 
-            app.MapControllers();
-
             // Seed roles
             using (var scope = app.Services.CreateScope())
             {
@@ -168,6 +144,36 @@ namespace Tabibi
                 if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
                 {
                   await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+                }
+
+                // Bootstrap: there is no self-registration path for the Admin role,
+                // so seed one admin account from config if none exists yet.
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+                var existingAdmins = await userManager.GetUsersInRoleAsync(UserRoles.Admin);
+                if (existingAdmins.Count == 0)
+                {
+                    var adminEmail = builder.Configuration["AdminSeed:Email"];
+                    var adminPassword = builder.Configuration["AdminSeed:Password"];
+                    var adminFullName = builder.Configuration["AdminSeed:FullName"] ?? "Admin";
+
+                    if (!string.IsNullOrEmpty(adminEmail) && !string.IsNullOrEmpty(adminPassword))
+                    {
+                        var adminUser = new AppUser
+                        {
+                            UserName = adminEmail,
+                            Email = adminEmail,
+                            FullName = adminFullName,
+                            EmailConfirmed = true,
+                            PhoneNumber = "0000000000",
+                            PhoneNumberConfirmed = true
+                        };
+
+                        var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+                        if (createResult.Succeeded)
+                        {
+                            await userManager.AddToRoleAsync(adminUser, UserRoles.Admin);
+                        }
+                    }
                 }
             }
 

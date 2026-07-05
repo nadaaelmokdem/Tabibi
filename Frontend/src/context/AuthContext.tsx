@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: string,
       password: string,
       phoneNumber: string,
-      role?: "patient" | "doctor",
+      role?: "user" | "doctor",
     ) => {
       setIsLoading(true);
       setError(null);
