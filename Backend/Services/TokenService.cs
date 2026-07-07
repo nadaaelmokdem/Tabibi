@@ -9,7 +9,7 @@ namespace Tabibi.Services
         private async Task<TokenRefreshResult?> GenerateResultAsync(string userId, string refreshToken)
 {
     var user = await userManager.FindByIdAsync(userId);
-    if (user is null) return null;
+    if (user is null || !user.IsActive) return null;
 
     var roles = await userManager.GetRolesAsync(user);
     var jwtToken = authUtils.GenerateJwtToken(user, roles);

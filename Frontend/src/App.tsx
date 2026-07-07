@@ -4,7 +4,7 @@ import { LangProvider } from "./context/LangContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import ConsultationChat from "./pages/ConsultationChat";
 import MainLayout from "./components/Layout/MainLayout";
-import { USER_AUTH_CONFIG, DOCTOR_AUTH_CONFIG } from "./config/authConfig";
+import { USER_AUTH_CONFIG, DOCTOR_AUTH_CONFIG, ADMIN_AUTH_CONFIG } from "./config/authConfig";
 import HomePage from "./pages/HomePage";
 import ChatPage from "./pages/ChatPage";
 import DoctorDashboard from "./pages/DoctorDashboard";
@@ -33,6 +33,10 @@ function App() {
             <Route
               path="/doctor-login"
               element={<SignIn {...DOCTOR_AUTH_CONFIG} />}
+            />
+            <Route
+              path="/admin-login"
+              element={<SignIn {...ADMIN_AUTH_CONFIG} />}
             />
             <Route
               path="/register"

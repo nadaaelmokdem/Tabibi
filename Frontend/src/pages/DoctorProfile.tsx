@@ -40,6 +40,8 @@ const ProfilePage: React.FC = () => {
     degreeProofUrl: "",
     specialties: [],
     isVerified: false,
+    verificationStatus: "Pending",
+    adminComment: undefined,
   });
 
   useEffect(() => {
@@ -68,6 +70,8 @@ const ProfilePage: React.FC = () => {
           degreeProofUrl: DoctorProfileData.degreeProofUrl,
           specialties: Array.isArray(DoctorProfileData.specialties) ? DoctorProfileData.specialties : [],
           isVerified: DoctorProfileData.isVerified,
+          verificationStatus: DoctorProfileData.verificationStatus,
+          adminComment: DoctorProfileData.adminComment,
         }));
       } catch (error) {
         console.log("Error: " + error);
@@ -89,7 +93,16 @@ const ProfilePage: React.FC = () => {
         } else {
           await DoctorService.updateProfileField(field as string, value);
         }
-        setProfile((prev) => ({ ...prev, [field]: value }));
+        setProfile((prev) => ({
+          ...prev,
+          [field]: value,
+          // Mirrors the backend: editing a rejected/changes-requested profile
+          // counts as a resubmission and sends it back to Pending.
+          verificationStatus:
+            prev.verificationStatus === "Rejected" || prev.verificationStatus === "NeedsChanges"
+              ? "Pending"
+              : prev.verificationStatus,
+        }));
       }
     } catch (error) {
       console.error("Failed to update profile field:", error);
@@ -180,7 +193,32 @@ const ProfilePage: React.FC = () => {
 
         {/* Details Section */}
         <div className="p-4 sm:p-8 bg-[#FBFAFF]/50 sm:rounded-b-2xl space-y-8">
-          
+
+          {(profile.verificationStatus === "Rejected" ||
+            profile.verificationStatus === "NeedsChanges") && (
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700">
+              <p className="font-bold mb-1">
+                {profile.verificationStatus === "Rejected"
+                  ? "Your application was rejected"
+                  : "Changes requested by admin"}
+              </p>
+              {profile.adminComment && <p>{profile.adminComment}</p>}
+              <p className="mt-1 text-orange-600/80">
+                Edit the relevant field below and it will automatically be resubmitted for review.
+              </p>
+            </div>
+          )}
+          {profile.verificationStatus === "Pending" && (
+            <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700">
+              Your profile is awaiting admin verification.
+            </div>
+          )}
+          {profile.verificationStatus === "Approved" && (
+            <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+              Your profile is verified.
+            </div>
+          )}
+
           {/* Section 1: Bio, Experience, Specialties & Pricing */}
           <div className="bg-white p-6 rounded-2xl border border-[#E6E1FF] shadow-sm space-y-6">
             <h2 className="text-xl font-bold text-[#6A5ACD] flex items-center gap-2">

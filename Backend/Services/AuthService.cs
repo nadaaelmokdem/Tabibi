@@ -14,6 +14,8 @@ namespace Tabibi.Services
     {
         public record TokenRefreshResult(string NewRefreshToken, string JwtToken);
 
+        public const string DeactivatedAccountMessage = "This account has been deactivated.";
+
         public async Task<ServiceResult> Logout(string token)
         {
             if (await tokenStore.RevokeTokenAsync(token))
@@ -43,11 +45,14 @@ namespace Tabibi.Services
             if (user is null)
                 return ServiceResult<LoginDTO?>.Failure("User is not registered!");
 
+            if (!user.IsActive)
+                return ServiceResult<LoginDTO?>.Failure(DeactivatedAccountMessage);
+
             var res = await signInManager.CheckPasswordSignInAsync(user, req.Password, true);
             if (res.Succeeded)
             {
                 var roles = await userManager.GetRolesAsync(user);
-                var userResponse = user.ToResponse();
+                var userResponse = user.ToResponse(UserRoles.ToUserType(roles));
                 userResponse.Roles = roles.ToList();
 
                 if (roles.Contains(UserRoles.Doctor))
@@ -126,7 +131,7 @@ namespace Tabibi.Services
             }
 
             var roles = await userManager.GetRolesAsync(user);
-            var userResponse = user.ToResponse();
+            var userResponse = user.ToResponse(UserRoles.ToUserType(roles));
             userResponse.Roles = roles.ToList();
 
             if (roles.Contains(UserRoles.Doctor))

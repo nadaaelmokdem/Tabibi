@@ -33,6 +33,7 @@ namespace Tabibi.Controllers
         }
 
         [HttpPost("add-to-role")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> AddToRole([FromBody] AddToRoleDTO addToRoleDTO)
         {
             var result = await authService.AddToRole(addToRoleDTO.Email, addToRoleDTO.Role);
@@ -50,7 +51,11 @@ namespace Tabibi.Controllers
         {
             var res = await authService.Login(req);
             if (!res.IsSuccess)
+            {
+                if (res.ErrorMessage == AuthService.DeactivatedAccountMessage)
+                    return StatusCode(403, res.ErrorMessage);
                 return NotFound("Invalid Email Or Password");
+            }
 
             Response.Cookies.SetRefreshTokenCookie(res.Data!.RefreshToken);
             Response.Cookies.SetAccessTokenCookie(res.Data!.Token);

@@ -44,6 +44,7 @@ namespace Tabibi.DTOs
         public string PhoneNumber { get; set; } = "";
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string UserType { get; set; } = "user";
         public List<string> Roles { get; set; } = new();
         public bool IsVerified { get; set; }
     }

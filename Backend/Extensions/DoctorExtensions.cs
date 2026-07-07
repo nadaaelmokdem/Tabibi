@@ -40,6 +40,8 @@ namespace Tabibi.Extensions
                 ProfilePictureUrl = doctor.ProfilePictureUrl,
                 AverageRating = doctor.AverageRating,
                 IsVerified = doctor.IsVerified,
+                VerificationStatus = doctor.VerificationStatus.ToString(),
+                AdminComment = doctor.AdminComment,
                 IsAvailableNow = doctor.IsAvailableNow,
                 Specialties = doctor.DoctorSpecialties
                     .Select(s => s.ToDTO())

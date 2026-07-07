@@ -4,6 +4,7 @@ using System.Security.Claims;
 using Tabibi.DTOs;
 using Tabibi.Services;
 using Tabibi.Extensions;
+using Tabibi.Shared;
 
 namespace Tabibi.Hubs
 {
@@ -62,6 +63,16 @@ namespace Tabibi.Hubs
         public async Task UnsubscribeFromPresence(string userId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"presence-{userId}");
+        }
+
+        // Lets an admin watch a session's messages live without being a participant -
+        // read-only, never validated against ValidateAccess (which only allows the
+        // patient/doctor pair), and admins never call SendMessage.
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task JoinAsObserver(int sessionId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(sessionId));
+            await Clients.Caller.SendAsync("JoinedSession", new { sessionId, role = "Observer" });
         }
 
         // Client calls this right after the connection starts, once it

@@ -7,6 +7,7 @@ export interface AppUser {
   profilePictureUrl?: string;
   isActive: boolean;
   createdAt: string;
+  userType?: "user" | "doctor" | "admin";
   roles?: string[];
   activeRole?: string;
   isVerified?: boolean;

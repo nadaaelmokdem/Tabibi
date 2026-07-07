@@ -30,6 +30,8 @@ namespace Tabibi.DTOs
     {
         public string FullName { get; set; } = string.Empty;
         public bool IsVerified { get; set; }
+        public string VerificationStatus { get; set; } = "Pending";
+        public string? AdminComment { get; set; }
         public int PendingChatRequestsCount { get; set; }
         public int TodaysAppointmentsCount { get; set; }
         public int TotalPatientsSeen { get; set; }
@@ -61,5 +63,6 @@ namespace Tabibi.DTOs
         public string FullName { get; set; } = string.Empty;
         public string? LicenseNumber { get; set; }
         public string? ClinicLocation { get; set; }
+        public string VerificationStatus { get; set; } = "Pending";
     }
 }

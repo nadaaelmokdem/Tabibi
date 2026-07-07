@@ -221,6 +221,13 @@ namespace Tabibi.Services
                         return ServiceResult.Failure("Field doesn't exist or cannot be updated via this endpoint!");
                 }
 
+                // Editing a rejected/changes-requested profile counts as a resubmission -
+                // send it back to the front of the admin's review queue.
+                if (doctor.VerificationStatus is DoctorVerificationStatus.Rejected or DoctorVerificationStatus.NeedsChanges)
+                {
+                    doctor.VerificationStatus = DoctorVerificationStatus.Pending;
+                }
+
                 await dbContext.SaveChangesAsync();
                 return ServiceResult.Success();
             }
@@ -359,6 +366,8 @@ namespace Tabibi.Services
             {
                 FullName = doctor.User.FullName,
                 IsVerified = doctor.IsVerified,
+                VerificationStatus = doctor.VerificationStatus.ToString(),
+                AdminComment = doctor.AdminComment,
                 PendingChatRequestsCount = pendingChatRequests.Count,
                 TodaysAppointmentsCount = todaysAppointments.Count,
                 TotalPatientsSeen = totalPatientsSeen,

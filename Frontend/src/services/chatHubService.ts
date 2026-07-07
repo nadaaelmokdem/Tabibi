@@ -1,5 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import type { ReceivedMessage } from "../types/ReceivedMessage";
+export type { ReceivedMessage };
 
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || "http://localhost:5009/api";
@@ -38,6 +39,13 @@ export async function stopConnection(): Promise<void> {
 export async function joinSession(sessionId: number): Promise<void> {
   const conn = await startConnection();
   await conn.invoke("JoinSession", sessionId);
+}
+
+// Admin-only: joins the session's group to watch messages arrive live,
+// without being validated as a patient/doctor participant. Never sends.
+export async function joinAsObserver(sessionId: number): Promise<void> {
+  const conn = await startConnection();
+  await conn.invoke("JoinAsObserver", sessionId);
 }
 
 export async function leaveSession(sessionId: number): Promise<void> {

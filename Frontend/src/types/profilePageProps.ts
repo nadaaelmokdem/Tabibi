@@ -27,6 +27,8 @@ export interface DoctorProfileData {
   degreeProofUrl?: string;
   specialties: any[];
   isVerified?: boolean;
+  verificationStatus?: "Pending" | "Approved" | "Rejected" | "NeedsChanges";
+  adminComment?: string;
 }
 
 export interface EditableHeaderFieldProps {
