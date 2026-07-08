@@ -14,12 +14,20 @@ export interface RecentPrescription {
   diagnosis?: string;
 }
 
+export interface UnreviewedAppointment {
+  appointmentId: number;
+  doctorId: number;
+  doctorName: string;
+  scheduledAt: string;
+}
+
 export interface PatientDashboardData {
   fullName: string;
   upcomingAppointmentsCount: number;
   chatSessionsCount: number;
   upcomingAppointments: UpcomingAppointment[];
   recentPrescriptions: RecentPrescription[];
+  unreviewedAppointments: UnreviewedAppointment[];
 }
 
 export interface ChatSession {
@@ -32,6 +40,8 @@ export interface ChatSession {
 export interface DoctorDashboardData {
   fullName: string;
   isVerified: boolean;
+  verificationStatus?: "Pending" | "Approved" | "Rejected" | "NeedsChanges";
+  adminComment?: string;
   chatSessionsCount: number;
   todaysAppointmentsCount: number;
   totalPatientsSeen: number;

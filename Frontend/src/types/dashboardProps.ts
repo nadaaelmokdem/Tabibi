@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { ElementType } from "react";
-import type { ChatMessage, RequestItem, ScheduleItem } from "./DoctorDashboard";
+import type { ChatMessage, ScheduleItem } from "./DoctorDashboard";
 
 export interface Appointment {
   id: number | string;
@@ -29,12 +29,6 @@ export interface CalendarModalProps {
 export interface MessagesListProps {
   messages: ChatMessage[];
   onMessageClick: (id: number) => void;
-}
-
-export interface PatientRequestsProps {
-  requests: RequestItem[];
-  onAccept: (req: RequestItem) => void;
-  onReschedule: (id: number) => void;
 }
 
 export interface StatCardProps {

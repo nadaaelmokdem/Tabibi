@@ -1,6 +1,5 @@
 import type {
   ScheduleItem,
-  RequestItem,
   ChatMessage,
 } from "../types/DoctorDashboard";
 
@@ -46,25 +45,6 @@ export const initialSchedule: ScheduleItem[] = [
   },
 ];
 
-export const initialRequests: RequestItem[] = [
-  {
-    id: 101,
-    name: "Omar Tariq",
-    time: "10:00 AM",
-    timeDisplay: "Tomorrow, 10 AM",
-    concern: "Chest pain concern",
-    initials: "OT",
-  },
-  {
-    id: 102,
-    name: "Laila Samir",
-    time: "02:00 PM",
-    timeDisplay: "Thu, 2 PM",
-    concern: "Prescription refill",
-    initials: "LS",
-  },
-];
-
 export const initialMessages: ChatMessage[] = [
   {
     id: 201,
@@ -87,7 +67,6 @@ export const initialMessages: ChatMessage[] = [
 export const initialStats = {
   earnings: "7,450 EGP",
   earningsTrend: "+12% this week",
-  pendingConsultations: 12,
   todaysAppointments: 5,
   nextSlot: "45m",
 };

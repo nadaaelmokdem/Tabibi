@@ -21,7 +21,7 @@ namespace Tabibi.Models
         [Required]
         public ConsultationType ConsultationType { get; set; } = ConsultationType.Chat;
 
-        public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
+        public AppointmentStatus Status { get; set; } = AppointmentStatus.Confirmed;
 
         [Column(TypeName = "decimal(10,2)")]
         public decimal Price { get; set; } = 0;
@@ -50,6 +50,6 @@ namespace Tabibi.Models
     }
 
     public enum ConsultationType { Chat, Video, Call, Clinic }
-    public enum AppointmentStatus { Pending, Confirmed, Completed, Cancelled }
+    public enum AppointmentStatus { Confirmed = 1, Completed = 2, Cancelled = 3 }
 
 }

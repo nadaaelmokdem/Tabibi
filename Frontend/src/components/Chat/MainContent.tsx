@@ -99,8 +99,6 @@ export function ChatInput({
     }
   };
 
-  const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
-
   return (
     <div className="bg-[#ffffff] border-t border-[#e5deff] p-3 sm:p-[16px] shrink-0 shadow-[0px_-4px_20px_rgba(42,36,85,0.03)] z-10 pb-safe">
       <div className="max-w-4xl mx-auto flex flex-col gap-[4px]">
@@ -130,13 +128,15 @@ export function ChatInput({
               }
             }}
           />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="cursor-pointer p-2 sm:p-[12px] text-[#474553] hover:text-[#5140b3] transition-colors shrink-0 rounded-lg hover:bg-[#eae5ff]"
-          >
-            <FiImage className="h-5 w-5" />
-          </button>
+          {onFileUpload && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="cursor-pointer p-2 sm:p-[12px] text-[#474553] hover:text-[#5140b3] transition-colors shrink-0 rounded-lg hover:bg-[#eae5ff]"
+            >
+              <FiImage className="h-5 w-5" />
+            </button>
+          )}
           <textarea
             ref={textareaRef}
             value={text}
@@ -156,11 +156,6 @@ export function ChatInput({
           >
             <FiSend className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
-        </div>
-        <div className="flex justify-end px-[4px]">
-          <span className="text-[10px] sm:text-[12px] leading-[1] font-medium text-[#787584]">
-            {wordCount} / 500 words
-          </span>
         </div>
       </div>
     </div>

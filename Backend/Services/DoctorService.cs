@@ -29,6 +29,7 @@ namespace Tabibi.Services
         {
             var doctor = await dbContext.DoctorProfiles
                 .Include(d => d.DoctorSpecialties)
+                .Include(d => d.OldSpecialties)
                 .FirstOrDefaultAsync(d => d.UserId == userId);
             if (doctor == null)
             {
@@ -41,7 +42,6 @@ namespace Tabibi.Services
                 switch (fieldName.ToLower())
                 {
                     case "licensenumber":
-                        if (doctor.IsVerified) return ServiceResult.Failure("Cannot edit sensitive data while verified.");
                         if (string.IsNullOrWhiteSpace(value))
                         {
                             return ServiceResult.Failure("License number is required.");
@@ -52,12 +52,13 @@ namespace Tabibi.Services
                         }
                         if (doctor.LicenseNumber != value)
                         {
+                            BackupApprovedDataIfNeeded(doctor);
+                            LogSensitiveChange(doctor.DoctorId, userId, "LicenseNumber", doctor.LicenseNumber, value);
                             doctor.LicenseNumber = value;
                             sensitiveDataChanged = true;
                         }
                         break;
                     case "nationalidnumber":
-                        if (doctor.IsVerified) return ServiceResult.Failure("Cannot edit sensitive data while verified.");
                         if (string.IsNullOrWhiteSpace(value))
                         {
                             return ServiceResult.Failure("National ID is required.");
@@ -68,6 +69,8 @@ namespace Tabibi.Services
                         }
                         if (doctor.NationalIdNumber != value)
                         {
+                            BackupApprovedDataIfNeeded(doctor);
+                            LogSensitiveChange(doctor.DoctorId, userId, "NationalIdNumber", doctor.NationalIdNumber, value);
                             doctor.NationalIdNumber = value;
                             sensitiveDataChanged = true;
                         }
@@ -92,20 +95,28 @@ namespace Tabibi.Services
                         }
                         break;
                     case "licenseexpirydate":
-                        if (doctor.IsVerified) return ServiceResult.Failure("Cannot edit sensitive data while verified.");
                         if (string.IsNullOrWhiteSpace(value))
                         {
-                            if (doctor.LicenseExpiryDate != null) sensitiveDataChanged = true;
+                            if (doctor.LicenseExpiryDate != null)
+                            {
+                                BackupApprovedDataIfNeeded(doctor);
+                                LogSensitiveChange(doctor.DoctorId, userId, "LicenseExpiryDate", doctor.LicenseExpiryDate?.ToString("yyyy-MM-dd"), null);
+                                sensitiveDataChanged = true;
+                            }
                             doctor.LicenseExpiryDate = null;
                         }
                         else if (DateTime.TryParse(value, out DateTime expiry))
                         {
-                            if (doctor.LicenseExpiryDate != expiry) sensitiveDataChanged = true;
+                            if (doctor.LicenseExpiryDate != expiry)
+                            {
+                                BackupApprovedDataIfNeeded(doctor);
+                                LogSensitiveChange(doctor.DoctorId, userId, "LicenseExpiryDate", doctor.LicenseExpiryDate?.ToString("yyyy-MM-dd"), expiry.ToString("yyyy-MM-dd"));
+                                sensitiveDataChanged = true;
+                            }
                             doctor.LicenseExpiryDate = expiry;
                         }
                         break;
                     case "specialties":
-                        if (doctor.IsVerified) return ServiceResult.Failure("Cannot edit sensitive data while verified.");
                         
                         var names = value.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
                         
@@ -119,6 +130,8 @@ namespace Tabibi.Services
                             return ServiceResult.Failure("A doctor can have a maximum of 3 specialties.");
                         }
 
+                        var oldSpecialties = FormatSpecialties(doctor.DoctorSpecialties);
+
                         var allSpecialties = await dbContext.Specialties.Where(s => names.Contains(s.Name)).ToListAsync();
                         var newSpecialtyIds = allSpecialties.Select(s => s.SpecialtyId).ToList();
 
@@ -130,6 +143,12 @@ namespace Tabibi.Services
                         
                         if (toRemove.Any() || toAddIds.Any())
                         {
+                            BackupApprovedDataIfNeeded(doctor);
+                            var newSpecialties = string.Join(", ", allSpecialties
+                                .Where(s => newSpecialtyIds.Contains(s.SpecialtyId))
+                                .Select(s => s.Name)
+                                .OrderBy(n => n));
+                            LogSensitiveChange(doctor.DoctorId, userId, "Specialties", oldSpecialties, newSpecialties);
                             sensitiveDataChanged = true;
                         }
 
@@ -141,19 +160,34 @@ namespace Tabibi.Services
                         }
                         break;
                     case "licenseproofurl":
-                        if (doctor.IsVerified) return ServiceResult.Failure("Cannot edit sensitive data while verified.");
                         if (!IsValidProofLink(value)) return ServiceResult.Failure("Please enter a valid link for the license proof.");
-                        if (doctor.LicenseProofUrl != value) { doctor.LicenseProofUrl = value; sensitiveDataChanged = true; }
+                        if (doctor.LicenseProofUrl != value)
+                        {
+                            BackupApprovedDataIfNeeded(doctor);
+                            LogSensitiveChange(doctor.DoctorId, userId, "LicenseProofUrl", doctor.LicenseProofUrl, value);
+                            doctor.LicenseProofUrl = value;
+                            sensitiveDataChanged = true;
+                        }
                         break;
                     case "idproofurl":
-                        if (doctor.IsVerified) return ServiceResult.Failure("Cannot edit sensitive data while verified.");
                         if (!IsValidProofLink(value)) return ServiceResult.Failure("Please enter a valid link for the ID proof.");
-                        if (doctor.IdProofUrl != value) { doctor.IdProofUrl = value; sensitiveDataChanged = true; }
+                        if (doctor.IdProofUrl != value)
+                        {
+                            BackupApprovedDataIfNeeded(doctor);
+                            LogSensitiveChange(doctor.DoctorId, userId, "IdProofUrl", doctor.IdProofUrl, value);
+                            doctor.IdProofUrl = value;
+                            sensitiveDataChanged = true;
+                        }
                         break;
                     case "degreeproofurl":
-                        if (doctor.IsVerified) return ServiceResult.Failure("Cannot edit sensitive data while verified.");
                         if (!IsValidProofLink(value)) return ServiceResult.Failure("Please enter a valid link for the degree proof.");
-                        if (doctor.DegreeProofUrl != value) { doctor.DegreeProofUrl = value; sensitiveDataChanged = true; }
+                        if (doctor.DegreeProofUrl != value)
+                        {
+                            BackupApprovedDataIfNeeded(doctor);
+                            LogSensitiveChange(doctor.DoctorId, userId, "DegreeProofUrl", doctor.DegreeProofUrl, value);
+                            doctor.DegreeProofUrl = value;
+                            sensitiveDataChanged = true;
+                        }
                         break;
                     case "profilepictureurl":
                         doctor.ProfilePictureUrl = value;
@@ -200,15 +234,21 @@ namespace Tabibi.Services
 
             try
             {
+                var oldLicenseNumber = doctor.LicenseNumber;
+                var oldNationalId = doctor.NationalIdNumber;
+                var oldLicenseExpiry = doctor.LicenseExpiryDate;
+                var oldLicenseProof = doctor.LicenseProofUrl;
+                var oldIdProof = doctor.IdProofUrl;
+                var oldDegreeProof = doctor.DegreeProofUrl;
+                var oldSpecialties = FormatSpecialties(doctor.DoctorSpecialties);
+
                 doctor.ClinicLocation = profileData.ClinicLocation;
                 doctor.ClinicPhoneNumber = profileData.ClinicPhoneNumber;
                 doctor.ProfilePictureUrl = profileData.ProfilePictureUrl;
                 doctor.Bio = profileData.Bio;
                 doctor.YearsOfExperience = profileData.YearsOfExperience;
 
-                 if (!doctor.IsVerified)
-                 {
-                     if (string.IsNullOrWhiteSpace(profileData.LicenseNumber))
+                if (string.IsNullOrWhiteSpace(profileData.LicenseNumber))
                      {
                          return ServiceResult<DoctorProfileDTO>.Failure("License number is required.");
                      }
@@ -245,11 +285,9 @@ namespace Tabibi.Services
                      doctor.IdProofUrl = profileData.IdProofUrl;
                      doctor.DegreeProofUrl = profileData.DegreeProofUrl;
                      doctor.LicenseExpiryDate = profileData.LicenseExpiryDate;
-                 }
+                     doctor.LicenseExpiryDate = profileData.LicenseExpiryDate;
 
-                if (!doctor.IsVerified)
-                {
-                    if (profileData.Specialties != null && profileData.Specialties.Any())
+                     if (profileData.Specialties != null && profileData.Specialties.Any())
                     {
                         var requestedNames = profileData.Specialties
                             .Where(s => !string.IsNullOrWhiteSpace(s))
@@ -293,10 +331,11 @@ namespace Tabibi.Services
                         }
                     }
                     else
-                    {
-                        doctor.DoctorSpecialties.Clear();
-                    }
-                }
+                     {
+                         doctor.DoctorSpecialties.Clear();
+                     }
+
+                 BackupApprovedDataIfNeeded(doctor);
                 
                 doctor.ClinicPrice = profileData.ClinicPrice;
                 doctor.IsClinicEnabled = profileData.IsClinicEnabled;
@@ -306,6 +345,29 @@ namespace Tabibi.Services
                 doctor.IsVideoEnabled = profileData.IsVideoEnabled;
                 doctor.CallPrice = profileData.CallPrice;
                 doctor.IsCallEnabled = profileData.IsCallEnabled;
+
+                 bool sensitiveChanged = false;
+
+                 sensitiveChanged |= LogIfChanged(doctor.DoctorId, userId, "LicenseNumber", oldLicenseNumber, doctor.LicenseNumber);
+                    sensitiveChanged |= LogIfChanged(doctor.DoctorId, userId, "NationalIdNumber", oldNationalId, doctor.NationalIdNumber);
+                    sensitiveChanged |= LogIfChanged(doctor.DoctorId, userId, "LicenseExpiryDate", oldLicenseExpiry?.ToString("yyyy-MM-dd"), doctor.LicenseExpiryDate?.ToString("yyyy-MM-dd"));
+                    sensitiveChanged |= LogIfChanged(doctor.DoctorId, userId, "LicenseProofUrl", oldLicenseProof, doctor.LicenseProofUrl);
+                    sensitiveChanged |= LogIfChanged(doctor.DoctorId, userId, "IdProofUrl", oldIdProof, doctor.IdProofUrl);
+                    sensitiveChanged |= LogIfChanged(doctor.DoctorId, userId, "DegreeProofUrl", oldDegreeProof, doctor.DegreeProofUrl);
+
+                    var newSpecialties = FormatSpecialties(doctor.DoctorSpecialties);
+                    if (!string.Equals(oldSpecialties, newSpecialties, StringComparison.Ordinal))
+                    {
+                         LogSensitiveChange(doctor.DoctorId, userId, "Specialties", oldSpecialties, newSpecialties);
+                         sensitiveChanged = true;
+                     }
+
+                if (sensitiveChanged)
+                {
+                    doctor.VerificationStatus = DoctorVerificationStatus.Pending;
+                    doctor.AdminComment = "Profile submitted or updated — pending admin review.";
+                    doctor.ReviewedAt = null;
+                }
 
                 await dbContext.SaveChangesAsync();
                 
@@ -325,6 +387,28 @@ namespace Tabibi.Services
                 .FirstOrDefaultAsync(d => d.UserId == userId);
 
             if (doctor == null) return null;
+
+            var now = DateTime.UtcNow;
+            var todayStart = now.Date;
+            var todayEnd = todayStart.AddDays(1);
+
+            var toComplete = await dbContext.Appointments
+                .Where(a => a.DoctorId == doctor.DoctorId 
+                         && a.Status == AppointmentStatus.Confirmed 
+                         && a.ScheduledAt >= todayStart 
+                         && a.ScheduledAt < todayEnd)
+                .ToListAsync();
+
+            bool changed = false;
+            foreach (var a in toComplete)
+            {
+                if (now >= a.ScheduledAt.AddMinutes(a.DurationMins))
+                {
+                    a.Status = AppointmentStatus.Completed;
+                    changed = true;
+                }
+            }
+            if (changed) await dbContext.SaveChangesAsync();
 
             var chatSessions = await dbContext.ChatSessions
                 .Include(cs => cs.Patient).ThenInclude(p => p.User)
@@ -369,6 +453,8 @@ namespace Tabibi.Services
             {
                 FullName = doctor.User.FullName,
                 IsVerified = doctor.IsVerified,
+                VerificationStatus = doctor.VerificationStatus.ToString(),
+                AdminComment = doctor.AdminComment,
                 ChatSessionsCount = chatSessions.Count,
                 TodaysAppointmentsCount = todaysAppointments.Count,
                 TotalPatientsSeen = totalPatientsSeen,
@@ -408,7 +494,7 @@ namespace Tabibi.Services
                 .Where(a => a.DoctorId == doctor.DoctorId)
                 .ToListAsync();
 
-            var blockingStatuses = new[] { AppointmentStatus.Pending, AppointmentStatus.Confirmed };
+            var blockingStatuses = new[] { AppointmentStatus.Confirmed };
             var activeAppointments = await dbContext.Appointments
                 .Where(a => a.DoctorId == doctor.DoctorId && a.ScheduledAt > DateTime.Now && blockingStatuses.Contains(a.Status))
                 .ToListAsync();
@@ -500,6 +586,61 @@ namespace Tabibi.Services
             // Check if it is a valid absolute HTTP/HTTPS URL
             return Uri.TryCreate(value, UriKind.Absolute, out var uriResult) 
                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+        }
+
+        private static string FormatSpecialties(IEnumerable<DoctorSpecialty> specialties)
+        {
+            return string.Join(", ", specialties
+                .Select(ds => ds.Specialty?.Name ?? "")
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .OrderBy(n => n));
+        }
+
+        private void LogSensitiveChange(int doctorId, string changedByUserId, string fieldName, string? oldValue, string? newValue)
+        {
+            if (string.Equals(oldValue ?? "", newValue ?? "", StringComparison.Ordinal)) return;
+
+            dbContext.DoctorProfileChangeLogs.Add(new DoctorProfileChangeLog
+            {
+                DoctorId = doctorId,
+                FieldName = fieldName,
+                OldValue = oldValue,
+                NewValue = newValue,
+                ChangedAt = DateTime.UtcNow,
+                ChangedByUserId = changedByUserId
+            });
+        }
+
+        private bool LogIfChanged(int doctorId, string changedByUserId, string fieldName, string? oldValue, string? newValue)
+        {
+            if (string.Equals(oldValue ?? "", newValue ?? "", StringComparison.Ordinal)) return false;
+            LogSensitiveChange(doctorId, changedByUserId, fieldName, oldValue, newValue);
+            return true;
+        }
+
+        private void BackupApprovedDataIfNeeded(DoctorProfile doctor)
+        {
+            if (doctor.VerificationStatus == DoctorVerificationStatus.Approved)
+            {
+                doctor.OldLicenseNumber = doctor.LicenseNumber;
+                doctor.OldNationalIdNumber = doctor.NationalIdNumber;
+                doctor.OldLicenseExpiryDate = doctor.LicenseExpiryDate;
+                doctor.OldLicenseProofUrl = doctor.LicenseProofUrl;
+                doctor.OldIdProofUrl = doctor.IdProofUrl;
+                doctor.OldDegreeProofUrl = doctor.DegreeProofUrl;
+
+                dbContext.DoctorOldSpecialties.RemoveRange(doctor.OldSpecialties);
+                doctor.OldSpecialties.Clear();
+
+                foreach (var ds in doctor.DoctorSpecialties)
+                {
+                    doctor.OldSpecialties.Add(new DoctorOldSpecialty
+                    {
+                        DoctorId = doctor.DoctorId,
+                        SpecialtyId = ds.SpecialtyId
+                    });
+                }
+            }
         }
     }
 }

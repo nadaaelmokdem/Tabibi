@@ -123,7 +123,7 @@ public class AppointmentService(
                 ScheduledAt = normalizedScheduledAt,
                 DurationMins = durationMins,
                 ConsultationType = request.Type,
-                Status = AppointmentStatus.Pending,
+                Status = AppointmentStatus.Confirmed,
                 Price = price.Value,
                 ChiefComplaint = request.ChiefComplaint
             };
@@ -171,6 +171,38 @@ public class AppointmentService(
         }
     }
 
+    public async Task AutoCompleteTodayAppointmentsAsync(int? patientId = null, int? doctorId = null)
+    {
+        var now = DateTime.UtcNow;
+        var todayStart = now.Date;
+        var todayEnd = todayStart.AddDays(1);
+
+        var query = dbContext.Appointments
+            .Where(a => a.Status == AppointmentStatus.Confirmed 
+                     && a.ScheduledAt >= todayStart 
+                     && a.ScheduledAt < todayEnd);
+
+        if (patientId.HasValue) query = query.Where(a => a.PatientId == patientId.Value);
+        if (doctorId.HasValue) query = query.Where(a => a.DoctorId == doctorId.Value);
+
+        var toComplete = await query.ToListAsync();
+        bool changed = false;
+
+        foreach (var a in toComplete)
+        {
+            if (now >= a.ScheduledAt.AddMinutes(a.DurationMins))
+            {
+                a.Status = AppointmentStatus.Completed;
+                changed = true;
+            }
+        }
+
+        if (changed)
+        {
+            await dbContext.SaveChangesAsync();
+        }
+    }
+
     public async Task<List<AppointmentListDTO>> GetDoctorAppointmentsAsync(string doctorUserId, AppointmentFilterDTO filters)
     {
         var doctor = await dbContext.DoctorProfiles.Include(d => d.User).FirstOrDefaultAsync(d => d.UserId == doctorUserId);
@@ -180,6 +212,8 @@ public class AppointmentService(
             .Include(a => a.Patient).ThenInclude(p => p.User)
             .Where(a => a.DoctorId == doctor.DoctorId)
             .AsQueryable();
+
+        await AutoCompleteTodayAppointmentsAsync(doctorId: doctor.DoctorId);
 
         query = ApplyFilters(query, filters);
 
@@ -211,6 +245,8 @@ public class AppointmentService(
             .Include(a => a.Doctor).ThenInclude(d => d.User)
             .Where(a => a.PatientId == patient.PatientId)
             .AsQueryable();
+
+        await AutoCompleteTodayAppointmentsAsync(patientId: patient.PatientId);
 
         query = ApplyFilters(query, filters);
 
@@ -261,5 +297,55 @@ public class AppointmentService(
             query = query.Where(a => a.Patient.User.FullName.ToLower().Contains(search) || a.Doctor.User.FullName.ToLower().Contains(search));
         }
         return query;
+    }
+
+    public async Task<ServiceResult<AppointmentListDTO>> CancelAppointmentAsync(string doctorUserId, int appointmentId)
+    {
+        var doctor = await dbContext.DoctorProfiles
+            .Include(d => d.User)
+            .FirstOrDefaultAsync(d => d.UserId == doctorUserId);
+
+        if (doctor == null)
+            return ServiceResult<AppointmentListDTO>.Failure("Doctor profile not found.");
+
+        var appointment = await dbContext.Appointments
+            .Include(a => a.Patient).ThenInclude(p => p.User)
+            .FirstOrDefaultAsync(a => a.AppointmentId == appointmentId && a.DoctorId == doctor.DoctorId);
+
+        if (appointment == null)
+            return ServiceResult<AppointmentListDTO>.Failure("Appointment not found.");
+
+        if (appointment.Status == AppointmentStatus.Cancelled)
+            return ServiceResult<AppointmentListDTO>.Failure("Appointment is already cancelled.");
+
+        if (appointment.Status == AppointmentStatus.Completed)
+            return ServiceResult<AppointmentListDTO>.Failure("Cannot cancel a completed appointment.");
+
+        appointment.Status = AppointmentStatus.Cancelled;
+        await dbContext.SaveChangesAsync();
+
+        var dto = new AppointmentListDTO
+        {
+            AppointmentId = appointment.AppointmentId,
+            DoctorName = doctor.User.FullName,
+            PatientName = appointment.Patient.User.FullName,
+            ScheduledAt = appointment.ScheduledAt,
+            ConsultationType = appointment.ConsultationType,
+            Status = appointment.Status,
+            DurationMins = appointment.DurationMins,
+            Price = appointment.Price,
+            ChiefComplaint = appointment.ChiefComplaint,
+            Notes = appointment.Notes,
+            PatientProfilePictureUrl = null,
+            SessionId = appointment.SessionId
+        };
+
+        var patientUserId = appointment.Patient.UserId;
+        if (!string.IsNullOrEmpty(patientUserId))
+        {
+            await notificationService.NotifyPatientCancellationAsync(patientUserId, dto);
+        }
+
+        return ServiceResult<AppointmentListDTO>.Success(dto);
     }
 }

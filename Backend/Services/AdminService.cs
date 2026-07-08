@@ -66,45 +66,202 @@ namespace Tabibi.Services
                 query = query.Where(d => d.VerificationStatus == status.Value);
             }
 
-            return await query
+            var doctors = await query
                 .OrderByDescending(d => d.ReviewedAt)
-                .Select(d => new AdminDoctorDTO
+                .ToListAsync();
+
+            var doctorIds = doctors.Select(d => d.DoctorId).ToList();
+
+            var changeStats = await dbContext.DoctorProfileChangeLogs
+                .Where(l => doctorIds.Contains(l.DoctorId))
+                .GroupBy(l => l.DoctorId)
+                .Select(g => new
                 {
-                    DoctorId = d.DoctorId,
-                    UserId = d.UserId,
-                    FullName = d.User.FullName,
-                    Email = d.User.Email ?? "",
-                    LicenseNumber = d.LicenseNumber ?? "",
-                    ClinicLocation = d.ClinicLocation ?? "",
-                    YearsOfExperience = d.YearsOfExperience ?? 0,
-                    VerificationStatus = d.VerificationStatus.ToString(),
-                    AdminComment = d.AdminComment,
-                    ReviewedAt = d.ReviewedAt,
-                    IsActive = d.User.IsActive
+                    DoctorId = g.Key,
+                    LastChangedAt = g.Max(x => x.ChangedAt)
+                })
+                .ToDictionaryAsync(x => x.DoctorId, x => x.LastChangedAt);
+
+            var pendingChangeCounts = new Dictionary<int, int>();
+            foreach (var doctor in doctors)
+            {
+                var pendingQuery = dbContext.DoctorProfileChangeLogs
+                    .Where(l => l.DoctorId == doctor.DoctorId);
+
+                if (doctor.ReviewedAt.HasValue)
+                {
+                    pendingQuery = pendingQuery.Where(l => l.ChangedAt > doctor.ReviewedAt.Value);
+                }
+
+                pendingChangeCounts[doctor.DoctorId] = await pendingQuery.CountAsync();
+            }
+
+            return doctors.Select(d => new AdminDoctorDTO
+            {
+                DoctorId = d.DoctorId,
+                UserId = d.UserId,
+                FullName = d.User.FullName,
+                Email = d.User.Email ?? "",
+                LicenseNumber = d.LicenseNumber ?? "",
+                ClinicLocation = d.ClinicLocation ?? "",
+                YearsOfExperience = d.YearsOfExperience ?? 0,
+                VerificationStatus = d.VerificationStatus.ToString(),
+                AdminComment = d.AdminComment,
+                ReviewedAt = d.ReviewedAt,
+                IsActive = d.User.IsActive,
+                PendingChangesCount = pendingChangeCounts.GetValueOrDefault(d.DoctorId),
+                LastChangedAt = changeStats.GetValueOrDefault(d.DoctorId)
+            }).ToList();
+        }
+
+        public async Task<AdminDoctorDetailDTO?> GetDoctorDetail(int doctorId)
+        {
+            var doctor = await dbContext.DoctorProfiles
+                .Include(d => d.User)
+                .Include(d => d.DoctorSpecialties)
+                .ThenInclude(ds => ds.Specialty)
+                .Include(d => d.OldSpecialties)
+                .ThenInclude(ds => ds.Specialty)
+                .FirstOrDefaultAsync(d => d.DoctorId == doctorId);
+
+            if (doctor == null) return null;
+
+            return new AdminDoctorDetailDTO
+            {
+                DoctorId = doctor.DoctorId,
+                UserId = doctor.UserId,
+                FullName = doctor.User.FullName,
+                Email = doctor.User.Email ?? "",
+                LicenseNumber = doctor.LicenseNumber,
+                NationalIdNumber = doctor.NationalIdNumber,
+                ClinicLocation = doctor.ClinicLocation,
+                ClinicPhoneNumber = doctor.ClinicPhoneNumber,
+                LicenseProofUrl = doctor.LicenseProofUrl,
+                IdProofUrl = doctor.IdProofUrl,
+                DegreeProofUrl = doctor.DegreeProofUrl,
+                LicenseExpiryDate = doctor.LicenseExpiryDate,
+                YearsOfExperience = doctor.YearsOfExperience,
+                Bio = doctor.Bio,
+                VerificationStatus = doctor.VerificationStatus.ToString(),
+                AdminComment = doctor.AdminComment,
+                ReviewedAt = doctor.ReviewedAt,
+                Specialties = doctor.DoctorSpecialties.Select(ds => new SpecialtyDTO
+                {
+                    SpecialtyId = ds.SpecialtyId,
+                    Name = ds.Specialty?.Name ?? ""
+                }).ToList(),
+                OldLicenseNumber = doctor.OldLicenseNumber,
+                OldNationalIdNumber = doctor.OldNationalIdNumber,
+                OldLicenseProofUrl = doctor.OldLicenseProofUrl,
+                OldIdProofUrl = doctor.OldIdProofUrl,
+                OldDegreeProofUrl = doctor.OldDegreeProofUrl,
+                OldLicenseExpiryDate = doctor.OldLicenseExpiryDate,
+                OldSpecialties = doctor.OldSpecialties.Select(ds => new SpecialtyDTO
+                {
+                    SpecialtyId = ds.SpecialtyId,
+                    Name = ds.Specialty?.Name ?? ""
+                }).ToList()
+            };
+        }
+
+        public async Task<List<DoctorProfileChangeLogDTO>> GetDoctorChanges(int doctorId)
+        {
+            var doctor = await dbContext.DoctorProfiles.FirstOrDefaultAsync(d => d.DoctorId == doctorId);
+            if (doctor == null) return new List<DoctorProfileChangeLogDTO>();
+
+            var query = dbContext.DoctorProfileChangeLogs
+                .Where(l => l.DoctorId == doctorId);
+
+            if (doctor.ReviewedAt.HasValue)
+            {
+                query = query.Where(l => l.ChangedAt > doctor.ReviewedAt.Value);
+            }
+
+            return await query
+                .OrderByDescending(l => l.ChangedAt)
+                .Select(l => new DoctorProfileChangeLogDTO
+                {
+                    ChangeLogId = l.ChangeLogId,
+                    FieldName = l.FieldName,
+                    OldValue = l.OldValue,
+                    NewValue = l.NewValue,
+                    ChangedAt = l.ChangedAt
                 })
                 .ToListAsync();
         }
 
-        public async Task<ServiceResult> VerifyDoctor(int doctorId, DoctorVerificationStatus decision, string? comment)
+        public async Task<ServiceResult> VerifyDoctor(int doctorId, ReviewDoctorRequestDTO request)
         {
-            if (decision == DoctorVerificationStatus.Pending)
+            if (request.Decision == DoctorVerificationStatus.Pending)
             {
                 return ServiceResult.Failure($"Decision must be one of: {DoctorVerificationStatus.Approved}, {DoctorVerificationStatus.Rejected}, {DoctorVerificationStatus.NeedsChanges}.");
             }
 
-            if (decision != DoctorVerificationStatus.Approved && string.IsNullOrWhiteSpace(comment))
+            if (request.Decision != DoctorVerificationStatus.Approved && string.IsNullOrWhiteSpace(request.Comment) && !request.BanDoctor)
             {
                 return ServiceResult.Failure("A comment is required when rejecting or requesting changes.");
             }
 
-            var doctor = await dbContext.DoctorProfiles.FirstOrDefaultAsync(d => d.DoctorId == doctorId);
+            var doctor = await dbContext.DoctorProfiles
+                .Include(d => d.User)
+                .Include(d => d.DoctorSpecialties)
+                .Include(d => d.OldSpecialties)
+                .FirstOrDefaultAsync(d => d.DoctorId == doctorId);
+
             if (doctor == null)
             {
                 return ServiceResult.Failure("Doctor not found!");
             }
 
-            doctor.VerificationStatus = decision;
-            doctor.AdminComment = comment;
+            if (request.BanDoctor)
+            {
+                doctor.VerificationStatus = DoctorVerificationStatus.Rejected;
+                doctor.AdminComment = request.Comment ?? "Your account has been rejected completely. Please contact support.";
+                doctor.User.IsActive = false;
+            }
+            else if (request.RevertToOldData)
+            {
+                doctor.LicenseNumber = doctor.OldLicenseNumber;
+                doctor.NationalIdNumber = doctor.OldNationalIdNumber;
+                doctor.LicenseProofUrl = doctor.OldLicenseProofUrl;
+                doctor.IdProofUrl = doctor.OldIdProofUrl;
+                doctor.DegreeProofUrl = doctor.OldDegreeProofUrl;
+                doctor.LicenseExpiryDate = doctor.OldLicenseExpiryDate;
+
+                dbContext.DoctorSpecialties.RemoveRange(doctor.DoctorSpecialties);
+                doctor.DoctorSpecialties.Clear();
+
+                foreach (var ds in doctor.OldSpecialties)
+                {
+                    doctor.DoctorSpecialties.Add(new DoctorSpecialty
+                    {
+                        DoctorId = doctor.DoctorId,
+                        SpecialtyId = ds.SpecialtyId
+                    });
+                }
+
+                doctor.VerificationStatus = DoctorVerificationStatus.Approved;
+                doctor.AdminComment = "Your recent changes were reverted to the last approved state. You are still approved.";
+            }
+            else
+            {
+                doctor.VerificationStatus = request.Decision;
+                doctor.AdminComment = request.Comment;
+            }
+
+            if (doctor.VerificationStatus == DoctorVerificationStatus.Approved || request.RevertToOldData)
+            {
+                // Clear old fields when approved or reverted (they are now the active fields)
+                doctor.OldLicenseNumber = null;
+                doctor.OldNationalIdNumber = null;
+                doctor.OldLicenseProofUrl = null;
+                doctor.OldIdProofUrl = null;
+                doctor.OldDegreeProofUrl = null;
+                doctor.OldLicenseExpiryDate = null;
+                dbContext.DoctorOldSpecialties.RemoveRange(doctor.OldSpecialties);
+                doctor.OldSpecialties.Clear();
+            }
+
             doctor.ReviewedAt = DateTime.UtcNow;
 
             await dbContext.SaveChangesAsync();

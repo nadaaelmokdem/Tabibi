@@ -73,23 +73,28 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                </button>
             </div>
             <div className="flex items-center gap-3 mb-6">
-              {user?.profilePictureUrl ? (
-                <img
-                  alt="Avatar"
-                  className="w-12 h-12 rounded-full object-cover shadow-sm"
-                  src={user.profilePictureUrl}
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl shadow-sm shrink-0">
-                  {firstName.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <div className="relative shrink-0">
+                {user?.profilePictureUrl ? (
+                  <img
+                    alt="Avatar"
+                    className="w-12 h-12 rounded-full object-cover shadow-sm"
+                    src={user.profilePictureUrl}
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl shadow-sm">
+                    {firstName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                {isDoctor && user?.isVerified && (
+                  <MdVerified
+                    className="absolute -top-0.5 -right-0.5 text-blue-500 text-base bg-white rounded-full"
+                    title="Verified Doctor"
+                  />
+                )}
+              </div>
               <div className="overflow-hidden">
                 <h2 className="text-lg font-bold text-primary whitespace-normal break-words w-full">
                   {isDoctor && user?.fullName ? (user.fullName.startsWith("Dr.") ? user.fullName : `Dr. ${user.fullName}`) : user?.fullName || "User Portal"}
-                  {isDoctor && user?.isVerified && (
-                    <MdVerified className="inline-block text-blue-500 text-lg ml-1 align-middle flex-shrink-0" title="Verified Doctor" />
-                  )}
                 </h2>
                 <p className="text-xs text-text-muted font-normal truncate">
                   {isAdmin ? "Admin Portal" : isDoctor ? "Doctor Portal" : "User Portal"}

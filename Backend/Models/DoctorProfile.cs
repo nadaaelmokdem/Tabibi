@@ -33,6 +33,13 @@ namespace Tabibi.Models
             public string? Bio { get; set; }
             public string? ProfilePictureUrl { get; set; }
 
+            public string? OldLicenseNumber { get; set; }
+            public string? OldNationalIdNumber { get; set; }
+            public string? OldLicenseProofUrl { get; set; }
+            public string? OldIdProofUrl { get; set; }
+            public string? OldDegreeProofUrl { get; set; }
+            public DateTime? OldLicenseExpiryDate { get; set; }
+
             [Column(TypeName = "decimal(3,2)")]
             public decimal AverageRating { get; set; } = 0;
 
@@ -65,6 +72,7 @@ namespace Tabibi.Models
             public AppUser User { get; set; } = null!;
 
             public ICollection<DoctorSpecialty> DoctorSpecialties { get; set; } = new List<DoctorSpecialty>();
+            public ICollection<DoctorOldSpecialty> OldSpecialties { get; set; } = new List<DoctorOldSpecialty>();
             public ICollection<DoctorAvailability> Availabilities { get; set; } = new List<DoctorAvailability>();
             public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
         }

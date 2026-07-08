@@ -33,4 +33,16 @@ export default class PublicService {
       return [];
     }
   }
+
+  static async getDoctorReviews(doctorId: number | string, page: number = 1, pageSize: number = 10): Promise<PaginatedResult<any>> {
+    try {
+      const response = await api.get(`reviews/doctor/${doctorId}`, {
+        params: { page, pageSize }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch doctor reviews:", error);
+      throw new Error("Failed to fetch doctor reviews.");
+    }
+  }
 }

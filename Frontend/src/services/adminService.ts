@@ -6,6 +6,8 @@ import type {
   DoctorDecision,
   AdminUser,
   AdminAppointment,
+  AdminDoctorDetail,
+  DoctorProfileChangeLog,
 } from "../types/admin";
 
 export default class AdminService {
@@ -28,11 +30,13 @@ export default class AdminService {
     doctorId: number,
     decision: DoctorDecision,
     comment?: string,
+    revertToOldData: boolean = false,
+    banDoctor: boolean = false
   ): Promise<boolean> {
     try {
       await api.patch(
         `admin/doctors/${doctorId}/verify`,
-        { decision, comment },
+        { decision, comment, revertToOldData, banDoctor },
         { withCredentials: true },
       );
       return true;
@@ -76,6 +80,16 @@ export default class AdminService {
 
   static async getAppointments(): Promise<AdminAppointment[]> {
     const response = await api.get("admin/appointments");
+    return response.data;
+  }
+
+  static async getDoctorDetail(doctorId: number): Promise<AdminDoctorDetail> {
+    const response = await api.get(`admin/doctors/${doctorId}`);
+    return response.data;
+  }
+
+  static async getDoctorChanges(doctorId: number): Promise<DoctorProfileChangeLog[]> {
+    const response = await api.get(`admin/doctors/${doctorId}/changes`);
     return response.data;
   }
 

@@ -9,6 +9,10 @@ import {
   subscribeToPresence,
   onUserPresenceChanged,
   offUserPresenceChanged,
+  onUnauthorized,
+  offUnauthorized,
+  onSendMessageError,
+  offSendMessageError,
 } from "../services/chatHubService";
 import type { ReceivedMessage } from "../types/ReceivedMessage";
 
@@ -31,9 +35,15 @@ export function useChatSession(sessionId: number) {
   // exact same function reference - required for connection.off() to work.
   const handleMessageRef = useRef<(msg: ReceivedMessage) => void>(() => {});
   const handlePresenceRef = useRef<(userId: string, isOnline: boolean) => void>(() => {});
+  const handleUnauthorizedRef = useRef<(payload: { Message: string }) => void>(() => {});
+  const handleSendMessageErrorRef = useRef<(message: string) => void>(() => {});
 
   useEffect(() => {
     let cancelled = false;
+
+    setMessages([]);
+    setSessionDetails(null);
+    setIsOtherUserOnline(false);
 
     handleMessageRef.current = (msg: ReceivedMessage) => {
       if (msg.sessionId !== sessionId) return; // ignore messages from other sessions, if any leak through
@@ -51,6 +61,14 @@ export function useChatSession(sessionId: number) {
         }
         return prev;
       });
+    };
+
+    handleUnauthorizedRef.current = (payload: { Message: string }) => {
+      setError(payload.Message || "You are not authorized to access this chat.");
+    };
+
+    handleSendMessageErrorRef.current = (message: string) => {
+      setError(message || "Unable to send message right now.");
     };
 
     async function init() {
@@ -72,6 +90,8 @@ export function useChatSession(sessionId: number) {
 
         onReceiveMessage(handleMessageRef.current);
         onUserPresenceChanged(handlePresenceRef.current);
+        onUnauthorized(handleUnauthorizedRef.current);
+        onSendMessageError(handleSendMessageErrorRef.current);
         await joinSession(sessionId);
         await subscribeToPresence(otherUserId);
         
@@ -91,6 +111,8 @@ export function useChatSession(sessionId: number) {
       cancelled = true;
       offReceiveMessage(handleMessageRef.current);
       offUserPresenceChanged(handlePresenceRef.current);
+      offUnauthorized(handleUnauthorizedRef.current);
+      offSendMessageError(handleSendMessageErrorRef.current);
       setSessionDetails((prev: any) => {
         if (prev) {
           const myRole = user?.activeRole?.toLowerCase() === "doctor" ? "Doctor" : "User";
@@ -104,15 +126,20 @@ export function useChatSession(sessionId: number) {
         // connection may already be closed on unmount - safe to ignore
       });
     };
-  }, [sessionId, user?.activeRole]);
+  }, [sessionId, user?.id, user?.activeRole]);
 
   const send = useCallback(
     async (content: string) => {
       if (!content.trim()) return;
-      await sendHubMessage(sessionId, content.trim());
-      // No optimistic local append here - the hub broadcasts back to the
-      // sender too (see ChatHub.SendMessage), so the message will arrive
-      // through onReceiveMessage with its real DB id/timestamp.
+      try {
+        setError(null);
+        await sendHubMessage(sessionId, content.trim());
+        // No optimistic local append here - the hub broadcasts back to the
+        // sender too (see ChatHub.SendMessage), so the message will arrive
+        // through onReceiveMessage with its real DB id/timestamp.
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unable to send message right now.");
+      }
     },
     [sessionId]
   );

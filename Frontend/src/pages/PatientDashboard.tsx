@@ -15,6 +15,7 @@ import { getAiQuota } from "../services/AIChat";
 import { useAuth } from "../context/AuthContext";
 import type { PatientDashboardData } from "../types/dashboard";
 import { formatTimeTo12Hour } from "../utils/dateUtils";
+import Swal from "sweetalert2";
 
 export default function PatientDashboard() {
   const navigate = useNavigate();
@@ -33,6 +34,12 @@ export default function PatientDashboard() {
   };
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
+    setData(null);
+    setRecentChats([]);
+    setAiQuota(null);
+
     Promise.all([
       PatientService.getDashboard(),
       ChatService.getSessions(user?.activeRole),
@@ -45,8 +52,139 @@ export default function PatientDashboard() {
       })
       .catch((err) => setError(err.message ?? "Failed to load dashboard"))
       .finally(() => setLoading(false));
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user?.id, user?.activeRole]);
+
+  useEffect(() => {
+    if (data?.unreviewedAppointments && data.unreviewedAppointments.length > 0) {
+      const appointment = data.unreviewedAppointments[0];
+      
+      Swal.fire({
+        title: 'Rate your consultation',
+        html: `
+          <div class="text-center mb-6">
+            <p class="text-gray-600 text-lg">
+              How was your recent consultation with <span class="font-semibold text-gray-800">${appointment.doctorName}</span>?
+            </p>
+            <div class="mt-4 flex justify-center gap-2" id="star-rating">
+              ${[1, 2, 3, 4, 5].map(star => `
+                <button type="button" data-rating="${star}" class="star-btn text-3xl text-gray-300 hover:text-yellow-400 focus:outline-none transition-colors">
+                  ★
+                </button>
+              `).join('')}
+            </div>
+            <textarea id="review-comment" rows="3" class="w-full mt-4 border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary p-3 border bg-gray-50 font-medium text-gray-700 outline-none transition-all resize-none" placeholder="Leave a comment (optional)..."></textarea>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Submit Review',
+        cancelButtonText: 'Skip for now',
+        buttonsStyling: false,
+        customClass: {
+          popup: 'bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-sm w-full border border-gray-100',
+          title: 'text-2xl font-bold mb-4 text-gray-800',
+          htmlContainer: 'w-full m-0',
+          confirmButton: 'w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 mb-3',
+          cancelButton: 'w-full py-3 text-gray-500 font-semibold hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors',
+          actions: 'flex flex-col w-full m-0'
+        },
+        didOpen: () => {
+          let selectedRating = 0;
+          const starBtns = document.querySelectorAll('.star-btn');
+          
+          starBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const rating = parseInt((e.currentTarget as HTMLElement).getAttribute('data-rating') || '0');
+              selectedRating = rating;
+              
+              starBtns.forEach((b, idx) => {
+                if (idx < rating) {
+                  b.classList.remove('text-gray-300');
+                  b.classList.add('text-yellow-400');
+                } else {
+                  b.classList.remove('text-yellow-400');
+                  b.classList.add('text-gray-300');
+                }
+              });
+            });
+            
+            btn.addEventListener('mouseenter', (e) => {
+              const rating = parseInt((e.currentTarget as HTMLElement).getAttribute('data-rating') || '0');
+              starBtns.forEach((b, idx) => {
+                if (idx < rating) {
+                  b.classList.add('text-yellow-300');
+                } else {
+                  b.classList.remove('text-yellow-300');
+                }
+              });
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+              starBtns.forEach((b, idx) => {
+                b.classList.remove('text-yellow-300');
+                if (idx < selectedRating) {
+                  b.classList.add('text-yellow-400');
+                } else {
+                  b.classList.add('text-gray-300');
+                }
+              });
+            });
+          });
+        },
+        preConfirm: () => {
+          let selectedRating = 0;
+          const starBtns = document.querySelectorAll('.star-btn');
+          starBtns.forEach(btn => {
+            if (btn.classList.contains('text-yellow-400')) {
+              selectedRating = Math.max(selectedRating, parseInt(btn.getAttribute('data-rating') || '0'));
+            }
+          });
+          
+          if (selectedRating === 0) {
+            Swal.showValidationMessage('Please select a rating');
+            return false;
+          }
+          
+          const comment = (document.getElementById('review-comment') as HTMLTextAreaElement).value;
+          return { rating: selectedRating, comment };
+        }
+      }).then((result) => {
+        if (result.isConfirmed && result.value) {
+          PatientService.submitReview(appointment.appointmentId, result.value.rating, result.value.comment)
+            .then(() => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Review Submitted',
+                text: 'Thank you for your feedback!',
+                timer: 2000,
+                showConfirmButton: false,
+                customClass: {
+                  popup: 'bg-white p-6 rounded-3xl shadow-2xl max-w-sm border border-gray-100',
+                  title: 'text-xl font-bold mb-2 text-gray-800'
+                }
+              });
+              
+              setData(prev => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  unreviewedAppointments: prev.unreviewedAppointments.filter(a => a.appointmentId !== appointment.appointmentId)
+                };
+              });
+            })
+            .catch(err => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.message || 'Failed to submit review',
+                customClass: {
+                  popup: 'bg-white p-6 rounded-3xl shadow-2xl max-w-sm border border-gray-100'
+                }
+              });
+            });
+        }
+      });
+    }
+  }, [data?.unreviewedAppointments]);
 
   if (loading) {
     return <div className="p-8 text-[var(--color-text-main)]/60">Loading your dashboard...</div>;
@@ -251,7 +389,7 @@ export default function PatientDashboard() {
                 </span>
               )}
             </div>
-            <button onClick={() => navigate('/messages')} className="cursor-pointer text-sm font-medium text-primary hover:underline">View all</button>
+            <button onClick={() => navigate('/doctor-chats')} className="cursor-pointer text-sm font-medium text-primary hover:underline">View all</button>
           </div>
           <div className="space-y-4 flex-1">
             {recentChats.length === 0 ? (

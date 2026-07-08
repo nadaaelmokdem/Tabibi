@@ -4,37 +4,29 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { format } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  MdSearch, MdFilterList, MdClear, MdAccessTime,
-  MdLocalHospital, MdVideocam, MdPhone, MdChat,
-  MdCircle,
-} from "react-icons/md";
+import { MdSearch, MdFilterList, MdClear, MdAccessTime, MdChat } from "react-icons/md";
+import { useAuth } from "../context/AuthContext";
 import { LuCalendarDays } from "react-icons/lu";
-
-const TYPE_OPTIONS = [
-  { value: "", label: "All",    icon: <MdAccessTime size={13} /> },
-  { value: "0", label: "Clinic", icon: <MdLocalHospital size={13} /> },
-  { value: "1", label: "Video",  icon: <MdVideocam size={13} /> },
-  { value: "2", label: "Call",   icon: <MdPhone size={13} /> },
-  { value: "3", label: "Chat",   icon: <MdChat size={13} /> },
-];
-
-const STATUS_OPTIONS = [
-  { value: "",           label: "All",       color: "text-gray-400" },
-  { value: "Pending",    label: "Pending",   color: "text-yellow-500" },
-  { value: "Confirmed",  label: "Confirmed", color: "text-green-500" },
-  { value: "Completed",  label: "Completed", color: "text-blue-500" },
-  { value: "Cancelled",  label: "Cancelled", color: "text-red-500" },
-];
-
-const TYPE_LABELS = ["Clinic", "Video", "Call", "Chat"];
-const APPT_STATUS = ["Pending", "Confirmed", "Completed", "Cancelled", "NoShow"];
+import AppointmentDetailModal from "../components/Appointments/AppointmentDetailModal";
+import {
+  CONSULTATION_TYPE_OPTIONS,
+  STATUS_OPTIONS,
+  type AppointmentListItem,
+  getConsultationTypeIcon,
+  getConsultationTypeLabel,
+  getStatusLabel,
+  getStatusBadgeClasses,
+  isChatConsultation,
+  MdCircle,
+} from "../utils/appointmentUtils";
 
 export default function PatientAppointmentsPage() {
   const navigate = useNavigate();
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const { user } = useAuth();
+  const [appointments, setAppointments] = useState<AppointmentListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ status: "", type: "", fromDate: "", toDate: "", search: "" });
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentListItem | null>(null);
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -48,7 +40,7 @@ export default function PatientAppointmentsPage() {
     }
   };
 
-  useEffect(() => { fetchAppointments(); }, [filters]);
+  useEffect(() => { fetchAppointments(); }, [filters, user?.id, user?.activeRole]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -172,7 +164,7 @@ export default function PatientAppointmentsPage() {
             <div className="flex flex-col gap-2">
               <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Consultation Type</label>
               <div className="flex flex-wrap gap-2">
-                {TYPE_OPTIONS.map((opt) => {
+                {CONSULTATION_TYPE_OPTIONS.map((opt) => {
                   const active = filters.type === opt.value;
                   return (
                     <button
@@ -199,7 +191,7 @@ export default function PatientAppointmentsPage() {
               <span className="text-xs text-gray-400 font-medium mt-1">Active:</span>
               {filters.search && <Pill label={`Doctor: "${filters.search}"`} onRemove={() => setFilters(f => ({ ...f, search: "" }))} />}
               {filters.status && <Pill label={`Status: ${filters.status}`} onRemove={() => setFilters(f => ({ ...f, status: "" }))} />}
-              {filters.type !== "" && <Pill label={`Type: ${TYPE_LABELS[+filters.type]}`} onRemove={() => setFilters(f => ({ ...f, type: "" }))} />}
+              {filters.type !== "" && <Pill label={`Type: ${getConsultationTypeLabel(filters.type)}`} onRemove={() => setFilters(f => ({ ...f, type: "" }))} />}
               {filters.fromDate && <Pill label={`From: ${format(new Date(filters.fromDate), "MMM d, yyyy")}`} onRemove={() => setFilters(f => ({ ...f, fromDate: "" }))} />}
               {filters.toDate && <Pill label={`To: ${format(new Date(filters.toDate), "MMM d, yyyy")}`} onRemove={() => setFilters(f => ({ ...f, toDate: "" }))} />}
             </div>
@@ -259,7 +251,9 @@ export default function PatientAppointmentsPage() {
                               </div>
                             )}
                             <div className="font-semibold text-gray-800">
-                              {(app.doctorName || "").startsWith("Dr.") ? app.doctorName : `Dr. ${app.doctorName || "Doctor"}`}
+                              <Link to={`/doctors/${app.doctorId}`} className="hover:underline hover:text-[#6A5ACD]">
+                                {(app.doctorName || "").startsWith("Dr.") ? app.doctorName : `Dr. ${app.doctorName || "Doctor"}`}
+                              </Link>
                             </div>
                           </div>
                         </td>
@@ -272,23 +266,18 @@ export default function PatientAppointmentsPage() {
                         </td>
                         <td className="px-6 py-4">
                           <span className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] rounded-full bg-indigo-50 text-indigo-600 font-bold border border-indigo-100 uppercase tracking-wide w-fit">
-                            {TYPE_OPTIONS.find(t => t.value === String(app.consultationType))?.icon}
-                            {TYPE_LABELS[app.consultationType] || "—"}
+                            {getConsultationTypeIcon(app.consultationType)}
+                            {getConsultationTypeLabel(app.consultationType)}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] uppercase tracking-wider rounded-full font-bold border w-fit ${
-                            app.status === 0 ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
-                            app.status === 1 ? "bg-green-50 text-green-700 border-green-200" :
-                            app.status === 2 ? "bg-blue-50 text-blue-700 border-blue-200" :
-                            "bg-red-50 text-red-700 border-red-200"
-                          }`}>
+                          <span className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] uppercase tracking-wider rounded-full font-bold border w-fit ${getStatusBadgeClasses(app.status)}`}>
                             <MdCircle size={7} />
-                            {APPT_STATUS[app.status] ?? "—"}
+                            {getStatusLabel(app.status)}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          {app.consultationType === 3 && app.sessionId ? (
+                          {isChatConsultation(app.consultationType) && app.sessionId ? (
                             <Link
                               to={`/chat/${app.sessionId}`}
                               className="flex items-center gap-1.5 text-white bg-[#6A5ACD] hover:bg-[#5140b3] px-4 py-1.5 rounded-lg font-semibold text-sm transition-all shadow-sm group-hover:shadow-md w-fit"
@@ -298,6 +287,7 @@ export default function PatientAppointmentsPage() {
                             </Link>
                           ) : (
                             <button
+                              onClick={() => setSelectedAppointment(app)}
                               className="cursor-pointer text-[#6A5ACD] bg-[#F8F7FF] hover:bg-[#E6E1FF] px-4 py-1.5 rounded-lg font-semibold text-sm transition-all border border-[#E6E1FF]"
                               title="View full appointment details"
                             >
@@ -314,6 +304,19 @@ export default function PatientAppointmentsPage() {
           )}
         </div>
       </div>
+
+      <AppointmentDetailModal
+        appointment={selectedAppointment}
+        partyLabel="Doctor"
+        partyName={
+          selectedAppointment
+            ? (selectedAppointment.doctorName || "").startsWith("Dr.")
+              ? selectedAppointment.doctorName!
+              : `Dr. ${selectedAppointment.doctorName || "Doctor"}`
+            : ""
+        }
+        onClose={() => setSelectedAppointment(null)}
+      />
     </div>
   );
 }

@@ -88,8 +88,14 @@ export default function TabibiLogin({
 
     try {
       const user = await login(email, password, requiredRole);
+      const isAdmin = user?.roles?.some((r) => r.toLowerCase() === "admin");
 
       if (requiredRole && user?.roles && !user.roles.includes(requiredRole)) {
+        if (isAdmin) {
+          navigate("/admin-dashboard");
+          return;
+        }
+
         Swal.fire({
           title: `Role Conflict`,
           html: `
@@ -137,7 +143,8 @@ export default function TabibiLogin({
           }
           } else {
             logout();
-            navigate(`/${requiredRole === "Doctor" ? "login" : "doctor-login"}`);
+            const fallback = requiredRole === "Doctor" ? "login" : "doctor-login";
+            navigate(`/${fallback}`);
           }
         });
         return;

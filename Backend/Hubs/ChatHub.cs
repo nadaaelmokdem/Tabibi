@@ -11,20 +11,19 @@ namespace Tabibi.Hubs
     public class ChatHub(ChatService chatService, PresenceTracker presenceTracker) : Hub
     {
         private static string GroupName(int sessionId) => $"session-{sessionId}";
+        private static string UserGroupName(string userId) => $"user-{userId}";
 
         private string? GetUserId() => Context.User?.GetId();
 
         // Helper to send unauthorized notifications to the caller instead of throwing HubException
-        private Task SendUnauthorized(string message) => Task.WhenAll(
-            Clients.Caller.SendAsync("Unauthorized", new { Message = message }),
-            Clients.Caller.SendAsync("Redirect", "/")
-        );
+        private Task SendUnauthorized(string message) => Clients.Caller.SendAsync("Unauthorized", new { Message = message });
 
         public override async Task OnConnectedAsync()
         {
             var userId = GetUserId();
             if (userId != null)
             {
+                await Groups.AddToGroupAsync(Context.ConnectionId, UserGroupName(userId));
                 presenceTracker.UserConnected(userId, Context.ConnectionId);
                 // Notify all clients (including the user themselves) about the online status
                 await Clients.All.SendAsync("UserPresenceChanged", userId, true);
@@ -41,6 +40,7 @@ namespace Tabibi.Hubs
             var userId = GetUserId();
             if (userId != null)
             {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, UserGroupName(userId));
                 presenceTracker.UserDisconnected(userId, Context.ConnectionId);
                 bool stillOnline = presenceTracker.IsUserOnline(userId);
                 if (!stillOnline)
@@ -119,34 +119,42 @@ namespace Tabibi.Hubs
                 return;
             }
 
-            var saved = await chatService.SaveMessage(request.SessionId, access.Role, request.Content.Trim());
-
-            var payload = new ReceiveMessagePayload
+            try
             {
-                MessageId = saved.MessageId,
-                SessionId = request.SessionId,
-                SenderRole = access.Role,
-                SenderName = access.SenderName,
-                Content = saved.Content,
-                SentAt = saved.SentAt
-            };
+                var saved = await chatService.SaveMessage(request.SessionId, access.Role, request.Content.Trim());
 
-            // Broadcast to everyone in the session's group, including the sender -
-            // simplest way to keep the sender's own UI in sync with the saved
-            // message (correct MessageId/SentAt from the DB) instead of trusting
-            // its own optimistic local copy.
-            await Clients.Group(GroupName(request.SessionId)).SendAsync("ReceiveMessage", payload);
-
-            // Determine the other party's user ID to notify them specifically (and the sender)
-            var sessionDetails = await chatService.GetSessionDetails(request.SessionId);
-            if (sessionDetails != null)
-            {
-                // We send a generic event to both users to update their session list
-                await Clients.User(sessionDetails.PatientUserId).SendAsync("UpdateSessionList", payload);
-                if (sessionDetails.DoctorUserId != "AI")
+                var payload = new ReceiveMessagePayload
                 {
-                    await Clients.User(sessionDetails.DoctorUserId).SendAsync("UpdateSessionList", payload);
+                    MessageId = saved.MessageId,
+                    SessionId = request.SessionId,
+                    SenderRole = access.Role,
+                    SenderUserId = userId,
+                    SenderName = access.SenderName,
+                    Content = saved.Content,
+                    SentAt = saved.SentAt
+                };
+
+                // Ensure the sender is in the session room before broadcasting so the
+                // sender's own UI always updates immediately, even if the join flow
+                // was still in progress or the connection had just reconnected.
+                await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(request.SessionId));
+                await Clients.Group(GroupName(request.SessionId)).SendAsync("ReceiveMessage", payload);
+
+                // Determine the other party's user ID to notify them specifically (and the sender)
+                var sessionDetails = await chatService.GetSessionDetails(request.SessionId);
+                if (sessionDetails != null)
+                {
+                    // We send a generic event to both users to update their session list
+                    await Clients.User(sessionDetails.PatientUserId).SendAsync("UpdateSessionList", payload);
+                    if (sessionDetails.DoctorUserId != "AI")
+                    {
+                        await Clients.User(sessionDetails.DoctorUserId).SendAsync("UpdateSessionList", payload);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync("SendMessageError", ex.Message);
             }
         }
     }

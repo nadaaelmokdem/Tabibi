@@ -415,6 +415,29 @@ namespace Tabibi.Migrations
                     b.ToTable("DoctorAvailabilities");
                 });
 
+            modelBuilder.Entity("Tabibi.Models.DoctorOldSpecialty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SpecialtyId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("SpecialtyId");
+
+                    b.ToTable("DoctorOldSpecialties");
+                });
+
             modelBuilder.Entity("Tabibi.Models.DoctorProfile", b =>
                 {
                     b.Property<int>("DoctorId")
@@ -480,6 +503,24 @@ namespace Tabibi.Migrations
                     b.Property<string>("NationalIdNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("OldDegreeProofUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldIdProofUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("OldLicenseExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OldLicenseNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldLicenseProofUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldNationalIdNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ProfilePictureUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -505,6 +546,41 @@ namespace Tabibi.Migrations
                         .IsUnique();
 
                     b.ToTable("DoctorProfiles");
+                });
+
+            modelBuilder.Entity("Tabibi.Models.DoctorProfileChangeLog", b =>
+                {
+                    b.Property<int>("ChangeLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChangeLogId"));
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ChangedByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FieldName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ChangeLogId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("DoctorProfileChangeLogs");
                 });
 
             modelBuilder.Entity("Tabibi.Models.DoctorReview", b =>
@@ -1155,6 +1231,25 @@ namespace Tabibi.Migrations
                     b.Navigation("Doctor");
                 });
 
+            modelBuilder.Entity("Tabibi.Models.DoctorOldSpecialty", b =>
+                {
+                    b.HasOne("Tabibi.Models.DoctorProfile", "Doctor")
+                        .WithMany("OldSpecialties")
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tabibi.Models.Specialty", "Specialty")
+                        .WithMany("DoctorOldSpecialties")
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Specialty");
+                });
+
             modelBuilder.Entity("Tabibi.Models.DoctorProfile", b =>
                 {
                     b.HasOne("Tabibi.Models.AppUser", "User")
@@ -1164,6 +1259,17 @@ namespace Tabibi.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Tabibi.Models.DoctorProfileChangeLog", b =>
+                {
+                    b.HasOne("Tabibi.Models.DoctorProfile", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
                 });
 
             modelBuilder.Entity("Tabibi.Models.DoctorReview", b =>
@@ -1299,6 +1405,8 @@ namespace Tabibi.Migrations
                     b.Navigation("Availabilities");
 
                     b.Navigation("DoctorSpecialties");
+
+                    b.Navigation("OldSpecialties");
                 });
 
             modelBuilder.Entity("Tabibi.Models.PatientProfile", b =>
@@ -1317,6 +1425,8 @@ namespace Tabibi.Migrations
 
             modelBuilder.Entity("Tabibi.Models.Specialty", b =>
                 {
+                    b.Navigation("DoctorOldSpecialties");
+
                     b.Navigation("DoctorSpecialties");
                 });
 #pragma warning restore 612, 618

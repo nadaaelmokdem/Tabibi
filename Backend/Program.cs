@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -52,12 +53,14 @@ namespace Tabibi
             builder.Services.AddSwaggerGen();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddSignalR();
+            builder.Services.AddSingleton<IUserIdProvider, SubClaimUserIdProvider>();
             builder.Services.AddScoped<ChatService>();
             builder.Services.AddScoped<AppointmentService>();
             builder.Services.AddScoped<SlotService>();
             builder.Services.AddScoped<PricingService>();
             builder.Services.AddScoped<AppointmentNotificationService>();
-builder.Services.AddSingleton<PresenceTracker>();
+            builder.Services.AddScoped<ReviewService>();
+            builder.Services.AddSingleton<PresenceTracker>();
 
             builder.Services.AddCors(options =>
             {
@@ -175,20 +178,31 @@ builder.Services.AddSingleton<PresenceTracker>();
 
                     if (!string.IsNullOrEmpty(adminEmail) && !string.IsNullOrEmpty(adminPassword))
                     {
-                        var adminUser = new AppUser
+                        var existingUser = await userManager.FindByEmailAsync(adminEmail);
+                        if (existingUser != null)
                         {
-                            UserName = adminEmail,
-                            Email = adminEmail,
-                            FullName = adminFullName,
-                            EmailConfirmed = true,
-                            PhoneNumber = "0000000000",
-                            PhoneNumberConfirmed = true
-                        };
+                            if (!await userManager.IsInRoleAsync(existingUser, UserRoles.Admin))
+                            {
+                                await userManager.AddToRoleAsync(existingUser, UserRoles.Admin);
+                            }
+                        }
+                        else
+                        {
+                            var adminUser = new AppUser
+                            {
+                                UserName = adminEmail,
+                                Email = adminEmail,
+                                FullName = adminFullName,
+                                EmailConfirmed = true,
+                                PhoneNumber = "0000000000",
+                                PhoneNumberConfirmed = true
+                            };
 
-                        var createResult = await userManager.CreateAsync(adminUser, adminPassword);
-                        if (createResult.Succeeded)
-                        {
-                            await userManager.AddToRoleAsync(adminUser, UserRoles.Admin);
+                            var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+                            if (createResult.Succeeded)
+                            {
+                                await userManager.AddToRoleAsync(adminUser, UserRoles.Admin);
+                            }
                         }
                     }
                 }

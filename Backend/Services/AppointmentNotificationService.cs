@@ -25,4 +25,13 @@ public class AppointmentNotificationService(IHubContext<AppointmentHub> hubConte
             .Group(UserGroupName(patientUserId))
             .SendAsync("AppointmentBookedConfirmation", appointment);
     }
+
+    public Task NotifyPatientCancellationAsync(
+        string patientUserId,
+        AppointmentListDTO appointment)
+    {
+        return hubContext.Clients
+            .Group(UserGroupName(patientUserId))
+            .SendAsync("AppointmentCancelled", appointment);
+    }
 }

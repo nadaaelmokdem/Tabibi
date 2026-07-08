@@ -15,6 +15,7 @@ namespace Tabibi.Models
 
             // Navigation
             public ICollection<DoctorSpecialty> DoctorSpecialties { get; set; } = new List<DoctorSpecialty>();
+            public ICollection<DoctorOldSpecialty> DoctorOldSpecialties { get; set; } = new List<DoctorOldSpecialty>();
         }
     }
 

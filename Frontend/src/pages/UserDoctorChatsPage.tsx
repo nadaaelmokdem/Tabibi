@@ -12,6 +12,8 @@ import { FaUserMd, FaUsers, FaRegClock, FaChevronRight } from "react-icons/fa";
 import { TbArrowLeft, TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse } from "react-icons/tb";
 import Swal from "sweetalert2";
 import { formatTimeTo12Hour } from "../utils/dateUtils";
+import Skeleton from "../components/common/Skeleton";
+import NetworkError from "../components/common/NetworkError";
 
 interface SessionInfo {
   sessionId: number;
@@ -20,6 +22,7 @@ interface SessionInfo {
   otherPartySpecialty: string;
   lastMessage: string;
   lastMessageTime: string | null;
+  doctorId?: number;
 }
 
 interface GroupedDoctor {
@@ -42,6 +45,9 @@ export default function UserDoctorChatsPage() {
   const numericSessionId = sessionId ? Number(sessionId) : undefined;
   
   useEffect(() => {
+    setSessions([]);
+    setExpandedDoctorId(null);
+
     ChatService.getSessions(user?.activeRole).then(data => {
       // Filter out AI sessions
       const doctorSessions = data.filter((s: any) => s.otherPartyUserId !== "AI" && s.otherPartyName !== "AI Medical Assistant");
@@ -75,7 +81,7 @@ export default function UserDoctorChatsPage() {
     
     onUpdateSessionList(handleUpdateSessionList);
     return () => offUpdateSessionList(handleUpdateSessionList);
-  }, [user?.activeRole]);
+  }, [user?.id, user?.activeRole]);
 
   const recentSessions = useMemo(() => {
     return [...sessions].sort((a, b) => {
@@ -280,17 +286,24 @@ function ActiveChatPane({
   isSidebarOpen: boolean;
   onOpenSidebar: () => void;
 }) {
+  const { user } = useAuth();
   const { messages, loading, error, send, sessionDetails, isOtherUserOnline } = useChatSession(numericSessionId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const now = useMemo(() => Date.now(), []);
+  const [now, setNow] = useState(() => Date.now());
 
   const [assessmentVisible, setAssessmentVisible] = useState(true);
+  const currentUserId = user?.id;
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => setNow(Date.now()), 60000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const displayMessages: Message[] = useMemo(
     () =>
       messages.map((m) => ({
         id: String(m.messageId),
-        senderId: m.senderRole,
+        senderId: m.senderUserId || m.senderRole || "",
         text: m.content,
         timestamp: formatTimeTo12Hour(new Date(m.sentAt)),
       })),
@@ -345,8 +358,8 @@ function ActiveChatPane({
     });
   };
 
-  if (loading) return <div className="flex-1 flex items-center justify-center text-[#787584] font-medium">Loading conversation...</div>;
-  if (error) return <div className="flex-1 flex items-center justify-center text-red-500 font-medium">Error: {error}</div>;
+  if (loading) return <div className="flex-1 p-8"><Skeleton className="h-full min-h-[400px] w-full" /></div>;
+  if (error) return <div className="flex-1 flex items-center justify-center"><NetworkError message={error} /></div>;
 
   return (
     <>
@@ -367,7 +380,19 @@ function ActiveChatPane({
              {contact.name.replace("Dr. ", "").charAt(0)}
           </div>
           <div>
-            <h2 className="font-extrabold text-[#1a1345] leading-tight text-[17px]">{contact.name}</h2>
+            <h2 className="font-extrabold text-[#1a1345] leading-tight text-[17px]">
+              {user?.activeRole === "Patient" && contact.doctorId ? (
+                <span 
+                  onClick={() => navigate(`/doctors/${contact.doctorId}`)} 
+                  className="hover:underline hover:text-[#6a5acd] cursor-pointer"
+                  title="View Profile"
+                >
+                  {contact.name}
+                </span>
+              ) : (
+                contact.name
+              )}
+            </h2>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className={`w-2 h-2 rounded-full ${contact.online ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-gray-400"}`}></span>
               <span className="text-[12px] font-semibold text-[#787584]">
@@ -424,9 +449,10 @@ function ActiveChatPane({
             No messages yet.
           </p>
         ) : (
-          displayMessages.map((msg) => (
-            <MessageBubble key={msg.id} msg={msg} isMe={msg.senderId === "User"} />
-          ))
+          displayMessages.map((msg) => {
+            const isMine = msg.senderId === currentUserId || msg.senderId === user?.id;
+            return <MessageBubble key={msg.id} msg={msg} isMe={isMine} />;
+          })
         )}
         <div ref={messagesEndRef} className="h-2 sm:h-4" />
       </div>
@@ -451,7 +477,7 @@ function ActiveChatPane({
         acceptedFileTypes=".jpg,.jpeg,.png,.pdf,.mp4,.mov,.avi,.webm,.mkv,.wmv"
         disabled={sessionDetails ? (
           (new Date(sessionDetails.startedAt).getTime() < now - 24 * 60 * 60 * 1000) || 
-          (sessionDetails.isCompanyPaid && displayMessages.filter(m => m.senderId === "User").length >= 1)
+          (sessionDetails.isCompanyPaid && displayMessages.filter(m => m.senderId === currentUserId && !m.text.startsWith("Clinical Assessment:")).length >= 1)
         ) : false} 
       />
     </>

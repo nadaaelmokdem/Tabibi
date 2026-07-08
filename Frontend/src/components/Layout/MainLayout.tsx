@@ -5,7 +5,7 @@ import Sidebar from "../DashboardSidebar";
 import { useAuth } from "../../context/AuthContext";
 import { LuMenu } from "react-icons/lu";
 import { MdMedicalServices } from "react-icons/md";
-import { startConnection } from "../../services/chatHubService";
+import { startConnection, stopConnection } from "../../services/chatHubService";
 
 /**
  * Layout wrapper that dynamically renders Navbar or Sidebar based on auth state.
@@ -18,10 +18,15 @@ export default function MainLayout() {
   const isAdmin = user?.activeRole?.toLowerCase() === "admin" || user?.roles?.some(r => r.toLowerCase() === "admin");
 
   useEffect(() => {
-    if (isAuthenticated) {
-      startConnection().catch(console.error);
-    }
-  }, [isAuthenticated]);
+    const syncChatConnection = async () => {
+      await stopConnection();
+      if (isAuthenticated) {
+        await startConnection();
+      }
+    };
+
+    syncChatConnection().catch(console.error);
+  }, [isAuthenticated, user?.id, user?.activeRole]);
 
   return (
     <div className={`flex min-h-screen ${isAuthenticated ? 'bg-gray-50' : ''}`}>

@@ -1,6 +1,7 @@
 import React from "react";
 import { FaClock, FaLock, FaCalendarTimes } from "react-icons/fa";
 import type { SlotWithMeta } from "../../types/booking";
+import Skeleton from "../common/Skeleton";
 
 interface SlotGridProps {
   slots: SlotWithMeta[];
@@ -19,11 +20,7 @@ const SlotGrid: React.FC<SlotGridProps> = ({
     return (
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-11 rounded-xl bg-gray-100 animate-pulse"
-            style={{ animationDelay: `${i * 0.06}s` }}
-          />
+          <Skeleton key={i} className="h-11 w-full" />
         ))}
       </div>
     );

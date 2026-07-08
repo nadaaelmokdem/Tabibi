@@ -465,18 +465,18 @@ export default function AIChatPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1a1345]/50 backdrop-blur-sm p-4">
           <div className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full border border-[#e5deff]">
             <h3 className="text-xl font-bold mb-3 text-[#1a1345]">Recharge AI Messages</h3>
-            <p className="mb-5 text-sm text-[#474553] font-medium leading-relaxed">You have run out of AI messages. Recharge now for 10 LE per 20 messages.</p>
+            <p className="mb-5 text-sm text-[#474553] font-medium leading-relaxed">You have run out of AI messages. Recharge now for 10.00 EGP per 20 messages.</p>
             <div className="mb-6">
-              <label className="block text-sm font-bold mb-2 text-[#1a1345]">Amount (LE)</label>
+              <label className="block text-sm font-bold mb-2 text-[#1a1345]">Amount (EGP)</label>
               <select 
                 className="w-full border border-[#e5deff] rounded-xl p-3 text-sm text-[#1a1345] font-medium focus:outline-none focus:border-[#6a5acd] focus:ring-1 focus:ring-[#6a5acd] transition-colors bg-[#f8f7ff]"
                 value={rechargeAmount}
                 onChange={(e) => setRechargeAmount(Number(e.target.value))}
               >
-                <option value={10}>10 LE (20 Messages)</option>
-                <option value={20}>20 LE (40 Messages)</option>
-                <option value={30}>30 LE (60 Messages)</option>
-                <option value={50}>50 LE (100 Messages)</option>
+                <option value={10}>10.00 EGP (20 Messages)</option>
+                <option value={20}>20.00 EGP (40 Messages)</option>
+                <option value={30}>30.00 EGP (60 Messages)</option>
+                <option value={50}>50.00 EGP (100 Messages)</option>
               </select>
             </div>
             <div className="flex gap-3 justify-end">
@@ -499,7 +499,7 @@ export default function AIChatPage() {
                 }}
                 className="px-5 py-2.5 text-sm font-bold text-white bg-[#6a5acd] rounded-xl hover:bg-[#5b4eb8] transition-colors shadow-md"
               >
-                Pay {rechargeAmount} LE
+                Pay {rechargeAmount.toFixed(2)} EGP
               </button>
             </div>
           </div>

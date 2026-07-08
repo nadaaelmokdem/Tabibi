@@ -33,10 +33,25 @@ namespace Tabibi.Controllers
             return Ok(doctors);
         }
 
+        [HttpGet("doctors/{doctorId}")]
+        public async Task<IActionResult> GetDoctorDetail(int doctorId)
+        {
+            var doctor = await adminService.GetDoctorDetail(doctorId);
+            if (doctor == null) return NotFound();
+            return Ok(doctor);
+        }
+
+        [HttpGet("doctors/{doctorId}/changes")]
+        public async Task<IActionResult> GetDoctorChanges(int doctorId)
+        {
+            var changes = await adminService.GetDoctorChanges(doctorId);
+            return Ok(changes);
+        }
+
         [HttpPatch("doctors/{doctorId}/verify")]
         public async Task<IActionResult> VerifyDoctor(int doctorId, [FromBody] ReviewDoctorRequestDTO request)
         {
-            var res = await adminService.VerifyDoctor(doctorId, request.Decision, request.Comment);
+            var res = await adminService.VerifyDoctor(doctorId, request);
             if (!res.IsSuccess)
             {
                 return BadRequest(res.ErrorMessage);

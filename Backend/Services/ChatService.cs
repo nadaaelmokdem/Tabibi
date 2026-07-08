@@ -66,6 +66,9 @@ namespace Tabibi.Services
                     MessageId = m.MessageId,
                     SessionId = m.SessionId,
                     SenderRole = m.Role,
+                    SenderUserId = m.Role == UserRoles.Patient
+                        ? m.Session.Patient.UserId
+                        : (m.Session.Doctor != null ? m.Session.Doctor.UserId : "AI"),
                     SenderName = m.Role == UserRoles.Patient
                         ? m.Session.Patient.User.FullName
                         : (m.Session.Doctor != null ? m.Session.Doctor.User.FullName : "AI Doctor"),
@@ -77,28 +80,22 @@ namespace Tabibi.Services
 
         public async Task<ChatSessionDetailsDTO?> GetSessionDetails(int sessionId)
         {
-            try
-            {
-                return await dbContext.ChatSessions
-                    .Where(s => s.SessionId == sessionId)
-                    .Select(s => new ChatSessionDetailsDTO
-                    {
-                        SessionId = s.SessionId,
-                        DoctorName = s.Doctor != null ? s.Doctor.User.FullName : "AI Medical Assistant",
-                        DoctorSpecialty = s.Doctor != null && s.Doctor.DoctorSpecialties.Any() ? string.Join(", ", s.Doctor.DoctorSpecialties.Select(ds => ds.Specialty.Name)) : "AI",
-                        PatientName = s.Patient.User.FullName,
-                        DoctorUserId = s.Doctor != null ? s.Doctor.UserId : "AI",
-                        PatientUserId = s.Patient.UserId,
-                        IsCompanyPaid = s.IsCompanyPaid,
-                        IsFollowUp = s.IsFollowUp,
-                        StartedAt = s.StartedAt
-                    })
-                    .FirstOrDefaultAsync();
-            }
-            catch 
-            {
-                return null;
-            }
+            return await dbContext.ChatSessions
+                .Where(s => s.SessionId == sessionId)
+                .Select(s => new ChatSessionDetailsDTO
+                {
+                    SessionId = s.SessionId,
+                    DoctorName = s.Doctor != null ? s.Doctor.User.FullName : "AI Medical Assistant",
+                    DoctorSpecialty = s.Doctor != null && s.Doctor.DoctorSpecialties.Any() ? string.Join(", ", s.Doctor.DoctorSpecialties.Select(ds => ds.Specialty.Name)) : "AI",
+                    PatientName = s.Patient.User.FullName,
+                    DoctorId = s.DoctorId,
+                    DoctorUserId = s.Doctor != null ? s.Doctor.UserId : "AI",
+                    PatientUserId = s.Patient.UserId,
+                    IsCompanyPaid = s.IsCompanyPaid,
+                    IsFollowUp = s.IsFollowUp,
+                    StartedAt = s.StartedAt
+                })
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<ChatSessionSummaryDTO>> GetUserSessions(string userId, string role)
@@ -117,6 +114,7 @@ namespace Tabibi.Services
                 .Select(s => new
                 {
                     s.SessionId,
+                    s.DoctorId,
                     DoctorName = s.Doctor != null ? s.Doctor.User.FullName : null,
                     DoctorUserId = s.Doctor != null ? s.Doctor.UserId : null,
                     DoctorSpecialties = s.Doctor != null 
@@ -131,14 +129,16 @@ namespace Tabibi.Services
                 })
                 .ToListAsync();
 
-            return sessions.Select(s => new ChatSessionSummaryDTO
+                return sessions.Select(s => new ChatSessionSummaryDTO
             {
                 SessionId = s.SessionId,
                 OtherPartyName = role == UserRoles.Patient ? (s.DoctorName ?? "AI Medical Assistant") : s.PatientName,
                 OtherPartyUserId = role == UserRoles.Patient ? (s.DoctorUserId ?? "AI") : s.PatientUserId,
+                DoctorId = role == UserRoles.Patient ? s.DoctorId : null,
                 OtherPartySpecialty = role == UserRoles.Patient ? (s.DoctorSpecialties.Any() ? string.Join(", ", s.DoctorSpecialties) : "AI") : "",
                 LastMessage = s.LastMessage?.Content ?? "",
-                LastMessageTime = s.LastMessage?.SentAt
+                LastMessageTime = s.LastMessage?.SentAt,
+                LastMessageRole = s.LastMessage?.Role
             })
             .OrderByDescending(s => s.LastMessageTime ?? DateTime.MinValue)
             .ToList();
@@ -217,6 +217,11 @@ namespace Tabibi.Services
             if (doctor.UserId == patientUserId)
             {
                 throw new Exception("You cannot start a chat session with yourself.");
+            }
+
+            if (!doctor.IsVerified)
+            {
+                throw new Exception("Doctor is not verified.");
             }
 
             // Check for existing active session first for both paid and unpaid

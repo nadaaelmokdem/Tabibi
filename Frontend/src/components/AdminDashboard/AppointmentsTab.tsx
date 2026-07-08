@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import AdminService from "../../services/adminService";
 import type { AdminAppointment } from "../../types/admin";
+import { formatMoney } from "../../utils/formatMoney";
+
+import Skeleton from "../common/Skeleton";
+import NetworkError from "../common/NetworkError";
 
 export default function AppointmentsTab() {
   const [appointments, setAppointments] = useState<AdminAppointment[]>([]);
@@ -14,8 +18,8 @@ export default function AppointmentsTab() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p className="text-[#2A2455]/60 text-sm">Loading appointments...</p>;
-  if (error) return <p className="text-red-500 text-sm">{error}</p>;
+  if (loading) return <Skeleton className="h-64 w-full" />;
+  if (error) return <NetworkError message={error} />;
 
   return (
     <div className="bg-white border border-[#E6E1FF] rounded-2xl overflow-hidden">
@@ -42,10 +46,10 @@ export default function AppointmentsTab() {
                 </td>
                 <td className="px-4 py-3 text-[#2A2455]/70">{a.consultationType}</td>
                 <td className="px-4 py-3 text-[#2A2455]/70">{a.status}</td>
-                <td className="px-4 py-3 text-[#2A2455]/70">${a.price.toFixed(2)}</td>
+                <td className="px-4 py-3 text-[#2A2455]/70">{formatMoney(a.price)}</td>
                 <td className="px-4 py-3 text-[#2A2455]/70">
                   {a.paymentStatus ?? "No payment"}
-                  {a.amountPaid != null && ` ($${a.amountPaid.toFixed(2)})`}
+                  {a.amountPaid != null && ` (${formatMoney(a.amountPaid)})`}
                 </td>
               </tr>
             ))}

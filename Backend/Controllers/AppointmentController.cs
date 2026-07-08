@@ -84,4 +84,18 @@ public class AppointmentController(
         var appointments = await appointmentService.GetPatientAppointmentsAsync(userId, filters);
         return Ok(appointments);
     }
+
+    [HttpPatch("{appointmentId}/cancel")]
+    [Authorize(Roles = UserRoles.Doctor)]
+    public async Task<IActionResult> CancelAppointment(int appointmentId)
+    {
+        var userId = User.GetId();
+        if (string.IsNullOrEmpty(userId)) return Unauthorized("User not authenticated");
+
+        var result = await appointmentService.CancelAppointmentAsync(userId, appointmentId);
+        if (!result.IsSuccess)
+            return BadRequest(result.ErrorMessage);
+
+        return Ok(result.Data);
+    }
 }

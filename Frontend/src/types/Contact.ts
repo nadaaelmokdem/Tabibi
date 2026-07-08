@@ -7,4 +7,5 @@ export default interface Contact {
   unread: number;
   online: boolean;
   specialty?: string;
+  doctorId?: number;
 }

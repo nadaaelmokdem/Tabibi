@@ -11,6 +11,8 @@ import UsersTab from "../components/AdminDashboard/UsersTab";
 import DoctorVerificationTab from "../components/AdminDashboard/DoctorVerificationTab";
 import AppointmentsTab from "../components/AdminDashboard/AppointmentsTab";
 import type { AdminDashboardData } from "../types/dashboard";
+import Skeleton from "../components/common/Skeleton";
+import NetworkError from "../components/common/NetworkError";
 
 const TABS = ["Overview", "Users", "Doctor Verification", "Appointments & Payments"] as const;
 type Tab = (typeof TABS)[number];
@@ -57,10 +59,15 @@ export default function AdminDashboard() {
 
       {activeTab === "Overview" && (
         <>
-          {loading && <p className="text-[#2A2455]/60 text-sm">Loading...</p>}
-          {error && !loading && (
-            <p className="text-red-500 text-sm">Couldn't load dashboard. {error}</p>
+          {loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
           )}
+          {error && !loading && <NetworkError message={`Couldn't load dashboard. ${error}`} />}
           {data && !loading && (
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <StatCard title="Patients" value={data.totalPatients} icon={MdPeopleAlt} isPrimary />

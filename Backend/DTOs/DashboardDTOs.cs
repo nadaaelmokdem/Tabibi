@@ -7,6 +7,7 @@ namespace Tabibi.DTOs
         public int ChatSessionsCount { get; set; }
         public List<UpcomingAppointmentDTO> UpcomingAppointments { get; set; } = new();
         public List<RecentPrescriptionDTO> RecentPrescriptions { get; set; } = new();
+        public List<UnreviewedAppointmentDTO> UnreviewedAppointments { get; set; } = new();
     }
 
     public class UpcomingAppointmentDTO
@@ -17,6 +18,14 @@ namespace Tabibi.DTOs
         public DateTime ScheduledAt { get; set; }
         public string ConsultationType { get; set; } = string.Empty; 
         public string Status { get; set; } = string.Empty; 
+    }
+
+    public class UnreviewedAppointmentDTO
+    {
+        public int AppointmentId { get; set; }
+        public int DoctorId { get; set; }
+        public string DoctorName { get; set; } = string.Empty;
+        public DateTime ScheduledAt { get; set; }
     }
 
     public class RecentPrescriptionDTO
@@ -31,6 +40,8 @@ namespace Tabibi.DTOs
     {
         public string FullName { get; set; } = string.Empty;
         public bool IsVerified { get; set; }
+        public string VerificationStatus { get; set; } = "Pending";
+        public string? AdminComment { get; set; }
         public int ChatSessionsCount { get; set; }
         public int TodaysAppointmentsCount { get; set; }
         public int TotalPatientsSeen { get; set; }

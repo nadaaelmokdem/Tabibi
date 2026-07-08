@@ -65,4 +65,16 @@ export default class PatientService {
     const response = await api.get("appointment/patient-appointments", { params: filters });
     return response.data;
   }
+
+  static async submitReview(appointmentId: number, rating: number, comment?: string): Promise<boolean> {
+    try {
+      await api.post("reviews", { appointmentId, rating, comment }, { withCredentials: true });
+      return true;
+    } catch (error: unknown) {
+      if (isAxiosError(error) && error.response) {
+        throw new Error(error.response.data || "Failed to submit review.");
+      }
+      throw new Error("An unexpected error occurred.");
+    }
+  }
 }

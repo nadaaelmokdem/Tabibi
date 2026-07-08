@@ -10,15 +10,6 @@ export interface ScheduleItem {
   avatar?: string;
 }
 
-export interface RequestItem {
-  id: number;
-  name: string;
-  time: string;
-  timeDisplay: string;
-  concern: string;
-  initials: string;
-}
-
 export interface ChatMessage {
   id: number;
   name: string;

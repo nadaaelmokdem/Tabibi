@@ -76,15 +76,15 @@ export default function CalendarModal({
   );
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-[#2A2455]/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-[2rem] w-full max-w-4xl flex flex-col md:flex-row overflow-hidden shadow-2xl animate-in zoom-in duration-200">
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-surface-container-lowest rounded-xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden shadow-2xl border border-surface-variant/30">
         <div className="flex-1 p-8">
           <div className="flex justify-between items-center mb-8">
             <div className="flex gap-3">
               <select
                 value={currentMonth}
                 onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
-                className="font-bold text-lg text-[#2A2455] bg-transparent outline-none cursor-pointer"
+                className="font-bold text-lg text-on-surface bg-transparent outline-none cursor-pointer"
               >
                 {months.map((m, i) => (
                   <option key={i} value={i}>
@@ -95,7 +95,7 @@ export default function CalendarModal({
               <select
                 value={currentYear}
                 onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-                className="font-bold text-lg text-[#2A2455] bg-transparent outline-none cursor-pointer"
+                className="font-bold text-lg text-on-surface bg-transparent outline-none cursor-pointer"
               >
                 {years.map((y) => (
                   <option key={y} value={y}>
@@ -106,13 +106,13 @@ export default function CalendarModal({
             </div>
             <button
               onClick={onClose}
-              className="bg-gray-100 p-2 rounded-full hover:bg-red-50 hover:text-red-500"
+              className="bg-surface-container-low p-2 rounded-full hover:bg-red-50 hover:text-red-500 cursor-pointer"
             >
               <MdClose size={20} />
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-3 text-center text-[10px] font-black mb-4 text-[#B8A7FF] uppercase tracking-widest">
+          <div className="grid grid-cols-7 gap-3 text-center text-[10px] font-black mb-4 text-primary/60 uppercase tracking-widest">
             <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
@@ -143,31 +143,31 @@ export default function CalendarModal({
                 >
                   <div
                     onClick={() => setSelectedDay(day)}
-                    className={`aspect-square flex flex-col items-center justify-center rounded-2xl cursor-pointer text-sm font-bold transition-all relative ${
+                    className={`aspect-square flex flex-col items-center justify-center rounded-xl cursor-pointer text-sm font-bold transition-all relative ${
                       selectedDay === day
-                        ? "bg-[#6A5ACD] text-white shadow-lg scale-105"
+                        ? "bg-primary text-on-primary shadow-lg scale-105"
                         : isToday
-                          ? "border-2 border-[#6A5ACD] text-[#6A5ACD]"
-                          : "bg-[#FBFAFF] text-[#2A2455] hover:bg-[#E6E1FF]"
+                          ? "border-2 border-primary text-primary"
+                          : "bg-surface-container-low text-on-surface hover:bg-primary/10"
                     }`}
                   >
                     {day}
                     {hasEvents && (
                       <div
-                        className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${selectedDay === day ? "bg-white" : "bg-[#6A5ACD]"}`}
+                        className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${selectedDay === day ? "bg-on-primary" : "bg-primary"}`}
                       ></div>
                     )}
                   </div>
 
                   {hoveredDay === day && hasEvents && (
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 bg-[#2A2455] text-white p-3 rounded-xl shadow-xl z-[1001] pointer-events-none text-[10px] animate-in fade-in zoom-in">
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 bg-on-surface text-on-primary p-3 rounded-xl shadow-xl z-[1001] pointer-events-none text-[10px]">
                       <p className="font-bold border-b border-white/10 pb-1 mb-1 italic">
                         Daily Summary:
                       </p>
                       {dayEvents.map((ev) => (
                         <div key={ev.id}>• {ev.name}</div>
                       ))}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-[#2A2455]"></div>
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-on-surface"></div>
                     </div>
                   )}
                 </div>
@@ -176,8 +176,8 @@ export default function CalendarModal({
           </div>
         </div>
 
-        <div className="w-full md:w-80 bg-[#FBFAFF] border-l border-[#E6E1FF] p-8">
-          <h3 className="font-black text-xl text-[#2A2455] mb-6 flex items-center gap-2">
+        <div className="w-full md:w-80 bg-surface-container-low border-l border-surface-variant/30 p-8">
+          <h3 className="font-semibold text-xl text-on-surface mb-6 flex items-center gap-2">
             Details
           </h3>
           <div className="space-y-3">
@@ -185,27 +185,27 @@ export default function CalendarModal({
               selectedDayEvents.map((ev) => (
                 <div
                   key={ev.id}
-                  className="bg-white p-4 rounded-2xl border border-[#E6E1FF] shadow-sm relative group"
+                  className="bg-surface-container-lowest p-4 rounded-xl border border-surface-variant/30 shadow-sm relative group"
                 >
                   <button
                     onClick={() => onCancelAppointment(ev.id)}
-                    className="absolute top-2 right-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                    className="absolute top-2 right-2 text-on-surface-variant/40 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                   >
                     <MdDelete size={14} />
                   </button>
-                  <div className="text-[#6A5ACD] font-bold text-xs mb-1 flex items-center gap-1">
+                  <div className="text-primary font-bold text-xs mb-1 flex items-center gap-1">
                     <MdAccessTime size={12} /> {ev.time}
                   </div>
-                  <div className="font-bold text-[#2A2455] text-sm">
+                  <div className="font-semibold text-on-surface text-sm">
                     {ev.name}
                   </div>
-                  <div className="text-[11px] text-gray-400 mt-1">
+                  <div className="text-[11px] text-on-surface-variant mt-1">
                     {ev.type}
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-gray-400 italic text-center py-20 text-sm">
+              <p className="text-on-surface-variant italic text-center py-20 text-sm">
                 No appointments
               </p>
             )}

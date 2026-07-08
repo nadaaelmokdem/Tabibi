@@ -3,13 +3,20 @@ namespace Tabibi.Extensions
     public static class CookieExtensions
     {
         private const string RefreshTokenCookieName = "X-Refresh-Token";
+        private const string AccessTokenCookieName = "X-Access-Token";
+
+        private static bool UseSecureCookies =>
+            !string.Equals(
+                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"),
+                "Development",
+                StringComparison.OrdinalIgnoreCase);
 
         public static void SetRefreshTokenCookie(this IResponseCookies cookies, string token, int days = 7)
         {
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = UseSecureCookies,
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(days)
             };
@@ -22,22 +29,20 @@ namespace Tabibi.Extensions
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = UseSecureCookies,
                 SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddDays(-1) // Expire immediately
+                Expires = DateTime.UtcNow.AddDays(-1)
             };
 
             cookies.Append(RefreshTokenCookieName, "", cookieOptions);
         }
-
-        private const string AccessTokenCookieName = "X-Access-Token";
 
         public static void SetAccessTokenCookie(this IResponseCookies cookies, string token, int minutes = 60)
         {
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = UseSecureCookies,
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddMinutes(minutes)
             };
@@ -50,9 +55,9 @@ namespace Tabibi.Extensions
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = UseSecureCookies,
                 SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddDays(-1) // Expire immediately
+                Expires = DateTime.UtcNow.AddDays(-1)
             };
 
             cookies.Append(AccessTokenCookieName, "", cookieOptions);

@@ -190,6 +190,28 @@ namespace Tabibi.Services
 
             if (patient == null) return null;
 
+            var now = DateTime.UtcNow;
+            var todayStart = now.Date;
+            var todayEnd = todayStart.AddDays(1);
+
+            var toComplete = await dbContext.Appointments
+                .Where(a => a.PatientId == patient.PatientId 
+                         && a.Status == AppointmentStatus.Confirmed 
+                         && a.ScheduledAt >= todayStart 
+                         && a.ScheduledAt < todayEnd)
+                .ToListAsync();
+
+            bool changed = false;
+            foreach (var a in toComplete)
+            {
+                if (now >= a.ScheduledAt.AddMinutes(a.DurationMins))
+                {
+                    a.Status = AppointmentStatus.Completed;
+                    changed = true;
+                }
+            }
+            if (changed) await dbContext.SaveChangesAsync();
+
             var upcomingAppointments = await dbContext.Appointments
                 .Include(a => a.Doctor).ThenInclude(d => d.User)
                 .Where(a => a.PatientId == patient.PatientId && a.ScheduledAt >= DateTime.UtcNow)
@@ -222,13 +244,32 @@ namespace Tabibi.Services
             var chatSessionsCount = await dbContext.ChatSessions
                 .CountAsync(cs => cs.PatientId == patient.PatientId && cs.Status == SessionStatus.Active);
 
+            var unreviewedAppointments = await dbContext.Appointments
+                .Include(a => a.Doctor).ThenInclude(d => d.User)
+                .Where(a => a.PatientId == patient.PatientId 
+                         && a.Status == AppointmentStatus.Completed 
+                         && a.Review == null
+                         && dbContext.ChatSessions.Any(cs => cs.PatientId == patient.PatientId 
+                                                          && cs.DoctorId == a.DoctorId 
+                                                          && cs.Messages.Any(m => m.Role == Tabibi.Shared.UserRoles.Patient)))
+                .OrderByDescending(a => a.ScheduledAt)
+                .Select(a => new UnreviewedAppointmentDTO
+                {
+                    AppointmentId = a.AppointmentId,
+                    DoctorId = a.DoctorId,
+                    DoctorName = a.Doctor.User.FullName,
+                    ScheduledAt = a.ScheduledAt
+                })
+                .ToListAsync();
+
             return new PatientDashboardDTO
             {
                 FullName = patient.User.FullName,
                 UpcomingAppointmentsCount = upcomingAppointments.Count,
                 ChatSessionsCount = chatSessionsCount,
                 UpcomingAppointments = upcomingAppointments,
-                RecentPrescriptions = recentPrescriptions
+                RecentPrescriptions = recentPrescriptions,
+                UnreviewedAppointments = unreviewedAppointments
             };
         }
 

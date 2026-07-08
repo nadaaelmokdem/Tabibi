@@ -40,6 +40,7 @@ export default class ChatService {
     otherPartySpecialty: string;
     lastMessage: string;
     lastMessageTime: string | null;
+    lastMessageRole?: string | null;
   }>> {
     const response = await api.get(`chat/sessions`, { params: { activeRole } });
     return response.data;

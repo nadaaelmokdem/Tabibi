@@ -12,21 +12,31 @@ export default function StatCard({
   return (
     <div
       onClick={onClick}
-      className={`p-6 rounded-2xl shadow-sm ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${isPrimary ? "bg-[#6A5ACD] text-white" : "bg-white border border-[#E6E1FF]"}`}
+      className={`p-6 rounded-xl shadow-[0_12px_24px_-4px_rgba(42,36,85,0.08),0_4px_12px_-2px_rgba(42,36,85,0.04)] border ${
+        onClick ? "cursor-pointer hover:shadow-md transition-shadow" : ""
+      } ${
+        isPrimary
+          ? "bg-primary text-on-primary border-primary/20"
+          : "bg-surface-container-lowest border-surface-variant/30"
+      }`}
     >
       <div
-        className={`flex justify-between items-start mb-2 ${isPrimary ? "opacity-90" : "text-[#2A2455]/70"}`}
+        className={`flex justify-between items-start mb-2 ${
+          isPrimary ? "opacity-90" : "text-on-surface-variant"
+        }`}
       >
         <span className="text-sm font-medium">{title}</span>
         <div
-          className={`p-2 rounded-xl ${isPrimary ? "bg-white/20" : "bg-[#F4F1FF] text-[#6A5ACD]"}`}
+          className={`p-2 rounded-xl ${
+            isPrimary ? "bg-white/20" : "bg-primary/10 text-primary"
+          }`}
         >
           <Icon size={18} />
         </div>
       </div>
       <div className="flex items-baseline gap-2 mt-2">
         <div
-          className={`font-bold ${isPrimary ? "text-4xl" : "text-3xl text-[#2A2455]"}`}
+          className={`font-bold ${isPrimary ? "text-4xl" : "text-3xl text-on-surface"}`}
         >
           {value}
         </div>
@@ -36,7 +46,7 @@ export default function StatCard({
       </div>
       {subtext && (
         <div
-          className={`text-xs mt-2 ${isPrimary ? "text-white/80" : "text-gray-400"}`}
+          className={`text-xs mt-2 ${isPrimary ? "text-white/80" : "text-on-surface-variant"}`}
         >
           {subtext}
         </div>

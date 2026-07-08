@@ -28,6 +28,7 @@ export interface AuthContextType {
   ) => Promise<void>;
   logout: () => void;
   clearError: () => void;
+  updateUser: (patch: Partial<AppUser>) => void;
 }
 
 export interface LoginRequest {

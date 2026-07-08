@@ -10,6 +10,7 @@ import authService from "../services/authService";
 import { type AppUser, type AuthContextType } from "../types/auth";
 import { useNavigate } from "react-router-dom";
 import { setUnauthorizedHandler, setForbiddenHandler } from "../services/api";
+import { stopConnection } from "../services/chatHubService";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -125,6 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     setIsLoading(true);
     try {
+      await stopConnection();
       await authService.logout();
       setUser(null);
       setError(null);
@@ -134,6 +136,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  const updateUser = useCallback((patch: Partial<AppUser>) => {
+    setUser((prevUser) => {
+      if (!prevUser) return null;
+      const updatedUser = { ...prevUser, ...patch };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      return updatedUser;
+    });
   }, []);
 
   const value: AuthContextType = {
@@ -146,6 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register,
     logout,
     clearError,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

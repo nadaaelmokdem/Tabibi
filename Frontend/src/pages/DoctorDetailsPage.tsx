@@ -26,6 +26,11 @@ export default function DoctorDetailsPage() {
   const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
 
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsTotal, setReviewsTotal] = useState(0);
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+
   useEffect(() => {
     if (id) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -48,8 +53,10 @@ export default function DoctorDetailsPage() {
       getAiQuota().then(quota => {
         setFreeGpMessages(quota.freeGpMessages || 0);
       }).catch(console.error);
+    } else {
+      setFreeGpMessages(0);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.id, user?.activeRole]);
 
   useEffect(() => {
     if (doctor && selectedDate) {
@@ -62,6 +69,19 @@ export default function DoctorDetailsPage() {
         .finally(() => setSlotsLoading(false));
     }
   }, [doctor, selectedDate]);
+
+  useEffect(() => {
+    if (doctor) {
+      setReviewsLoading(true);
+      PublicService.getDoctorReviews(doctor.doctorId, reviewsPage, 5)
+        .then(res => {
+          setReviews(res.items);
+          setReviewsTotal(res.totalCount);
+        })
+        .catch(console.error)
+        .finally(() => setReviewsLoading(false));
+    }
+  }, [doctor, reviewsPage]);
 
   const isSelf = user?.id === doctor?.userId;
 
@@ -309,11 +329,7 @@ export default function DoctorDetailsPage() {
     );
   }
 
-  const mockReviews = [
-    { id: 1, name: "Sarah M.", rating: 5, date: "2 weeks ago", text: "Very attentive and professional. Took the time to listen to all my concerns and explained the treatment plan clearly." },
-    { id: 2, name: "Ahmed K.", rating: 4, date: "1 month ago", text: "Great doctor, but I had to wait about 20 minutes past my appointment time. The consultation itself was excellent though." },
-    { id: 3, name: "Anonymous", rating: 5, date: "2 months ago", text: "Highly recommend! Resolved an issue I've been struggling with for months." },
-  ];
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -440,29 +456,60 @@ export default function DoctorDetailsPage() {
               </div>
             </div>
 
-            {/* Reviews Section (Mocked) */}
+            {/* Reviews Section */}
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Patient Reviews</h2>
-                <span className="text-primary font-semibold hover:underline cursor-pointer">View All</span>
+                <h2 className="text-2xl font-bold text-gray-900">Patient Reviews {reviewsTotal > 0 && `(${reviewsTotal})`}</h2>
               </div>
               <div className="space-y-6">
-                {mockReviews.map(review => (
-                  <div key={review.id} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className="font-bold text-gray-800">{review.name}</div>
-                        <div className="text-xs text-gray-500">{review.date}</div>
-                      </div>
-                      <div className="flex text-yellow-400 text-sm">
-                        {[...Array(5)].map((_, i) => (
-                          <FaStar key={i} className={i < review.rating ? "" : "text-gray-200"} />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-gray-600 text-sm leading-relaxed">{review.text}</p>
+                {reviewsLoading ? (
+                  <div className="flex justify-center py-8 text-primary">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
                   </div>
-                ))}
+                ) : reviews.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No reviews available for this doctor yet.</p>
+                ) : (
+                  <>
+                    {reviews.map(review => (
+                      <div key={review.reviewId} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <div className="font-bold text-gray-800">{review.patientName}</div>
+                            <div className="text-xs text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</div>
+                          </div>
+                          <div className="flex text-yellow-400 text-sm">
+                            {[...Array(5)].map((_, i) => (
+                              <FaStar key={i} className={i < review.rating ? "" : "text-gray-200"} />
+                            ))}
+                          </div>
+                        </div>
+                        {review.comment && (
+                          <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
+                        )}
+                      </div>
+                    ))}
+                    
+                    {reviewsTotal > reviews.length && (
+                      <div className="flex justify-center pt-4 border-t border-gray-100 gap-4 items-center">
+                         <button 
+                           onClick={() => setReviewsPage(p => Math.max(1, p - 1))}
+                           disabled={reviewsPage === 1}
+                           className="text-sm font-semibold text-primary disabled:text-gray-400 cursor-pointer disabled:cursor-not-allowed hover:underline"
+                         >
+                           Previous
+                         </button>
+                         <span className="text-sm text-gray-500">Page {reviewsPage}</span>
+                         <button 
+                           onClick={() => setReviewsPage(p => p + 1)}
+                           disabled={reviewsPage * 5 >= reviewsTotal}
+                           className="text-sm font-semibold text-primary disabled:text-gray-400 cursor-pointer disabled:cursor-not-allowed hover:underline"
+                         >
+                           Next
+                         </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 

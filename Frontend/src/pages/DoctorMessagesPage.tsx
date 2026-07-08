@@ -11,6 +11,8 @@ import type { ReceivedMessage } from "../types/ReceivedMessage";
 import { FaUserMd, FaUsers, FaRegClock, FaChevronRight } from "react-icons/fa";
 import { TbArrowLeft, TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse } from "react-icons/tb";
 import { formatTimeTo12Hour } from "../utils/dateUtils";
+import Skeleton from "../components/common/Skeleton";
+import NetworkError from "../components/common/NetworkError";
 
 interface SessionInfo {
   sessionId: number;
@@ -39,6 +41,9 @@ export default function DoctorMessagesPage() {
   const numericSessionId = sessionId ? Number(sessionId) : undefined;
   
   useEffect(() => {
+    setSessions([]);
+    setExpandedPatientId(null);
+
     ChatService.getSessions(user?.activeRole).then(data => {
       // Filter out empty sessions (where patient hasn't written anything yet)
       const activeSessions = data.filter(s => s.lastMessage && s.lastMessage.trim() !== "");
@@ -70,7 +75,7 @@ export default function DoctorMessagesPage() {
     
     onUpdateSessionList(handleUpdateSessionList);
     return () => offUpdateSessionList(handleUpdateSessionList);
-  }, [user?.activeRole]);
+  }, [user?.id, user?.activeRole]);
 
   const recentSessions = useMemo(() => {
     return [...sessions].sort((a, b) => {
@@ -271,15 +276,22 @@ function ActiveChatPane({
   isSidebarOpen: boolean;
   onOpenSidebar: () => void;
 }) {
+  const { user } = useAuth();
   const { messages, loading, error, send, sessionDetails, isOtherUserOnline } = useChatSession(numericSessionId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const now = useMemo(() => Date.now(), []);
+  const [now, setNow] = useState(() => Date.now());
+  const currentUserId = user?.id;
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => setNow(Date.now()), 60000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const displayMessages: Message[] = useMemo(
     () =>
       messages.map((m) => ({
         id: String(m.messageId),
-        senderId: m.senderRole,
+        senderId: m.senderUserId || m.senderRole || "",
         text: m.content,
         timestamp: formatTimeTo12Hour(new Date(m.sentAt)),
       })),
@@ -301,8 +313,8 @@ function ActiveChatPane({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [displayMessages]);
 
-  if (loading) return <div className="flex-1 flex items-center justify-center text-[#787584] font-medium">Loading conversation...</div>;
-  if (error) return <div className="flex-1 flex items-center justify-center text-red-500 font-medium">Error: {error}</div>;
+  if (loading) return <div className="flex-1 p-8"><Skeleton className="h-full min-h-[400px] w-full" /></div>;
+  if (error) return <div className="flex-1 flex items-center justify-center"><NetworkError message={error} /></div>;
 
   return (
     <>
@@ -353,9 +365,10 @@ function ActiveChatPane({
             No messages yet.
           </p>
         ) : (
-          displayMessages.map((msg) => (
-            <MessageBubble key={msg.id} msg={msg} isMe={msg.senderId === "Doctor"} />
-          ))
+          displayMessages.map((msg) => {
+            const isMine = msg.senderId === currentUserId || msg.senderId === user?.id;
+            return <MessageBubble key={msg.id} msg={msg} isMe={isMine} />;
+          })
         )}
         <div ref={messagesEndRef} className="h-2 sm:h-4" />
       </div>

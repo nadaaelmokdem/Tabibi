@@ -34,6 +34,7 @@ namespace Tabibi.Controllers
         }
 
         [HttpPost("add-to-role")]
+        [Authorize]
         public async Task<IActionResult> AddToRole([FromBody] AddToRoleDTO addToRoleDTO)
         {
             var result = await authService.AddToRole(addToRoleDTO.Email, addToRoleDTO.Role);
@@ -92,15 +93,7 @@ namespace Tabibi.Controllers
             var result = await tokenService.RefreshTokenAsync(currentToken);
             if (result is null) return Unauthorized("Invalid Token");
 
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-
-            Response.Cookies.Append("X-Refresh-Token", result.NewRefreshToken, cookieOptions);
+            Response.Cookies.SetRefreshTokenCookie(result.NewRefreshToken);
             Response.Cookies.SetAccessTokenCookie(result.JwtToken);
 
             return Ok();

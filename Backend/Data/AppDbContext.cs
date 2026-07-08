@@ -9,10 +9,12 @@ namespace Tabibi.Data
         // Core Models
         public DbSet<PatientProfile> PatientProfiles { get; set; }
         public DbSet<DoctorProfile> DoctorProfiles { get; set; }
+        public DbSet<DoctorProfileChangeLog> DoctorProfileChangeLogs { get; set; }
         public DbSet<Specialty> Specialties { get; set; }
 
         // Doctor Relations
         public DbSet<DoctorSpecialty> DoctorSpecialties { get; set; }
+        public DbSet<DoctorOldSpecialty> DoctorOldSpecialties { get; set; }
         public DbSet<DoctorAvailability> DoctorAvailabilities { get; set; }
         public DbSet<DoctorReview> DoctorReviews { get; set; }
 
@@ -87,6 +89,13 @@ namespace Tabibi.Data
                 .HasForeignKey(ds => ds.DoctorId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // DoctorProfile to DoctorOldSpecialty (1:many)
+            modelBuilder.Entity<DoctorProfile>()
+                .HasMany(d => d.OldSpecialties)
+                .WithOne(ds => ds.Doctor)
+                .HasForeignKey(ds => ds.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // DoctorProfile to DoctorAvailability (1:many)
             modelBuilder.Entity<DoctorProfile>()
                 .HasMany(d => d.Availabilities)
@@ -110,10 +119,22 @@ namespace Tabibi.Data
                 .HasForeignKey(ds => ds.SpecialtyId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Specialty to DoctorOldSpecialty (1:many)
+            modelBuilder.Entity<Specialty>()
+                .HasMany(s => s.DoctorOldSpecialties)
+                .WithOne(ds => ds.Specialty)
+                .HasForeignKey(ds => ds.SpecialtyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // ==================== DoctorSpecialty Configurations ====================
             
             // DoctorSpecialty - composite key
             modelBuilder.Entity<DoctorSpecialty>()
+                .HasKey(ds => ds.Id);
+
+            // ==================== DoctorOldSpecialty Configurations ====================
+            
+            modelBuilder.Entity<DoctorOldSpecialty>()
                 .HasKey(ds => ds.Id);
 
             // ==================== ChatSession Configurations ====================
@@ -206,6 +227,12 @@ namespace Tabibi.Data
                 .HasIndex(ds => ds.DoctorId);
 
             modelBuilder.Entity<DoctorSpecialty>()
+                .HasIndex(ds => ds.SpecialtyId);
+
+            modelBuilder.Entity<DoctorOldSpecialty>()
+                .HasIndex(ds => ds.DoctorId);
+
+            modelBuilder.Entity<DoctorOldSpecialty>()
                 .HasIndex(ds => ds.SpecialtyId);
 
             // Payment indexes

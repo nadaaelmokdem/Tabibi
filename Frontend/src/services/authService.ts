@@ -32,6 +32,8 @@ class AuthService {
         const hasRole = user.roles?.some((r) => r.toLowerCase() === reqLower);
         if (hasRole) {
           user.activeRole = requiredRole;
+        } else if (user.roles?.some((r) => r.toLowerCase() === "admin")) {
+          user.activeRole = "Admin";
         }
       }
       

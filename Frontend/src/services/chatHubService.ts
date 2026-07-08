@@ -6,6 +6,24 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || "http://localh
 const HUB_URL = API_BASE.replace(/\/api\/?$/, "") + "/hubs/chat";
 
 let connection: signalR.HubConnection | null = null;
+const joinedSessions = new Set<number>();
+
+function registerReconnectHandler(conn: signalR.HubConnection): void {
+  if ((conn as signalR.HubConnection & { __rejoinHandlerRegistered?: boolean }).__rejoinHandlerRegistered) {
+    return;
+  }
+
+  (conn as signalR.HubConnection & { __rejoinHandlerRegistered?: boolean }).__rejoinHandlerRegistered = true;
+  conn.onreconnected(async () => {
+    for (const sessionId of joinedSessions) {
+      try {
+        await conn.invoke("JoinSession", sessionId);
+      } catch {
+        // Ignore rejoin errors until the next reconnect attempt.
+      }
+    }
+  });
+}
 
 export function getChatConnection(): signalR.HubConnection {
   if (connection) return connection;
@@ -20,6 +38,7 @@ export function getChatConnection(): signalR.HubConnection {
 
   // Register a default no-op handler to suppress the missing client method warning
   connection.on("UserPresenceChanged", () => {});
+  registerReconnectHandler(connection);
 
   return connection;
 }
@@ -33,19 +52,32 @@ export async function startConnection(): Promise<signalR.HubConnection> {
 }
 
 export async function stopConnection(): Promise<void> {
-  if (connection && connection.state !== signalR.HubConnectionState.Disconnected) {
-    await connection.stop();
+  if (connection) {
+    try {
+      if (connection.state !== signalR.HubConnectionState.Disconnected) {
+        await connection.stop();
+      }
+    } finally {
+      connection = null;
+      joinedSessions.clear();
+    }
   }
+}
+
+export async function resetConnection(): Promise<void> {
+  await stopConnection();
 }
 
 export async function joinSession(sessionId: number): Promise<void> {
   const conn = await startConnection();
   await conn.invoke("JoinSession", sessionId);
+  joinedSessions.add(sessionId);
 }
 
 export async function leaveSession(sessionId: number): Promise<void> {
   if (!connection) return;
   await connection.invoke("LeaveSession", sessionId);
+  joinedSessions.delete(sessionId);
 }
 
 export async function sendMessage(sessionId: number, content: string): Promise<void> {
@@ -91,4 +123,24 @@ export function onUpdateSessionList(callback: (payload: ReceivedMessage) => void
 export function offUpdateSessionList(callback: (payload: ReceivedMessage) => void): void {
   if (!connection) return;
   connection.off("UpdateSessionList", callback);
+}
+
+export function onUnauthorized(callback: (payload: { Message: string }) => void): void {
+  const conn = getChatConnection();
+  conn.on("Unauthorized", callback);
+}
+
+export function offUnauthorized(callback: (payload: { Message: string }) => void): void {
+  if (!connection) return;
+  connection.off("Unauthorized", callback);
+}
+
+export function onSendMessageError(callback: (message: string) => void): void {
+  const conn = getChatConnection();
+  conn.on("SendMessageError", callback);
+}
+
+export function offSendMessageError(callback: (message: string) => void): void {
+  if (!connection) return;
+  connection.off("SendMessageError", callback);
 }

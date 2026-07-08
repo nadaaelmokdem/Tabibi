@@ -10,7 +10,6 @@ public class SlotService(AppDbContext dbContext)
 
     private static readonly AppointmentStatus[] BlockingStatuses =
     [
-        AppointmentStatus.Pending,
         AppointmentStatus.Confirmed
     ];
 

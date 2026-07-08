@@ -78,4 +78,9 @@ export default class DoctorService {
     const response = await api.get("appointment/doctor-appointments", { params: filters });
     return response.data;
   }
+
+  static async cancelAppointment(appointmentId: number): Promise<any> {
+    const response = await api.patch(`appointment/${appointmentId}/cancel`);
+    return response.data;
+  }
 }

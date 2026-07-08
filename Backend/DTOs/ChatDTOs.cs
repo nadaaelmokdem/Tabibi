@@ -5,6 +5,7 @@ namespace Tabibi.DTOs
         public int MessageId { get; set; }
         public int SessionId { get; set; }
         public string SenderRole { get; set; } = string.Empty;
+        public string SenderUserId { get; set; } = string.Empty;
         public string SenderName { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }
@@ -23,6 +24,7 @@ namespace Tabibi.DTOs
         public int MessageId { get; set; }
         public int SessionId { get; set; }
         public string SenderRole { get; set; } = string.Empty;
+        public string SenderUserId { get; set; } = string.Empty;
         public string SenderName { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }

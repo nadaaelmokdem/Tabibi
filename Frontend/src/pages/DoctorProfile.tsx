@@ -39,6 +39,8 @@ const ProfilePage: React.FC = () => {
     degreeProofUrl: "",
     specialties: [],
     isVerified: false,
+    verificationStatus: "Pending",
+    adminComment: "",
   });
 
   useEffect(() => {
@@ -67,6 +69,8 @@ const ProfilePage: React.FC = () => {
           degreeProofUrl: DoctorProfileData.degreeProofUrl ?? "",
           specialties: Array.isArray(DoctorProfileData.specialties) ? DoctorProfileData.specialties : [],
           isVerified: DoctorProfileData.isVerified,
+          verificationStatus: (DoctorProfileData.verificationStatus ?? "Pending") as DoctorProfileData["verificationStatus"],
+          adminComment: DoctorProfileData.adminComment ?? "",
           
           clinicPrice: DoctorProfileData.clinicPrice, isClinicEnabled: DoctorProfileData.isClinicEnabled,
           
@@ -256,7 +260,6 @@ const ProfilePage: React.FC = () => {
                 profile={profile}
                 availableSpecialties={availableSpecialties}
                 onSave={handleBulkSave}
-                disabled={profile.isVerified}
               />
             </div>
           </div>
@@ -298,12 +301,32 @@ const ProfilePage: React.FC = () => {
               <MdAssignment className="text-lg" /> Verification Documents & Paperwork
             </h2>
             <p className="text-sm text-[#2A2455]/70 mb-5">
-              Upload and verify your official credentials. These files are securely reviewed for authentication purposes.
+              Upload and verify your official credentials. Modifying any of these fields while approved will set your status to pending, but you can continue providing services at your pricing until reviewed.
             </p>
             {!profile.isVerified && (
-              <div className="bg-[#FFF8E1] border-l-4 border-[#FFC107] p-4 rounded-md mb-6 shadow-sm">
-                <p className="text-[#856404] text-[14px] font-medium leading-relaxed">
-                  <strong>Notice:</strong> Your profile is currently unverified. You may edit these credentials, but doing so will notify the administration to re-review your profile, which may delay the verification process.
+              <div className={`border-l-4 p-4 rounded-md mb-6 shadow-sm ${
+                profile.verificationStatus === "Rejected"
+                  ? "bg-red-50 border-red-400"
+                  : profile.verificationStatus === "NeedsChanges"
+                    ? "bg-orange-50 border-orange-400"
+                    : "bg-[#FFF8E1] border-[#FFC107]"
+              }`}>
+                <p className={`text-[14px] font-medium leading-relaxed ${
+                  profile.verificationStatus === "Rejected"
+                    ? "text-red-800"
+                    : profile.verificationStatus === "NeedsChanges"
+                      ? "text-orange-800"
+                      : "text-[#856404]"
+                }`}>
+                  <strong>Notice:</strong>{" "}
+                  {profile.verificationStatus === "Pending" &&
+                    "Your profile is pending admin verification. You won't appear in patient search until approved."}
+                  {profile.verificationStatus === "NeedsChanges" &&
+                    (profile.adminComment || "The admin requested changes to your profile. Please update and resubmit.")}
+                  {profile.verificationStatus === "Rejected" &&
+                    (profile.adminComment || "Your application was rejected. Contact support for details.")}
+                  {!profile.verificationStatus &&
+                    "Your profile is currently unverified. Editing credentials will notify administration to re-review your profile."}
                 </p>
               </div>
             )}
@@ -318,7 +341,6 @@ const ProfilePage: React.FC = () => {
                 onCancel={() => setEditingField(null)}
                 type="text"
                 fieldName="nationalIdNumber"
-                disabled={profile.isVerified}
               />
               <EditableDetailItem
                 icon={<FiHash />}
@@ -331,7 +353,6 @@ const ProfilePage: React.FC = () => {
                 type="text"
                 fieldName="idProofUrl"
                 allowUpload={true}
-                disabled={profile.isVerified}
               />
               <EditableDetailItem
                 icon={<MdAssignment />}
@@ -343,7 +364,6 @@ const ProfilePage: React.FC = () => {
                 onCancel={() => setEditingField(null)}
                 type="text"
                 fieldName="licenseNumber"
-                disabled={profile.isVerified}
               />
               <EditableDetailItem
                 icon={<MdAssignment />}
@@ -356,7 +376,6 @@ const ProfilePage: React.FC = () => {
                 type="text"
                 fieldName="licenseProofUrl"
                 allowUpload={true}
-                disabled={profile.isVerified}
               />
               <EditableDetailItem
                 icon={<FiCalendar />}
@@ -368,7 +387,6 @@ const ProfilePage: React.FC = () => {
                 onCancel={() => setEditingField(null)}
                 type="date"
                 fieldName="licenseExpiryDate"
-                disabled={profile.isVerified}
               />
               <EditableDetailItem
                 icon={<FiBriefcase />}
@@ -381,7 +399,6 @@ const ProfilePage: React.FC = () => {
                 type="text"
                 fieldName="degreeProofUrl"
                 allowUpload={true}
-                disabled={profile.isVerified}
               />
             </div>
           </div>

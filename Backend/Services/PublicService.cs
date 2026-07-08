@@ -29,8 +29,7 @@ namespace Tabibi.Services
                 .ThenInclude(ds => ds.Specialty)
                 .AsQueryable();
 
-            // Filter out unverified doctors
-            //query = query.Where(d => d.IsVerified);
+            query = query.Where(d => d.VerificationStatus == DoctorVerificationStatus.Approved);
 
             query = query.Where(d => d.DoctorSpecialties.Count != 0);
 
@@ -102,7 +101,7 @@ namespace Tabibi.Services
                 .ThenInclude(ds => ds.Specialty)
                 .FirstOrDefaultAsync(dp => dp.DoctorId == doctorId);
 
-            if (d == null) return null;
+            if (d == null || d.VerificationStatus != DoctorVerificationStatus.Approved) return null;
 
             return new DoctorListDTO
             {
