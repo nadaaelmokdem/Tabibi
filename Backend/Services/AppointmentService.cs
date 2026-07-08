@@ -19,7 +19,7 @@ public class AppointmentService(
     {
         var availabilities = await slotService.GetActiveAvailabilitiesAsync(
             doctorId,
-            date.DayOfWeek);
+            date);
 
         if (availabilities.Count == 0)
             return [];
@@ -169,5 +169,97 @@ public class AppointmentService(
             return ServiceResult<AppointmentBookedDTO>.Failure(
                 "This slot was just booked by another patient. Please choose a different time.");
         }
+    }
+
+    public async Task<List<AppointmentListDTO>> GetDoctorAppointmentsAsync(string doctorUserId, AppointmentFilterDTO filters)
+    {
+        var doctor = await dbContext.DoctorProfiles.Include(d => d.User).FirstOrDefaultAsync(d => d.UserId == doctorUserId);
+        if (doctor == null) return new List<AppointmentListDTO>();
+
+        var query = dbContext.Appointments
+            .Include(a => a.Patient).ThenInclude(p => p.User)
+            .Where(a => a.DoctorId == doctor.DoctorId)
+            .AsQueryable();
+
+        query = ApplyFilters(query, filters);
+
+        return await query
+            .OrderByDescending(a => a.ScheduledAt)
+            .Select(a => new AppointmentListDTO
+            {
+                AppointmentId = a.AppointmentId,
+                DoctorName = doctor.User.FullName,
+                PatientName = a.Patient.User.FullName,
+                ScheduledAt = a.ScheduledAt,
+                ConsultationType = a.ConsultationType,
+                Status = a.Status,
+                DurationMins = a.DurationMins,
+                Price = a.Price,
+                ChiefComplaint = a.ChiefComplaint,
+                Notes = a.Notes,
+                PatientProfilePictureUrl = null,
+                SessionId = a.SessionId
+            }).ToListAsync();
+    }
+
+    public async Task<List<AppointmentListDTO>> GetPatientAppointmentsAsync(string patientUserId, AppointmentFilterDTO filters)
+    {
+        var patient = await dbContext.PatientProfiles.Include(p => p.User).FirstOrDefaultAsync(p => p.UserId == patientUserId);
+        if (patient == null) return new List<AppointmentListDTO>();
+
+        var query = dbContext.Appointments
+            .Include(a => a.Doctor).ThenInclude(d => d.User)
+            .Where(a => a.PatientId == patient.PatientId)
+            .AsQueryable();
+
+        query = ApplyFilters(query, filters);
+
+        return await query
+            .OrderByDescending(a => a.ScheduledAt)
+            .Select(a => new AppointmentListDTO
+            {
+                AppointmentId = a.AppointmentId,
+                DoctorName = a.Doctor.User.FullName,
+                PatientName = patient.User.FullName,
+                ScheduledAt = a.ScheduledAt,
+                ConsultationType = a.ConsultationType,
+                Status = a.Status,
+                DurationMins = a.DurationMins,
+                Price = a.Price,
+                ChiefComplaint = a.ChiefComplaint,
+                Notes = a.Notes,
+                DoctorProfilePictureUrl = a.Doctor.ProfilePictureUrl,
+                SessionId = a.SessionId
+            }).ToListAsync();
+    }
+
+    private IQueryable<Appointment> ApplyFilters(IQueryable<Appointment> query, AppointmentFilterDTO filters)
+    {
+        if (filters.Type.HasValue)
+        {
+            query = query.Where(a => a.ConsultationType == filters.Type.Value);
+        }
+        if (!string.IsNullOrEmpty(filters.Status))
+        {
+            if (Enum.TryParse<AppointmentStatus>(filters.Status, true, out var statusEnum))
+            {
+                query = query.Where(a => a.Status == statusEnum);
+            }
+        }
+        if (filters.FromDate.HasValue)
+        {
+            query = query.Where(a => a.ScheduledAt >= filters.FromDate.Value);
+        }
+        if (filters.ToDate.HasValue)
+        {
+            var toDateEnd = filters.ToDate.Value.Date.AddDays(1).AddTicks(-1);
+            query = query.Where(a => a.ScheduledAt <= toDateEnd);
+        }
+        if (!string.IsNullOrEmpty(filters.Search))
+        {
+            var search = filters.Search.ToLower();
+            query = query.Where(a => a.Patient.User.FullName.ToLower().Contains(search) || a.Doctor.User.FullName.ToLower().Contains(search));
+        }
+        return query;
     }
 }

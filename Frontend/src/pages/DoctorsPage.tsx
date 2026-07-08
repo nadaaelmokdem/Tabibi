@@ -287,16 +287,6 @@ const DoctorsPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
 
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-600 mb-4 drop-shadow-sm">
-            Find Your Perfect Doctor
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Browse through our extensive list of highly qualified medical professionals. Filter by specialty, price, and consultation type to find exactly what you need.
-          </p>
-        </div>
-
         {/* Filters Section */}
         <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-10 border border-white/50">
           <div className="flex items-center gap-2 mb-4 text-primary font-bold text-lg">

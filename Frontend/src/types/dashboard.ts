@@ -1,6 +1,7 @@
 export interface UpcomingAppointment {
   appointmentId: number;
   doctorName: string;
+  patientName?: string;
   scheduledAt: string;
   consultationType: string;
   status: string;

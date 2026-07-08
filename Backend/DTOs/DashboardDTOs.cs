@@ -13,6 +13,7 @@ namespace Tabibi.DTOs
     {
         public int AppointmentId { get; set; }
         public string DoctorName { get; set; } = string.Empty;
+        public string PatientName { get; set; } = string.Empty;
         public DateTime ScheduledAt { get; set; }
         public string ConsultationType { get; set; } = string.Empty; 
         public string Status { get; set; } = string.Empty; 
@@ -61,5 +62,6 @@ namespace Tabibi.DTOs
         public string FullName { get; set; } = string.Empty;
         public string? LicenseNumber { get; set; }
         public string? ClinicLocation { get; set; }
+        public string VerificationStatus { get; set; } = "Pending";
     }
 }

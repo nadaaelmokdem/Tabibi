@@ -32,13 +32,30 @@ public class SlotService(AppDbContext dbContext)
 
     public async Task<List<DoctorAvailability>> GetActiveAvailabilitiesAsync(
         int doctorId,
-        DayOfWeek day)
+        DateOnly date)
     {
+        // First, check if there are any specific-date overrides for this exact date.
+        var specificDateSlots = await dbContext.DoctorAvailabilities
+            .AsNoTracking()
+            .Where(a =>
+                a.DoctorId == doctorId &&
+                a.SpecificDate.HasValue &&
+                a.SpecificDate.Value.Date == date.ToDateTime(TimeOnly.MinValue).Date &&
+                a.IsActive)
+            .OrderBy(a => a.StartTime)
+            .ToListAsync();
+
+        // If specific overrides exist, use them (they fully override the weekly pattern).
+        if (specificDateSlots.Count > 0)
+            return specificDateSlots;
+
+        // Otherwise fall back to the generic weekly (DayOfWeek) schedule.
         return await dbContext.DoctorAvailabilities
             .AsNoTracking()
             .Where(a =>
                 a.DoctorId == doctorId &&
-                a.DayOfWeek == day &&
+                !a.SpecificDate.HasValue &&
+                a.DayOfWeek == date.DayOfWeek &&
                 a.IsActive)
             .OrderBy(a => a.StartTime)
             .ToListAsync();
@@ -125,7 +142,7 @@ public class SlotService(AppDbContext dbContext)
             return SlotValidationResult.Invalid("Doctor is not verified.");
 
         var date = DateOnly.FromDateTime(normalized);
-        var availabilities = await GetActiveAvailabilitiesAsync(doctorId, date.DayOfWeek);
+        var availabilities = await GetActiveAvailabilitiesAsync(doctorId, date);
 
         if (availabilities.Count == 0)
             return SlotValidationResult.Invalid("Doctor has no availability on this day.");

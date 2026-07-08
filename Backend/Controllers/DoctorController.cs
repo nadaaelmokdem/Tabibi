@@ -142,5 +142,29 @@ namespace Tabibi.Controllers
 
             return Ok(new { url = fileUrl, field = fieldName });
         }
+
+        [HttpGet("availability")]
+        public async Task<IActionResult> GetAvailability()
+        {
+            var userId = User.GetId();
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var availabilities = await doctorService.GetAvailabilities(userId);
+            return Ok(availabilities);
+        }
+
+        [HttpPut("availability")]
+        public async Task<IActionResult> UpdateAvailability([FromBody] UpdateAvailabilityRequestDTO request)
+        {
+            var userId = User.GetId();
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var res = await doctorService.UpdateAvailabilities(userId, request);
+            if (!res.IsSuccess) return BadRequest(res.ErrorMessage);
+
+            return Ok(new { message = "Availability updated successfully" });
+        }
     }
 }

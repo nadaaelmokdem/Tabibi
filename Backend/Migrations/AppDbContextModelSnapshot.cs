@@ -402,6 +402,9 @@ namespace Tabibi.Migrations
                     b.Property<int>("SlotDurationMins")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("SpecificDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
 
@@ -419,6 +422,9 @@ namespace Tabibi.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DoctorId"));
+
+                    b.Property<string>("AdminComment")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("AverageRating")
                         .HasColumnType("decimal(3,2)");
@@ -459,9 +465,6 @@ namespace Tabibi.Migrations
                     b.Property<bool>("IsClinicEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsVideoEnabled")
                         .HasColumnType("bit");
 
@@ -480,9 +483,15 @@ namespace Tabibi.Migrations
                     b.Property<string>("ProfilePictureUrl")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("VerificationStatus")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("VideoPrice")
                         .HasColumnType("decimal(10,2)");

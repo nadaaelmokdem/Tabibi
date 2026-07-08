@@ -3,33 +3,20 @@ import {
   MdAttachMoney,
   MdCalendarMonth,
   MdChevronRight,
-  MdDescription,
   MdChatBubble,
 } from "react-icons/md";
 import StatCard from "../components/DoctorDashboard/StatCard";
 import ScheduleItemComponent, {
   type ScheduleItem,
 } from "../components/DoctorDashboard/ScheduleItem";
-import RequestItemComponent from "../components/DoctorDashboard/RequestItem";
 import CalendarModal from "../components/DoctorDashboard/CalendarModal";
 import { useNavigate } from "react-router-dom";
-import { getTodayStr, sortSchedule } from "../utils/dateUtils";
-import {
-  initialSchedule,
-  initialRequests,
-} from "../data/dummyData.ts";
+import { getTodayStr, formatTimeTo12Hour } from "../utils/dateUtils";
 import ChatService from "../services/chatService";
 import { onUserPresenceChanged, subscribeToPresence } from "../services/chatHubService";
 import { useAuth } from "../context/AuthContext";
-
-interface RequestItem {
-  id: number;
-  name: string;
-  time: string;
-  timeDisplay: string;
-  concern: string;
-  initials: string;
-}
+import DoctorService from "../services/doctorService";
+import type { DoctorDashboardData } from "../types/dashboard";
 
 
 
@@ -38,13 +25,22 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  const [schedule, setSchedule] = useState<ScheduleItem[]>(initialSchedule);
-  const [requests, setRequests] = useState<RequestItem[]>(initialRequests);
+  const [dashboardData, setDashboardData] = useState<DoctorDashboardData | null>(null);
   const [sessions, setSessions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let currentSessions: any[] = [];
+    DoctorService.getDashboard().then(data => {
+      setDashboardData(data);
+      // Fallback for chat sessions if the dashboard provides it
+      if (data.chatSessions) {
+        setSessions(data.chatSessions);
+      }
+      setLoading(false);
+    }).catch(console.error);
+
     ChatService.getSessions(user?.activeRole).then((data) => {
       setSessions(data);
       currentSessions = data;
@@ -68,46 +64,42 @@ export default function Dashboard() {
   }, []);
 
   const handleCancelAppointment = (id: number) => {
+    // In the future this would hit an API to cancel
     if (window.confirm("Cancel this appointment?")) {
-      setSchedule(schedule.filter((s) => s.id !== id));
+      if (dashboardData) {
+        setDashboardData({
+          ...dashboardData,
+          todaysAppointments: dashboardData.todaysAppointments.filter(a => a.appointmentId !== id)
+        });
+      }
     }
   };
 
-  const handleAccept = (req: RequestItem) => {
-    setRequests(requests.filter((r) => r.id !== req.id));
-    setSchedule([
-      ...schedule,
-      {
-        id: Date.now(),
-        time: req.time,
-        duration: "30 min",
-        name: req.name,
-        type: "New Consultation",
-        badge: "Video",
-        date: getTodayStr(),
-        initials: req.initials,
-      },
-    ]);
-    // Navigate to the chat
-    navigate(`/chat/${req.id}`);
-  };
+  if (loading) {
+    return <div className="p-8 text-[var(--color-text-main)]/60">Loading your dashboard...</div>;
+  }
 
-  const handleReschedule = (id: number) => {
-    setRequests(requests.filter((r) => r.id !== id));
-  };
-
-  const todayAppointments = schedule.filter(
-    (s) => s.date === getTodayStr(),
-  ).length;
+  const mappedSchedule = dashboardData?.todaysAppointments.map(app => {
+    const d = new Date(app.scheduledAt);
+    return {
+      id: app.appointmentId,
+      time: formatTimeTo12Hour(d),
+      duration: "30 min",
+      name: app.patientName || "Patient",
+      type: "Consultation",
+      badge: app.consultationType,
+      date: getTodayStr(),
+      initials: (app.patientName || "P").charAt(0).toUpperCase() || 'P'
+    } as ScheduleItem;
+  }) || [];
 
   return (
     <div className="w-full bg-[#FBFAFF] p-4 md:p-8 min-h-screen relative">
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
-          title="Total Earnings"
-          value="7,450 EGP"
-          trend="+12% this week"
+          title="Total Patients Seen"
+          value={dashboardData?.totalPatientsSeen || 0}
           icon={MdAttachMoney}
         />
         <StatCard
@@ -118,8 +110,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Today's Appointments"
-          value={todayAppointments}
-          subtext="Next slot in 45m"
+          value={dashboardData?.todaysAppointmentsCount || 0}
           icon={MdCalendarMonth}
           isPrimary
         />
@@ -130,50 +121,36 @@ export default function Dashboard() {
         {/* Daily Schedule Section */}
         <div className="xl:col-span-2 bg-white rounded-[1.5rem] border border-[#E6E1FF] shadow-sm overflow-hidden">
           <div className="p-6 border-b border-gray-50 flex justify-between items-center">
-            <h3 className="font-bold text-lg text-[#2A2455]">Daily Schedule</h3>
-            <button
-              onClick={() => setIsCalendarOpen(true)}
-              className="text-[#6A5ACD] text-sm font-bold flex items-center gap-1 hover:underline"
-            >
-              View Calendar <MdChevronRight size={16} />
-            </button>
+            <div className="flex items-center gap-3">
+              <h3 className="font-bold text-lg text-[#2A2455]">Daily Schedule</h3>
+            </div>
+            <div className="flex gap-4">
+              <button onClick={() => navigate('/doctor-appointments')} className="cursor-pointer text-sm font-medium text-[#6A5ACD] hover:underline">View all</button>
+              <button
+                onClick={() => setIsCalendarOpen(true)}
+                className="text-[#6A5ACD] text-sm font-bold flex items-center gap-1 hover:underline cursor-pointer"
+              >
+                View Calendar <MdChevronRight size={16} />
+              </button>
+            </div>
           </div>
           <div className="p-6 space-y-4">
-            {sortSchedule(schedule).map((item) => (
-              <ScheduleItemComponent
-                key={item.id}
-                item={item}
-                onCancel={handleCancelAppointment}
-              />
-            ))}
+            {mappedSchedule.length > 0 ? (
+              mappedSchedule.map((item) => (
+                <ScheduleItemComponent
+                  key={item.id}
+                  item={item}
+                  onCancel={handleCancelAppointment}
+                />
+              ))
+            ) : (
+              <p className="text-sm text-gray-500 text-center py-4">No appointments for today.</p>
+            )}
           </div>
         </div>
 
         {/* Right Sidebar */}
         <div className="space-y-6">
-          {/* Patient Requests */}
-          <div className="bg-white rounded-[1.5rem] border border-[#E6E1FF] shadow-sm p-6">
-            <h3 className="font-bold mb-6 flex items-center justify-between text-[#2A2455]">
-              <div className="flex items-center gap-2">
-                <MdDescription size={18} className="text-[#6A5ACD]" /> User
-                Requests
-              </div>
-              <span className="bg-red-50 text-red-500 text-[10px] font-bold px-2.5 py-1 rounded-full">
-                {requests.length} New
-              </span>
-            </h3>
-            {requests.map((req) => (
-              <RequestItemComponent
-                key={req.id}
-                req={req}
-                onAccept={handleAccept}
-                onReschedule={handleReschedule}
-              />
-            ))}
-            <button className="w-full text-center mt-2 text-sm font-bold text-[#6A5ACD] hover:underline pt-2 border-t border-gray-50">
-              View All Requests
-            </button>
-          </div>
 
           {/* Messages */}
           <div className="bg-white rounded-[1.5rem] border border-[#E6E1FF] shadow-sm p-6">
@@ -193,7 +170,7 @@ export default function Dashboard() {
                   >
                     <div className="relative">
                       <div className="w-8 h-8 rounded-full bg-[#E6E1FF] text-[#6A5ACD] flex items-center justify-center font-bold text-xs">
-                        {session.otherPartyName.charAt(0).toUpperCase()}
+                        {(session.otherPartyName || "U").charAt(0).toUpperCase() || 'U'}
                       </div>
                       {onlineUsers[session.otherPartyUserId] && (
                         <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
@@ -202,10 +179,10 @@ export default function Dashboard() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline mb-0.5">
                         <div className="font-bold text-xs text-[#2A2455] truncate group-hover:text-[#6A5ACD] transition-colors">
-                          {session.otherPartyName}
+                          {session.otherPartyName || "User"}
                         </div>
                         <div className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
-                          {session.lastMessageTime ? new Date(session.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+                          {session.lastMessageTime ? formatTimeTo12Hour(new Date(session.lastMessageTime)) : ""}
                         </div>
                       </div>
                       <p className="text-[11px] text-gray-500 truncate">
@@ -224,7 +201,7 @@ export default function Dashboard() {
       <CalendarModal
         isOpen={isCalendarOpen}
         onClose={() => setIsCalendarOpen(false)}
-        schedule={schedule}
+        schedule={mappedSchedule}
         onCancelAppointment={handleCancelAppointment}
       />
     </div>

@@ -15,6 +15,7 @@ export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const isDoctor = user?.activeRole?.toLowerCase() === "doctor";
+  const isAdmin = user?.activeRole?.toLowerCase() === "admin" || user?.roles?.some(r => r.toLowerCase() === "admin");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -40,7 +41,7 @@ export default function MainLayout() {
               <LuMenu className="text-2xl" />
             </button>
             <Link 
-              to={isDoctor ? "/doctor-dashboard" : "/user-dashboard"}
+              to={isAdmin ? "/admin-dashboard" : isDoctor ? "/doctor-dashboard" : "/user-dashboard"}
               className="ml-3 font-bold text-primary text-lg flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <MdMedicalServices className="text-primary-light text-xl" />

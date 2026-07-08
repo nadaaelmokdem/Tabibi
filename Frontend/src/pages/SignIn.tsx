@@ -29,7 +29,7 @@ export default function TabibiLogin({
 }: SignInProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from || "/";
+  const from = location.state?.from || (requiredRole === "Doctor" ? "/doctor-dashboard" : requiredRole === "Admin" ? "/admin-dashboard" : "/user-dashboard");
   const { login, logout } = useAuth();
   
   const [email, setEmail] = useState("");

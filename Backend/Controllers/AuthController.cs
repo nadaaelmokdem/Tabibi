@@ -26,9 +26,10 @@ namespace Tabibi.Controllers
             Response.Cookies.SetRefreshTokenCookie(res.Data!.RefreshToken);
             Response.Cookies.SetAccessTokenCookie(res.Data!.Token);
 
-            return Ok(new
+            return Ok(new AuthResponse
             {
-                user = res.Data.User
+                Success = true,
+                User = res.Data.User
             });
         }
 
@@ -55,8 +56,10 @@ namespace Tabibi.Controllers
             Response.Cookies.SetRefreshTokenCookie(res.Data!.RefreshToken);
             Response.Cookies.SetAccessTokenCookie(res.Data!.Token);
 
-            return Ok(new { 
-                user = res.Data.User
+            return Ok(new AuthResponse 
+            { 
+                Success = true,
+                User = res.Data.User
             });
 
         }

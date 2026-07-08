@@ -15,7 +15,8 @@ export default function HomePage() {
 
   if (isAuthenticated && location.pathname === "/" && !location.state?.loggingOut) {
     const isDoctor = user?.activeRole?.toLowerCase() === "doctor";
-    return <Navigate to={isDoctor ? "/doctor-dashboard" : "/user-dashboard"} replace />;
+    const isAdmin = user?.activeRole?.toLowerCase() === "admin" || user?.roles?.some(r => r.toLowerCase() === "admin");
+    return <Navigate to={isAdmin ? "/admin-dashboard" : isDoctor ? "/doctor-dashboard" : "/user-dashboard"} replace />;
   }
   return (
     <>

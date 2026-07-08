@@ -4,7 +4,6 @@ import {
   MdCheckCircle,
   MdHealthAndSafety,
   MdLock,
-  MdBolt,
 } from "react-icons/md";
 
 /**
@@ -100,10 +99,6 @@ function GuestCTAs({ navigate }: { navigate: ReturnType<typeof useNavigate> }) {
         <span className="flex items-center gap-1.5 whitespace-nowrap">
           <MdCheckCircle className="text-primary text-base shrink-0" /> Free
           daily assessment credits
-        </span>
-        <span className="flex items-center gap-1.5 whitespace-nowrap">
-          <MdBolt className="text-primary text-base shrink-0" /> No sign-up
-          required to start
         </span>
         <span className="flex items-center gap-1.5 whitespace-nowrap">
           <MdLock className="text-primary text-base shrink-0" /> Secure &

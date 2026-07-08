@@ -15,7 +15,7 @@ export default class AppointmentService {
     const response = await api.get<AvailableSlot[]>("appointment/available-slots", {
       params: { doctorId, date, type },
     });
-    return response.data?.data ?? response.data;
+    return (response.data as any)?.data ?? response.data;
   }
 
   static async bookAppointment(
@@ -25,6 +25,6 @@ export default class AppointmentService {
       "appointment/book",
       request,
     );
-    return response.data?.data ?? response.data;
+    return (response.data as any)?.data ?? response.data;
   }
 }

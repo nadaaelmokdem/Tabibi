@@ -1,10 +1,10 @@
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LangProvider } from "./context/LangContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import DoctorChatPage from "./pages/DoctorChatPage";
 import MainLayout from "./components/Layout/MainLayout";
-import { USER_AUTH_CONFIG, DOCTOR_AUTH_CONFIG } from "./config/authConfig";
+import { USER_AUTH_CONFIG, DOCTOR_AUTH_CONFIG, ADMIN_AUTH_CONFIG } from "./config/authConfig";
 import HomePage from "./pages/HomePage";
 import AIChatPage from "./pages/AIChatPage";
 import DoctorDashboard from "./pages/DoctorDashboard";
@@ -20,6 +20,17 @@ import AdminDashboard from "./pages/AdminDashboard";
 import DoctorMessagesPage from "./pages/DoctorMessagesPage";
 import DoctorDetailsPage from "./pages/DoctorDetailsPage";
 import UserDoctorChatsPage from "./pages/UserDoctorChatsPage";
+import DoctorAvailabilityPage from "./pages/DoctorAvailabilityPage";
+import DoctorAppointmentsPage from "./pages/DoctorAppointmentsPage";
+import PatientAppointmentsPage from "./pages/PatientAppointmentsPage";
+
+function AppointmentsRedirect() {
+  const { user } = useAuth();
+  if (user?.activeRole?.toLowerCase() === "doctor") {
+    return <Navigate to="/doctor-appointments" replace />;
+  }
+  return <Navigate to="/patient-appointments" replace />;
+}
 
 function App() {
   return (
@@ -37,6 +48,10 @@ function App() {
               element={<SignIn {...DOCTOR_AUTH_CONFIG} />}
             />
             <Route
+              path="/admin-login"
+              element={<SignIn {...ADMIN_AUTH_CONFIG} />}
+            />
+            <Route
               path="/register"
               element={<SignUp {...USER_AUTH_CONFIG} />}
             />
@@ -44,13 +59,34 @@ function App() {
               path="/doctor-register"
               element={<SignUp {...DOCTOR_AUTH_CONFIG} />}
             />
-            <Route path="/user-data" element={<PatientAdditionalData />} />
-            <Route path="/doctor-data" element={<DoctorAdditionalData />} />
+            <Route
+              path="/user-data"
+              element={
+                <ProtectedRoute allowedRoles={["User"]}>
+                  <PatientAdditionalData />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/doctor-data"
+              element={
+                <ProtectedRoute allowedRoles={["Doctor"]}>
+                  <DoctorAdditionalData />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Main Layout Routes (with Navbar) */}
             <Route element={<MainLayout />}>
               <Route path="/" element={<HomePage />} />
-              <Route path="/appointments" element={<HomePage />} />
+              <Route
+                path="/appointments"
+                element={
+                  <ProtectedRoute>
+                    <AppointmentsRedirect />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/messages"
                 element={
@@ -112,7 +148,7 @@ function App() {
               <Route
                 path="/profile"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["User"]}>
                     <PatientProfilePage />
                   </ProtectedRoute>
                 }
@@ -120,8 +156,32 @@ function App() {
               <Route
                 path="/doctor-profile"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["Doctor"]}>
                     <DoctorProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor-appointments"
+                element={
+                  <ProtectedRoute allowedRoles={["Doctor"]}>
+                    <DoctorAppointmentsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/doctor-availability"
+                element={
+                  <ProtectedRoute allowedRoles={["Doctor"]}>
+                    <DoctorAvailabilityPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/patient-appointments"
+                element={
+                  <ProtectedRoute allowedRoles={["User"]}>
+                    <PatientAppointmentsPage />
                   </ProtectedRoute>
                 }
               />

@@ -7,6 +7,10 @@ import { useAuth } from "../context/AuthContext";
 import ChatService from "../services/chatService";
 import Swal from "sweetalert2";
 import { getAiQuota } from "../services/AIChat";
+import AppointmentService from "../services/appointmentService";
+import type { AvailableSlot } from "../types/appointment";
+import { ConsultationType } from "../types/appointment";
+import { formatTimeTo12Hour } from "../utils/dateUtils";
 
 export default function DoctorDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +21,10 @@ export default function DoctorDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [freeGpMessages, setFreeGpMessages] = useState<number>(0);
+  
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -42,6 +50,18 @@ export default function DoctorDetailsPage() {
       }).catch(console.error);
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (doctor && selectedDate) {
+      setSlotsLoading(true);
+      AppointmentService.getAvailableSlots(doctor.doctorId, selectedDate)
+        .then(slots => {
+          setAvailableSlots(slots);
+        })
+        .catch(console.error)
+        .finally(() => setSlotsLoading(false));
+    }
+  }, [doctor, selectedDate]);
 
   const isSelf = user?.id === doctor?.userId;
 
@@ -175,8 +195,99 @@ export default function DoctorDetailsPage() {
     }
   };
 
-  const handleBookAppointment = () => {
-    alert("Booking integration coming soon!");
+  const handleSlotClick = (slot: AvailableSlot) => {
+    if (!slot.isAvailable || !doctor) return;
+    if (!isAuthenticated) {
+      navigate("/login", { state: { returnUrl: `/doctors/${doctor.doctorId}` } });
+      return;
+    }
+    if (user?.activeRole?.toLowerCase() === "doctor") {
+      alert("Doctors cannot book appointments.");
+      return;
+    }
+
+    const optionsHtml = [];
+    if (doctor.isClinicEnabled) optionsHtml.push(`<option value="${ConsultationType.Clinic}">Clinic Visit (${doctor.clinicPrice} EGP)</option>`);
+    if (doctor.isVideoEnabled) optionsHtml.push(`<option value="${ConsultationType.Video}">Video Call (${doctor.videoPrice} EGP)</option>`);
+    if (doctor.isCallEnabled) optionsHtml.push(`<option value="${ConsultationType.Call}">Voice Call (${doctor.callPrice} EGP)</option>`);
+    
+    if (optionsHtml.length === 0) {
+      Swal.fire('Error', 'This doctor has no bookable consultation types.', 'error');
+      return;
+    }
+
+    const timeString = formatTimeTo12Hour(new Date(slot.start));
+
+    Swal.fire({
+      title: 'Book Appointment',
+      html: `
+        <div class="text-left mb-4">
+          <p class="font-semibold text-gray-700 mb-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
+            <span class="text-gray-500 text-sm block mb-1">Time</span>
+            <span class="text-primary text-lg">${timeString}</span>
+          </p>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Consultation Type</label>
+          <select id="swal-type" class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary p-3 border mb-4 bg-gray-50 font-medium text-gray-700 outline-none transition-all">
+            ${optionsHtml.join('')}
+          </select>
+          <label class="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Chief Complaint <span class="text-gray-400 font-normal">(Optional)</span></label>
+          <textarea id="swal-complaint" rows="3" class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary p-3 border bg-gray-50 font-medium text-gray-700 outline-none transition-all resize-none" placeholder="Briefly describe your symptoms..."></textarea>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Confirm Booking',
+      buttonsStyling: false,
+      customClass: {
+        popup: 'bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full border border-gray-100',
+        title: 'text-2xl font-bold mb-4 text-gray-800 text-left w-full',
+        htmlContainer: 'w-full m-0',
+        confirmButton: 'w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md mt-2 cursor-pointer',
+        cancelButton: 'w-full mt-3 py-3 text-gray-500 font-semibold hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer',
+      },
+      preConfirm: () => {
+        return {
+          type: parseInt((document.getElementById('swal-type') as HTMLSelectElement).value),
+          complaint: (document.getElementById('swal-complaint') as HTMLTextAreaElement).value
+        }
+      }
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        AppointmentService.bookAppointment({
+          doctorId: doctor.doctorId,
+          scheduledAt: slot.start,
+          type: result.value.type as any,
+          chiefComplaint: result.value.complaint
+        }).then(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Appointment Booked!',
+            text: 'Your appointment has been confirmed.',
+            buttonsStyling: false,
+            customClass: {
+              popup: 'bg-white p-6 rounded-3xl shadow-2xl max-w-sm border border-gray-100',
+              title: 'text-2xl font-bold mb-2 text-gray-800',
+              htmlContainer: 'text-gray-600 mb-6',
+              confirmButton: 'w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-xl cursor-pointer',
+            }
+          }).then(() => {
+            navigate('/user-dashboard');
+          });
+        }).catch(err => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Booking Failed',
+            text: err.response?.data?.message || err.message || 'Failed to book appointment',
+            buttonsStyling: false,
+            customClass: {
+              popup: 'bg-white p-6 rounded-3xl shadow-2xl max-w-sm border border-gray-100',
+              title: 'text-2xl font-bold mb-2 text-gray-800',
+              htmlContainer: 'text-gray-600 mb-6',
+              confirmButton: 'w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl cursor-pointer',
+            }
+          });
+        });
+      }
+    });
   };
 
   if (loading) {
@@ -197,13 +308,6 @@ export default function DoctorDetailsPage() {
       </div>
     );
   }
-
-  // Generate mocks
-  const mockTimeslots = [
-    { date: "Tomorrow", slots: ["10:00 AM", "11:30 AM", "02:00 PM", "04:30 PM"] },
-    { date: "Wed, Oct 25", slots: ["09:00 AM", "01:00 PM", "03:30 PM"] },
-    { date: "Thu, Oct 26", slots: ["10:30 AM", "12:00 PM", "05:00 PM"] },
-  ];
 
   const mockReviews = [
     { id: 1, name: "Sarah M.", rating: 5, date: "2 weeks ago", text: "Very attentive and professional. Took the time to listen to all my concerns and explained the treatment plan clearly." },
@@ -372,32 +476,58 @@ export default function DoctorDetailsPage() {
               <div className="bg-white rounded-3xl shadow-xl shadow-primary/5 border border-primary/10 p-6 sticky top-24">
                 <h3 className="text-xl font-bold text-gray-900 mb-6">Book an Appointment</h3>
                 
-                {/* Mock Timeslots */}
+                {/* Live Timeslots */}
                 <div className="mb-6 space-y-4">
-                  {mockTimeslots.map((day, idx) => (
-                    <div key={idx}>
-                      <div className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                        <FaRegCalendarAlt className="text-primary/60" /> {day.date}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {day.slots.map((slot, sIdx) => (
-                          <button key={sIdx} className="bg-gray-50 hover:bg-primary hover:text-white border border-gray-200 hover:border-primary text-gray-600 text-xs font-medium py-2 px-3 rounded-lg transition-colors cursor-pointer">
-                            {slot}
-                          </button>
-                        ))}
-                      </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                      <FaRegCalendarAlt className="text-primary/60" /> Select Date
+                    </label>
+                    <input 
+                      type="date" 
+                      min={new Date().toISOString().split('T')[0]}
+                      value={selectedDate}
+                      onChange={e => setSelectedDate(e.target.value)}
+                      className="w-full p-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-gray-700 font-medium"
+                    />
+                  </div>
+                  
+                  <div className="pt-2">
+                    <div className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                       Available Slots
                     </div>
-                  ))}
+                    {slotsLoading ? (
+                      <div className="flex justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
+                      </div>
+                    ) : availableSlots.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+                        {availableSlots.map((slot, sIdx) => {
+                          const timeString = formatTimeTo12Hour(new Date(slot.start));
+                          return (
+                            <button 
+                              key={sIdx} 
+                              disabled={!slot.isAvailable}
+                              onClick={() => handleSlotClick(slot)}
+                              className={`text-xs font-medium py-2.5 px-3 rounded-lg transition-all ${
+                                slot.isAvailable 
+                                  ? "bg-primary/5 hover:bg-primary hover:text-white border border-primary/20 hover:border-primary text-primary cursor-pointer shadow-sm"
+                                  : "bg-gray-50 border border-gray-100 text-gray-400 cursor-not-allowed opacity-60"
+                              }`}
+                            >
+                              {timeString}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-xl border border-gray-100">
+                        No slots available on this date.
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-3 pt-4 border-t border-gray-100">
-                  <button 
-                    onClick={handleBookAppointment}
-                    className="w-full bg-gradient-to-r from-primary to-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all text-center flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <FaClinicMedical /> Book Visit
-                  </button>
-                  
                   {doctor.isChatEnabled && (
                     <>
                       <div className="relative flex items-center py-2">

@@ -62,4 +62,26 @@ public class AppointmentController(
 
         return Ok(result.Data);
     }
+
+    [HttpGet("doctor-appointments")]
+    [Authorize(Roles = UserRoles.Doctor)]
+    public async Task<IActionResult> GetDoctorAppointments([FromQuery] AppointmentFilterDTO filters)
+    {
+        var userId = User.GetId();
+        if (string.IsNullOrEmpty(userId)) return Unauthorized("User not authenticated");
+
+        var appointments = await appointmentService.GetDoctorAppointmentsAsync(userId, filters);
+        return Ok(appointments);
+    }
+
+    [HttpGet("patient-appointments")]
+    [Authorize(Roles = UserRoles.Patient)]
+    public async Task<IActionResult> GetPatientAppointments([FromQuery] AppointmentFilterDTO filters)
+    {
+        var userId = User.GetId();
+        if (string.IsNullOrEmpty(userId)) return Unauthorized("User not authenticated");
+
+        var appointments = await appointmentService.GetPatientAppointmentsAsync(userId, filters);
+        return Ok(appointments);
+    }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 using Tabibi.Data;
 using Tabibi.Models;
 using Tabibi.Services;
@@ -21,6 +22,9 @@ namespace Tabibi
             builder.Services.AddControllers(options =>
             {
                 options.Filters.Add<Tabibi.Filters.ApiResponseFilter>();
+            }).AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
             // DbContext
@@ -157,6 +161,36 @@ builder.Services.AddSingleton<PresenceTracker>();
                 if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
                 {
                     await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+                }
+
+                // Bootstrap: there is no self-registration path for the Admin role,
+                // so seed one admin account from config if none exists yet.
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+                var existingAdmins = await userManager.GetUsersInRoleAsync(UserRoles.Admin);
+                if (existingAdmins.Count == 0)
+                {
+                    var adminEmail = builder.Configuration["AdminSeed:Email"] ?? "admin@admin.com";
+                    var adminPassword = builder.Configuration["AdminSeed:Password"] ?? "Admin@123";
+                    var adminFullName = builder.Configuration["AdminSeed:FullName"] ?? "Admin";
+
+                    if (!string.IsNullOrEmpty(adminEmail) && !string.IsNullOrEmpty(adminPassword))
+                    {
+                        var adminUser = new AppUser
+                        {
+                            UserName = adminEmail,
+                            Email = adminEmail,
+                            FullName = adminFullName,
+                            EmailConfirmed = true,
+                            PhoneNumber = "0000000000",
+                            PhoneNumberConfirmed = true
+                        };
+
+                        var createResult = await userManager.CreateAsync(adminUser, adminPassword);
+                        if (createResult.Succeeded)
+                        {
+                            await userManager.AddToRoleAsync(adminUser, UserRoles.Admin);
+                        }
+                    }
                 }
             }
 

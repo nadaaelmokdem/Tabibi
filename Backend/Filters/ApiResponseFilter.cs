@@ -29,20 +29,12 @@ namespace Tabibi.Filters
                         var dataProp = serviceResult.GetType().GetProperty("Data");
                         var data = dataProp?.GetValue(serviceResult);
 
-                        objectResult.Value = new
-                        {
-                            success = true,
-                            data = data
-                        };
+                        objectResult.Value = data;
                         objectResult.StatusCode = statusCode == 200 ? 200 : statusCode;
                     }
                     else
                     {
-                        objectResult.Value = new
-                        {
-                            success = false,
-                            error = serviceResult.ErrorMessage
-                        };
+                        objectResult.Value = serviceResult.ErrorMessage;
                         if (statusCode == 200)
                         {
                             objectResult.StatusCode = 400;
@@ -53,25 +45,13 @@ namespace Tabibi.Filters
                 {
                     // If already formatted, avoid double formatting
                     var type = objectResult.Value?.GetType();
-                    var hasSuccessProp = type?.GetProperty("success") != null;
+                    var hasSuccessProp = type?.GetProperty("success", System.Reflection.BindingFlags.IgnoreCase | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance) != null;
 
                     if (!hasSuccessProp)
                     {
-                        if (isSuccessStatusCode)
+                        if (!isSuccessStatusCode)
                         {
-                            objectResult.Value = new
-                            {
-                                success = true,
-                                data = objectResult.Value
-                            };
-                        }
-                        else
-                        {
-                            objectResult.Value = new
-                            {
-                                success = false,
-                                error = objectResult.Value
-                            };
+                            objectResult.Value = objectResult.Value;
                         }
                     }
                 }
@@ -82,14 +62,11 @@ namespace Tabibi.Filters
 
                 if (isSuccessStatusCode)
                 {
-                    context.Result = new ObjectResult(new { success = true })
-                    {
-                        StatusCode = statusCodeResult.StatusCode
-                    };
+                    context.Result = new StatusCodeResult(statusCodeResult.StatusCode);
                 }
                 else
                 {
-                    context.Result = new ObjectResult(new { success = false, error = "An error occurred." })
+                    context.Result = new ObjectResult("An error occurred.")
                     {
                         StatusCode = statusCodeResult.StatusCode
                     };

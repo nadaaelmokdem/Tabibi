@@ -38,6 +38,43 @@ export const EditableDetailItem: React.FC<EditableDetailItemProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const validateInput = (val: string | undefined): boolean => {
+    if (fieldName === "licenseNumber") {
+      if (!val || !val.trim()) {
+        setError("License number is required.");
+        return false;
+      }
+      if (!/^\d+$/.test(val.trim())) {
+        setError("Must contain digits only (Egyptian Medical Syndicate number).");
+        return false;
+      }
+    }
+    if (fieldName === "nationalIdNumber") {
+      if (!val || !val.trim()) {
+        setError("National ID is required.");
+        return false;
+      }
+      if (!/^(2|3)\d{13}$/.test(val.trim())) {
+        setError("Must be a valid 14-digit Egyptian National ID.");
+        return false;
+      }
+    }
+    if (fieldName === "licenseProofUrl" || fieldName === "idProofUrl" || fieldName === "degreeProofUrl") {
+      if (val && val.trim() !== "") {
+        const trimmed = val.trim();
+        if (!trimmed.startsWith("/")) {
+          try {
+            const url = new URL(trimmed);
+            if (url.protocol !== "http:" && url.protocol !== "https:") {
+              setError("Please enter a valid HTTP/HTTPS link.");
+              return false;
+            }
+          } catch {
+            setError("Please enter a valid URL link.");
+            return false;
+          }
+        }
+      }
+    }
     if (type === "number" && val?.trim() !== "") {
       const num = Number(val);
       if (isNaN(num) || num < 0) {
@@ -108,7 +145,7 @@ export const EditableDetailItem: React.FC<EditableDetailItemProps> = ({
         inputRef.current.focus();
       }
     }
-    setLocalValue(value);
+    setLocalValue(type === "date" && value ? value.split("T")[0] : value);
     setError(null);
   }, [isEditing, value, options, type]);
 

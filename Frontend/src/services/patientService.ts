@@ -60,4 +60,9 @@ export default class PatientService {
     const response = await api.get("patient/dashboard-summary");
     return response.data;
   }
+
+  static async getAppointments(filters: any = {}): Promise<any[]> {
+    const response = await api.get("appointment/patient-appointments", { params: filters });
+    return response.data;
+  }
 }

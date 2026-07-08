@@ -3,6 +3,7 @@ import type { AvailableSlot } from "../types/appointment";
 import type { SlotWithMeta, WeekDay, SelectedSlot } from "../types/booking";
 import AppointmentService from "../services/appointmentService";
 import { USE_MOCK_DATA } from "../config/apiConfig";
+import { formatTimeTo12Hour } from "./dateUtils";
 
 const SLOT_DURATION_MINS = 30;
 
@@ -27,7 +28,21 @@ export function getDayName(date: Date): string {
 }
 
 export function combineDateAndTime(date: Date, timeLabel: string): Date {
-  const [hours, minutes] = timeLabel.split(":").map(Number);
+  const cleanLabel = timeLabel.trim();
+  const isPM = cleanLabel.toUpperCase().includes("PM");
+  const isAM = cleanLabel.toUpperCase().includes("AM");
+  
+  const timeOnly = cleanLabel.replace(/(AM|PM)/i, "").trim();
+  const [hoursStr, minutesStr] = timeOnly.split(":");
+  let hours = parseInt(hoursStr, 10);
+  const minutes = parseInt(minutesStr, 10);
+  
+  if (isPM && hours < 12) {
+    hours += 12;
+  } else if (isAM && hours === 12) {
+    hours = 0;
+  }
+
   const result = new Date(date);
   result.setHours(hours, minutes, 0, 0);
   return result;
@@ -79,11 +94,7 @@ function mapApiSlot(
 ): SlotWithMeta {
   const startDate = new Date(slot.start);
   const dateKey = formatDateKey(startDate);
-  const timeLabel = startDate.toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  const timeLabel = formatTimeTo12Hour(startDate);
   const slotKey = makeSlotKey(doctorId, dateKey, timeLabel);
   const isPast = startDate < new Date();
 
@@ -118,10 +129,11 @@ export function buildMockSlotsForDay(
 
   const now = new Date();
 
-  return timeLabels.map((timeLabel, index) => {
-    const start = combineDateAndTime(date, timeLabel);
+  return timeLabels.map((tLabel, index) => {
+    const start = combineDateAndTime(date, tLabel);
     const end = addMinutes(start, SLOT_DURATION_MINS);
-    const slotKey = makeSlotKey(doctor.doctorId, dateKey, timeLabel);
+    const formattedLabel = formatTimeTo12Hour(tLabel);
+    const slotKey = makeSlotKey(doctor.doctorId, dateKey, formattedLabel);
     const isPast = start < now;
     const isBooked = bookedSlots.has(slotKey);
 
@@ -142,7 +154,7 @@ export function buildMockSlotsForDay(
       end: end.toISOString(),
       isAvailable: status === "available",
       price: null,
-      timeLabel,
+      timeLabel: formattedLabel,
       slotKey,
       status,
     };

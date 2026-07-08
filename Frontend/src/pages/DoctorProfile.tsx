@@ -195,9 +195,11 @@ const ProfilePage: React.FC = () => {
           {/* Name & Handle */}
           <div className="flex-1 text-center sm:text-left flex flex-col justify-center w-full">
             <div className="flex items-center gap-3 justify-center sm:justify-start w-full">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#2A2455] truncate max-w-full flex items-center gap-2">
-                {profile.fullName}
-                {profile.isVerified && <MdVerified className="text-blue-500 text-2xl flex-shrink-0" title="Verified Doctor" />}
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#2A2455] whitespace-normal break-words max-w-full">
+                {profile.fullName.startsWith("Dr.") ? profile.fullName : `Dr. ${profile.fullName}`}
+                {profile.isVerified && (
+                  <MdVerified className="inline-block text-blue-500 text-2xl ml-2 align-middle flex-shrink-0" title="Verified Doctor" />
+                )}
               </h1>
             </div>
             <div className="mt-0.5">
@@ -298,6 +300,13 @@ const ProfilePage: React.FC = () => {
             <p className="text-sm text-[#2A2455]/70 mb-5">
               Upload and verify your official credentials. These files are securely reviewed for authentication purposes.
             </p>
+            {!profile.isVerified && (
+              <div className="bg-[#FFF8E1] border-l-4 border-[#FFC107] p-4 rounded-md mb-6 shadow-sm">
+                <p className="text-[#856404] text-[14px] font-medium leading-relaxed">
+                  <strong>Notice:</strong> Your profile is currently unverified. You may edit these credentials, but doing so will notify the administration to re-review your profile, which may delay the verification process.
+                </p>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <EditableDetailItem
                 icon={<FiHash />}

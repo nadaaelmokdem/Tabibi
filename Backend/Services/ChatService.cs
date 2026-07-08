@@ -125,7 +125,7 @@ namespace Tabibi.Services
                     PatientName = s.Patient.User.FullName,
                     PatientUserId = s.Patient.UserId,
                     LastMessage = dbContext.ChatMessages
-                        .Where(m => m.SessionId == s.SessionId)
+                        .Where(m => m.SessionId == s.SessionId && !m.Content.StartsWith("Clinical Assessment:"))
                         .OrderByDescending(m => m.SentAt)
                         .FirstOrDefault()
                 })

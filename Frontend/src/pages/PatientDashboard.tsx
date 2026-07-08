@@ -14,6 +14,7 @@ import ChatService from "../services/chatService";
 import { getAiQuota } from "../services/AIChat";
 import { useAuth } from "../context/AuthContext";
 import type { PatientDashboardData } from "../types/dashboard";
+import { formatTimeTo12Hour } from "../utils/dateUtils";
 
 export default function PatientDashboard() {
   const navigate = useNavigate();
@@ -191,8 +192,11 @@ export default function PatientDashboard() {
         {/* Upcoming Appointments */}
         <div className="col-span-1 md:col-span-6 bg-surface-container-lowest rounded-xl p-6 shadow-[0_12px_24px_-4px_rgba(42,36,85,0.08),0_4px_12px_-2px_rgba(42,36,85,0.04)] border border-surface-variant/30 flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-on-surface">Upcoming Appointments</h2>
-            {data.upcomingAppointmentsCount > 0 && <span className="text-sm font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full">{data.upcomingAppointmentsCount} total</span>}
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-semibold text-on-surface">Upcoming Appointments</h2>
+              {data.upcomingAppointmentsCount > 0 && <span className="text-sm font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full">{data.upcomingAppointmentsCount} total</span>}
+            </div>
+            <button onClick={() => navigate('/patient-appointments')} className="cursor-pointer text-sm font-medium text-primary hover:underline">View all</button>
           </div>
           <div className="space-y-4 flex-1">
             {data.upcomingAppointments.length === 0 ? (
@@ -211,15 +215,17 @@ export default function PatientDashboard() {
                 <div key={a.appointmentId}>
                   <div className="flex items-center gap-4 p-4 rounded-lg hover:bg-surface-container-low transition-colors border border-transparent hover:border-surface-variant/30 cursor-pointer">
                     <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-sm text-lg font-bold">
-                      {a.doctorName.replace(/^Dr\.\s*/, '').charAt(0)}
+                      {(a.doctorName || "D").replace(/^Dr\.\s*/, '').charAt(0) || 'D'}
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-base text-on-surface font-semibold">{a.doctorName}</h4>
+                      <h4 className="text-base text-on-surface font-semibold">
+                        {(a.doctorName || "").startsWith("Dr.") ? a.doctorName : `Dr. ${a.doctorName || "Doctor"}`}
+                      </h4>
                       <p className="text-sm text-on-surface-variant">{a.consultationType}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-on-surface font-semibold">
-                        {new Date(a.scheduledAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric'})}, {new Date(a.scheduledAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        {new Date(a.scheduledAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric'})}, {formatTimeTo12Hour(new Date(a.scheduledAt))}
                       </p>
                       <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-primary-fixed text-on-primary-fixed text-[12px] font-medium rounded-full">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
@@ -260,11 +266,13 @@ export default function PatientDashboard() {
                 <div key={c.sessionId}>
                   <div className="flex items-center gap-4 p-4 rounded-lg hover:bg-surface-container-low transition-colors border border-transparent hover:border-surface-variant/30 cursor-pointer" onClick={() => navigate(c.otherPartyUserId === 'AI' ? `/ai-chat/${c.sessionId}` : `/chat/${c.sessionId}`)}>
                     <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 shadow-sm text-lg font-bold">
-                      {c.otherPartyName.replace(/^Dr\.\s*/, '').charAt(0)}
+                      {(c.otherPartyName || "U").replace(/^Dr\.\s*/, '').charAt(0) || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-baseline">
-                        <h4 className="text-base text-on-surface font-semibold truncate">{c.otherPartyName}</h4>
+                        <h4 className="text-base text-on-surface font-semibold truncate">
+                          {c.otherPartyUserId === 'AI' || (c.otherPartyName || "").startsWith("Dr.") ? (c.otherPartyName || "AI") : `Dr. ${c.otherPartyName || "Doctor"}`}
+                        </h4>
                         <span className="text-[12px] text-on-surface-variant font-medium">{c.lastMessageTime ? new Date(c.lastMessageTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''}</span>
                       </div>
                       <p className="text-sm text-on-surface-variant truncate">{c.lastMessage || "No messages yet"}</p>

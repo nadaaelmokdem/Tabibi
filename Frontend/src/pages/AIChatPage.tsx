@@ -14,6 +14,7 @@ import { useAuth } from "../context/AuthContext";
 import { TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse, TbArrowLeft } from "react-icons/tb";
 import { HiSparkles } from "react-icons/hi";
 import { MdOutlineAccountBalanceWallet } from "react-icons/md";
+import { formatTimeTo12Hour } from "../utils/dateUtils";
 
 const CURRENT_USER_ID = "user1";
 
@@ -36,7 +37,7 @@ export default function AIChatPage() {
       id: "intro-1",
       senderId: "c1",
       text: "Hello! I'm your Tabibi AI assistant. Please describe your symptoms in as much detail as possible, including when they started.",
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      timestamp: formatTimeTo12Hour(new Date()),
       context: ""
     }
   ]);
@@ -126,9 +127,9 @@ export default function AIChatPage() {
         if (history.length > 0) {
           const historyMessages: Message[] = history.map((m, index) => ({
             id: m.messageId.toString(),
-            senderId: (m.senderRole as string) === "User" || (m.senderRole as string) === "Patient" ? CURRENT_USER_ID : "c1",
+            senderId: (m.senderRole as string) === "User" ? CURRENT_USER_ID : "c1",
             text: m.content,
-            timestamp: new Date(m.sentAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            timestamp: formatTimeTo12Hour(new Date(m.sentAt)),
             context: index === history.length - 1 ? (historyData.clinicalAssessment || "") : ""
           }));
           setMessages(prev => {
@@ -146,7 +147,7 @@ export default function AIChatPage() {
           id: "intro-1",
           senderId: "c1",
           text: "Hello! I'm your Tabibi AI assistant. Please describe your symptoms in as much detail as possible, including when they started.",
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          timestamp: formatTimeTo12Hour(new Date()),
           context: ""
         }
       ]);
@@ -168,10 +169,7 @@ export default function AIChatPage() {
       id: Date.now().toString(),
       senderId: CURRENT_USER_ID,
       text: trimmedText,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      timestamp: formatTimeTo12Hour(new Date()),
       context: "",
     };
 
@@ -185,10 +183,7 @@ export default function AIChatPage() {
       id: aiMessageId,
       senderId: "c1",
       text: "...",
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      timestamp: formatTimeTo12Hour(new Date()),
       context: "",
     };
 
@@ -267,10 +262,7 @@ export default function AIChatPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, initialPromptHandled, isLoading]);
 
-  const nowLabel = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const nowLabel = formatTimeTo12Hour(new Date());
   const todayLabel = new Date().toLocaleDateString([], {
     month: "short",
     day: "numeric",
@@ -316,11 +308,11 @@ export default function AIChatPage() {
                   onClick={() => navigate(`/ai-chat/${session.sessionId}`)}
                   className={`p-4 rounded-xl cursor-pointer transition-all border ${numericSessionId === session.sessionId ? 'bg-[#f0ebff] border-[#b8a7ff]' : 'bg-white border-[#f0ebff] hover:border-[#b8a7ff] hover:shadow-sm'}`}
                 >
-                  <div className="flex justify-between items-center mb-1.5">
-                    <span className="font-bold text-[#1a1345] text-sm truncate flex items-center gap-2">
-                      <HiSparkles className="text-[#6a5acd]" /> {session.otherPartyName}
+                  <div className="flex justify-between items-start mb-1.5 gap-2">
+                    <span className="font-bold text-[#1a1345] text-sm break-words whitespace-normal flex items-start gap-2">
+                      <HiSparkles className="text-[#6a5acd] mt-1 flex-shrink-0" /> {session.otherPartyName}
                     </span>
-                    <span className="text-xs font-medium text-[#787584] shrink-0 ml-2">
+                    <span className="text-xs font-medium text-[#787584] shrink-0">
                       {session.lastMessageTime ? new Date(session.lastMessageTime).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : ''}
                     </span>
                   </div>

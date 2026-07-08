@@ -29,3 +29,17 @@ export const DOCTOR_AUTH_CONFIG: AuthFlowConfig = {
   continueDataLink: "doctor-data",
   requiredRole: "Doctor",
 };
+
+// Admin accounts are seeded/managed, not self-registered - registerLink just
+// falls back to the regular patient signup rather than a dedicated admin one.
+export const ADMIN_AUTH_CONFIG: AuthFlowConfig = {
+  background: "user-login.jpg",
+  headerText: "Platform administration.",
+  pText:
+    "Sign in to manage doctor verification, users, appointments, and platform oversight.",
+  registerLink: "register",
+  additionalLink: "admin-dashboard",
+  signInLink: "admin-login",
+  continueDataLink: "admin-dashboard",
+  requiredRole: "Admin",
+};

@@ -21,7 +21,7 @@ export default class DoctorService {
         if (error.response.status === 404) {
           throw new Error("User not found!");
         } else if (error.response.status === 400) {
-          throw new Error("Invalid data provided!");
+          throw new Error(typeof error.response.data === "string" ? error.response.data : "Invalid data provided!");
         }
       }
 
@@ -48,16 +48,7 @@ export default class DoctorService {
   }
 
   static async bulkUpdateProfile(profileData: any): Promise<void> {
-    try {
-      await api.put("doctor/profile", profileData, { withCredentials: true });
-    } catch (error: unknown) {
-      if (isAxiosError(error) && error.response) {
-        if (error.response.status === 400) {
-          throw new Error(error.response.data || "Invalid data provided!");
-        }
-      }
-      throw error;
-    }
+    await api.put("doctor/profile", profileData, { withCredentials: true });
   }
 
   static async getProfile(): Promise<DoctorProfileData> {
@@ -71,6 +62,20 @@ export default class DoctorService {
 
   static async getSpecialties(): Promise<{ specialtyId: number; name: string }[]> {
     const response = await api.get("specialties");
+    return response.data;
+  }
+
+  static async getAvailability(): Promise<any[]> {
+    const response = await api.get("doctor/availability");
+    return response.data;
+  }
+
+  static async updateAvailability(availabilities: any[]): Promise<void> {
+    await api.put("doctor/availability", { availabilities }, { withCredentials: true });
+  }
+
+  static async getAppointments(filters: any = {}): Promise<any[]> {
+    const response = await api.get("appointment/doctor-appointments", { params: filters });
     return response.data;
   }
 }

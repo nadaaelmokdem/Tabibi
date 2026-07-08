@@ -10,6 +10,7 @@ import { onUpdateSessionList, offUpdateSessionList } from "../services/chatHubSe
 import type { ReceivedMessage } from "../types/ReceivedMessage";
 import { FaUserMd, FaUsers, FaRegClock, FaChevronRight } from "react-icons/fa";
 import { TbArrowLeft, TbLayoutSidebarLeftCollapse, TbLayoutSidebarRightCollapse } from "react-icons/tb";
+import { formatTimeTo12Hour } from "../utils/dateUtils";
 
 interface SessionInfo {
   sessionId: number;
@@ -172,9 +173,9 @@ export default function DoctorMessagesPage() {
                   onClick={() => navigate(`/chat/${session.sessionId}`)}
                   className={`p-4 rounded-xl cursor-pointer transition-all border ${numericSessionId === session.sessionId ? 'bg-[#f0ebff] border-[#b8a7ff]' : 'bg-white border-[#f0ebff] hover:border-[#b8a7ff] hover:shadow-sm'}`}
                 >
-                  <div className="flex justify-between items-center mb-1.5">
-                    <span className="font-bold text-[#1a1345] text-sm">{session.otherPartyName}</span>
-                    <span className="text-xs font-medium text-[#787584]">
+                  <div className="flex justify-between items-start mb-1.5 gap-2">
+                    <span className="font-bold text-[#1a1345] text-sm break-words whitespace-normal">{session.otherPartyName}</span>
+                    <span className="text-xs font-medium text-[#787584] shrink-0">
                       {session.lastMessageTime ? new Date(session.lastMessageTime).toLocaleDateString(undefined, {month: 'short', day: 'numeric'}) : ''}
                     </span>
                   </div>
@@ -195,7 +196,7 @@ export default function DoctorMessagesPage() {
                     className="w-full p-4 flex justify-between items-center bg-transparent transition-colors rounded-xl"
                   >
                     <div className="flex flex-col text-left">
-                      <span className="font-bold text-[#1a1345] text-[15px]">{patient.patientName}</span>
+                      <span className="font-bold text-[#1a1345] text-[15px] break-words whitespace-normal">{patient.patientName}</span>
                       <span className="text-[13px] font-medium text-[#6a5acd] mt-0.5">{patient.sessions.length} Session{patient.sessions.length !== 1 ? 's' : ''}</span>
                     </div>
                     <FaChevronRight className={`text-[#474553] text-sm transition-transform ${expandedPatientId === patient.patientId ? 'rotate-90' : ''}`} />
@@ -280,10 +281,7 @@ function ActiveChatPane({
         id: String(m.messageId),
         senderId: m.senderRole,
         text: m.content,
-        timestamp: new Date(m.sentAt).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        timestamp: formatTimeTo12Hour(new Date(m.sentAt)),
       })),
     [messages]
   );

@@ -24,18 +24,21 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   
   const isDoctor = user?.activeRole?.toLowerCase() === "doctor";
+  const isAdmin = user?.roles?.some(r => r.toLowerCase() === "admin");
   const hasBothRoles = user?.roles?.some(r => r.toLowerCase() === "doctor") && user?.roles?.some(r => r.toLowerCase() === "user");
   
-  const navItems = isDoctor ? [
+  const navItems = isAdmin ? [
+    { name: "Admin Dashboard", icon: LuLayoutDashboard, path: "/admin-dashboard" },
+  ] : isDoctor ? [
     { name: "Doctor Dashboard", icon: LuLayoutDashboard, path: "/doctor-dashboard" },
-    { name: "Appointments", icon: LuCalendarDays, path: "/appointments" },
-    { name: "Patients", icon: LuFolderHeart, path: "/patients" },
+    { name: "Appointments", icon: LuCalendarDays, path: "/doctor-appointments" },
+    { name: "Availability", icon: LuCalendarDays, path: "/doctor-availability" },
     { name: "Messages", icon: LuMessageSquare, path: "/messages" },
   ] : [
     { name: "User Dashboard", icon: LuLayoutDashboard, path: "/user-dashboard" },
     { name: "Chat With AI", icon: HiOutlineSparkles, path: "/ai-chat" },
     { name: "Doctor Chats", icon: MdMedicalServices, path: "/doctor-chats" },
-    { name: "Appointments", icon: LuCalendarDays, path: "/appointments" },
+    { name: "Appointments", icon: LuCalendarDays, path: "/patient-appointments" },
     { name: "Browse Doctors", icon: LuFolderHeart, path: "/doctors" },
   ];
 
@@ -58,7 +61,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-8">
                <Link 
-                 to={isDoctor ? "/doctor-dashboard" : "/user-dashboard"} 
+                 to={isAdmin ? "/admin-dashboard" : isDoctor ? "/doctor-dashboard" : "/user-dashboard"} 
                  onClick={onClose} 
                  className="text-2xl font-extrabold text-primary flex items-center gap-2 hover:opacity-80 transition-opacity"
                >
@@ -82,12 +85,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </div>
               )}
               <div className="overflow-hidden">
-                <h2 className="text-lg font-bold text-primary truncate w-full flex items-center gap-1">
-                  {user?.fullName || "User Portal"}
-                  {isDoctor && user?.isVerified && <MdVerified className="text-blue-500 text-lg flex-shrink-0" title="Verified Doctor" />}
+                <h2 className="text-lg font-bold text-primary whitespace-normal break-words w-full">
+                  {isDoctor && user?.fullName ? (user.fullName.startsWith("Dr.") ? user.fullName : `Dr. ${user.fullName}`) : user?.fullName || "User Portal"}
+                  {isDoctor && user?.isVerified && (
+                    <MdVerified className="inline-block text-blue-500 text-lg ml-1 align-middle flex-shrink-0" title="Verified Doctor" />
+                  )}
                 </h2>
                 <p className="text-xs text-text-muted font-normal truncate">
-                  {isDoctor ? "Doctor Portal" : "User Portal"}
+                  {isAdmin ? "Admin Portal" : isDoctor ? "Doctor Portal" : "User Portal"}
                 </p>
                 {hasBothRoles && (
                   <button
@@ -129,20 +134,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Bottom Section */}
           <div className="mt-auto space-y-4 pt-4 border-t border-surface-variant">
             <div className="space-y-1">
-              <NavLink
-                to={isDoctor ? "/doctor-profile" : "/profile"}
-                onClick={() => onClose()}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out active:scale-95 ${
-                    isActive
-                      ? "bg-surface-variant text-primary border-r-4 border-primary"
-                      : "text-text-muted hover:bg-surface-variant/50 hover:text-text-main"
-                  }`
-                }
-              >
-                <LuSettings className="text-lg" />
-                <span>Profile Settings</span>
-              </NavLink>
+              {!isAdmin && (
+                <NavLink
+                  to={isDoctor ? "/doctor-profile" : "/profile"}
+                  onClick={() => onClose()}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out active:scale-95 ${
+                      isActive
+                        ? "bg-surface-variant text-primary border-r-4 border-primary"
+                        : "text-text-muted hover:bg-surface-variant/50 hover:text-text-main"
+                    }`
+                  }
+                >
+                  <LuSettings className="text-lg" />
+                  <span>Profile Settings</span>
+                </NavLink>
+              )}
               <a
                 className="flex items-center gap-3 px-4 py-2 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 ease-in-out active:scale-95 cursor-pointer"
                 onClick={async () => {

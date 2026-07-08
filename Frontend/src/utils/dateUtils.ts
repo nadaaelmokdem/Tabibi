@@ -48,3 +48,39 @@ export const sortSchedule = <T extends { date: string; time: string }>(
     return parseTime(a.time) - parseTime(b.time);
   });
 };
+
+export const formatTimeTo12Hour = (time: Date | string): string => {
+  if (time instanceof Date) {
+    let hours = time.getHours();
+    const minutes = String(time.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // the hour '0' should be '12'
+    return `${hours}:${minutes} ${ampm}`;
+  }
+
+  if (typeof time === "string") {
+    if (time.includes("AM") || time.includes("PM")) {
+      return time;
+    }
+    if (time.includes("T")) {
+      const date = new Date(time);
+      if (!isNaN(date.getTime())) {
+        return formatTimeTo12Hour(date);
+      }
+    }
+    const parts = time.split(":");
+    if (parts.length >= 2) {
+      let hours = parseInt(parts[0], 10);
+      const minutes = parts[1].substring(0, 2);
+      if (!isNaN(hours)) {
+        const ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours}:${minutes} ${ampm}`;
+      }
+    }
+  }
+  return String(time);
+};
+

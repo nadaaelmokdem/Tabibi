@@ -65,6 +65,10 @@ export const DetailReadView: React.FC<DetailReadViewProps> = ({
             <p className="text-md font-medium text-[#2A2455] leading-relaxed whitespace-pre-wrap break-words">
               {value}
             </p>
+          ) : type === "date" ? (
+            <p className="text-lg font-bold text-[#2A2455] truncate leading-tight">
+              {value.split("T")[0]}
+            </p>
           ) : (
             <p className="text-lg font-bold text-[#2A2455] truncate leading-tight">
               {value}
