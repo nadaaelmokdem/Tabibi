@@ -65,6 +65,9 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
 
+  /* --- Shadows --- */
+  --shadow-floating: 0 20px 45px -10px rgba(106, 90, 205, 0.28);
+
 
 
   --font-size-label-sm: 12px;

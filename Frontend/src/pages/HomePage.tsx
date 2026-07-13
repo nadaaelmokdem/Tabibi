@@ -1,7 +1,9 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import HeroSection from "../components/Home/HeroSection";
-import FeaturesSection from "../components/Home/FeaturesSection";
+import DoctorsPreviewSection from "../components/Home/DoctorsPreviewSection";
+import FreePerksSection from "../components/Home/FreePerksSection";
+import PricingSection from "../components/Home/PricingSection";
 import Footer from "../components/Home/Footer";
 
 
@@ -22,7 +24,9 @@ export default function HomePage() {
     <>
       <main className="flex-grow">
         <HeroSection />
-        <FeaturesSection />
+        <DoctorsPreviewSection />
+        <FreePerksSection />
+        <PricingSection />
       </main>
 
       <Footer />
