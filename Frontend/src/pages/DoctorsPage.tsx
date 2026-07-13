@@ -7,6 +7,7 @@ import BookingScheduleModal from "../components/Doctor/BookingScheduleModal";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import ChatService from "../services/chatService";
+import AppointmentService from "../services/appointmentService";
 import { getAiQuota } from "../services/AIChat";
 import NetworkError from "../components/common/NetworkError";
 
@@ -186,19 +187,36 @@ const DoctorsPage: React.FC = () => {
     }
 
     try {
-      const assessment = localStorage.getItem("clinical_assessment");
-      const sessionId = await ChatService.startSession(doctorId, false, assessment);
-      navigate(`/chat/${sessionId}`);
+      const res: any = await AppointmentService.bookAppointment({
+        doctorId,
+        scheduledAt: new Date().toISOString(),
+        type: 0 as any, // 0 = Chat
+        paymentMethod: 1, // 1 = Online
+      });
+
+      const redirectUrl = res?.paymentUrl || res?.PaymentUrl || res?.sessionUrl || res?.data?.paymentUrl || res?.data?.PaymentUrl;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
+      throw new Error("Payment link could not be generated.");
     } catch (err: any) {
-      alert(err.response?.data || "Failed to start chat session.");
+      alert(err.response?.data?.message || err.response?.data || err.message || "Failed to start chat session.");
     }
   };
 
   const confirmStartChat = async (isCompanyPaid: boolean) => {
     if (!selectedDoctorForChat) return;
+
+    if (!isCompanyPaid) {
+      setSelectedDoctorForChat(null);
+      await handleStartChat(selectedDoctorForChat.doctorId);
+      return;
+    }
+
     try {
       const assessment = localStorage.getItem("clinical_assessment");
-      const sessionId = await ChatService.startSession(selectedDoctorForChat.doctorId, isCompanyPaid, assessment);
+      const sessionId = await ChatService.startSession(selectedDoctorForChat.doctorId, true, assessment);
       navigate(`/chat/${sessionId}`);
     } catch (err: any) {
       alert(err.response?.data || "Failed to start chat session.");

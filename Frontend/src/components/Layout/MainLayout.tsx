@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
-import Navbar from "../Navbar";
+import Navbar from "../navbar";
 import Sidebar from "../DashboardSidebar";
 import { useAuth } from "../../context/AuthContext";
 import { LuMenu } from "react-icons/lu";

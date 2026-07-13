@@ -12,12 +12,11 @@ export const CachedImage: React.FC<CachedImageProps> = ({ src, fallbackSrc, ...p
   useEffect(() => {
     if (!src) return;
     
-    const fullUrl = src.startsWith('http') || src.startsWith('data:') ? src : getFileUrl(src);
-
     if (src.startsWith('data:')) {
-      setCachedSrc(src);
       return;
     }
+
+    const fullUrl = src.startsWith('http') ? src : getFileUrl(src);
 
     let isMounted = true;
 
@@ -40,7 +39,7 @@ export const CachedImage: React.FC<CachedImageProps> = ({ src, fallbackSrc, ...p
         } else {
            if (isMounted) setCachedSrc(fullUrl);
         }
-      } catch (err) {
+      } catch {
          if (isMounted) setCachedSrc(fullUrl);
       }
     };
