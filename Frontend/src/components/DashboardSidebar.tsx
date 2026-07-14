@@ -11,6 +11,7 @@ import {
   LuArrowLeftRight
 } from "react-icons/lu";
 import { MdMedicalServices, MdVerified } from "react-icons/md";
+import { FaStethoscope } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { getFileUrl } from "../utils/fileUtils";
@@ -62,12 +63,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-8">
-               <Link 
-                 to={isAdmin ? "/admin-dashboard" : isDoctor ? "/doctor-dashboard" : "/user-dashboard"} 
-                 onClick={onClose} 
-                 className="text-2xl font-extrabold text-primary flex items-center gap-2 hover:opacity-80 transition-opacity"
+               <Link
+                 to={isAdmin ? "/admin-dashboard" : isDoctor ? "/doctor-dashboard" : "/user-dashboard"}
+                 onClick={onClose}
+                 className="text-xl font-extrabold text-primary-dark tracking-tight flex items-center gap-2.5 hover:opacity-80 transition-opacity"
                >
-                 <MdMedicalServices className="text-primary-light text-3xl" />
+                 <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-primary to-primary-light">
+                   <FaStethoscope size={15} className="text-white" />
+                 </div>
                  Tabibi
                </Link>
                <button onClick={onClose} className="lg:hidden p-2 text-text-muted hover:text-text-main">
@@ -89,7 +92,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 )}
                 {isDoctor && user?.isVerified && (
                   <MdVerified
-                    className="absolute -top-0.5 -right-0.5 text-blue-500 text-base bg-white rounded-full"
+                    className="absolute -top-0.5 -right-0.5 text-primary text-base bg-white rounded-full"
                     title="Verified Doctor"
                   />
                 )}
@@ -108,7 +111,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                       navigate(isDoctor ? "/user-dashboard" : "/doctor-dashboard");
                       onClose();
                     }}
-                    className="cursor-pointer flex items-center gap-1 mt-1 text-xs text-[#6a5acd] hover:text-[#5140b3] transition-colors"
+                    className="cursor-pointer flex items-center gap-1 mt-1 text-xs text-primary hover:text-primary-dark transition-colors"
                   >
                     <LuArrowLeftRight className="text-[10px]" /> Switch to {isDoctor ? "User" : "Doctor"}
                   </button>
@@ -127,7 +130,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out active:scale-95 ${
                     isActive || (item.path === "/chat" && location.pathname.startsWith("/chat/"))
-                      ? "bg-surface-variant text-primary border-r-4 border-primary"
+                      ? "bg-primary/10 text-primary font-bold"
                       : "text-text-muted hover:bg-surface-variant/50 hover:text-text-main"
                   }`
                 }
@@ -148,7 +151,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ease-in-out active:scale-95 ${
                       isActive
-                        ? "bg-surface-variant text-primary border-r-4 border-primary"
+                        ? "bg-primary/10 text-primary font-bold"
                         : "text-text-muted hover:bg-surface-variant/50 hover:text-text-main"
                     }`
                   }

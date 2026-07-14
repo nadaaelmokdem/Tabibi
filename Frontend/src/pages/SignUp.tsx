@@ -156,7 +156,7 @@ export default function SignUp({
   const getInputBorderClass = (fieldName: string) =>
     errors[fieldName]
       ? "border-red-400 focus:ring-red-400 focus:border-red-400"
-      : "border-[#e5deff] focus:ring-[#b8a7ff] focus:border-[#b8a7ff]";
+      : "border-surface-variant focus:ring-primary-light focus:border-primary-light";
 
   return (
     <AuthLayout
@@ -166,17 +166,17 @@ export default function SignUp({
       cardMaxWidth="max-w-2xl"
     >
       {/* Toggle */}
-      <div className="flex w-full bg-[#f0ebff] rounded-full p-1 mb-0.5">
+      <div className="flex w-full bg-surface-container rounded-full p-1 mb-0.5">
         <button
           type="button"
           onClick={() => navigate(`/${signInLink}`)}
-          className="flex-1 py-1.5 text-[13px] lg:text-[14px] font-semibold rounded-full transition-all text-[#6a5acd] hover:bg-[#e5deff] cursor-pointer"
+          className="flex-1 py-1.5 text-[13px] lg:text-[14px] font-semibold rounded-full transition-all text-primary hover:bg-surface-variant cursor-pointer"
         >
           Login
         </button>
         <button
           type="button"
-          className="flex-1 py-1.5 text-[13px] lg:text-[14px] font-semibold rounded-full transition-all bg-[#6a5acd] text-white shadow-sm"
+          className="flex-1 py-1.5 text-[13px] lg:text-[14px] font-semibold rounded-full transition-all bg-primary text-white shadow-sm"
         >
           Register
         </button>
@@ -211,7 +211,7 @@ export default function SignUp({
           id="fullName"
           label="Full Name"
           icon={
-            <MdPerson className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#c9c4d5] pointer-events-none text-lg" />
+            <MdPerson className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none text-lg" />
           }
           placeholder="John Doe"
           type="text"
@@ -227,7 +227,7 @@ export default function SignUp({
           id="email"
           label="Email Address"
           icon={
-            <MdOutlineMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#c9c4d5] pointer-events-none text-lg" />
+            <MdOutlineMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none text-lg" />
           }
           placeholder="name@example.com"
           type="email"
@@ -243,7 +243,7 @@ export default function SignUp({
           id="phoneNumber"
           label="Phone Number"
           icon={
-            <MdPhone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#c9c4d5] pointer-events-none text-lg" />
+            <MdPhone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none text-lg" />
           }
           placeholder="+201012345678"
           type="tel"
@@ -282,7 +282,7 @@ export default function SignUp({
 
         {/* Submit */}
         <button
-          className="cursor-pointer mt-0 w-full h-9 lg:h-10 flex items-center justify-center gap-2 bg-[#6a5acd] text-[#f0ebff] hover:bg-[#5140b3] hover:text-[#ffffff] rounded-full text-[13px] lg:text-[14px] leading-[20px] tracking-[0.01em] font-semibold transition-all shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+          className="cursor-pointer mt-0 w-full h-9 lg:h-10 flex items-center justify-center gap-2 bg-primary text-white hover:bg-primary-dark hover:-translate-y-0.5 rounded-xl text-[13px] lg:text-[14px] leading-[20px] tracking-[0.01em] font-semibold transition-all shadow-floating disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           type="submit"
           disabled={isLoading}
         >

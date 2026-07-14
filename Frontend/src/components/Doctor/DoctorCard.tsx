@@ -45,9 +45,9 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
   };
 
   return (
-    <div 
+    <div
       onClick={handleCardClick}
-      className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 border border-white/40 flex flex-col sm:flex-row gap-6 group cursor-pointer"
+      className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-primary/10 hover:border-primary/25 hover:-translate-y-0.5 flex flex-col sm:flex-row gap-6 group cursor-pointer"
     >
       <div className="flex-shrink-0 flex justify-center items-center">
         {doctor.profilePictureUrl ? (
@@ -66,14 +66,14 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
       <div className="flex-grow flex flex-col justify-between">
         <div>
           <div className="flex justify-between items-start mb-2">
-            <h3 className="text-xl font-bold text-gray-800 group-hover:text-primary transition-colors">
-              Dr. {doctor.fullName} {isSelf && <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-md font-semibold tracking-wide uppercase">You</span>}
+            <h3 className="text-xl font-bold text-primary-dark tracking-tight group-hover:text-primary transition-colors">
+              Dr. {doctor.fullName} {isSelf && <span className="ml-2 text-xs bg-surface-variant text-on-surface-variant px-2 py-1 rounded-md font-semibold tracking-wide uppercase">You</span>}
             </h3>
             <div className="flex items-center bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full text-xs font-semibold">
               <FaStar className="mr-1" /> {doctor.averageRating.toFixed(1)}
             </div>
           </div>
-          
+
           <div className="flex flex-wrap gap-2 mb-3">
             {doctor.specialties.map(spec => (
               <span key={spec.specialtyId} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium">
@@ -82,7 +82,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
             ))}
           </div>
 
-          <div className="space-y-1 text-sm text-gray-600 mb-4">
+          <div className="space-y-1 text-sm text-text-muted mb-4">
             {doctor.yearsOfExperience !== undefined && doctor.yearsOfExperience !== null && (
               <p className="flex items-center"><FaBriefcase className="mr-2 text-primary/70" /> {doctor.yearsOfExperience} Years Experience</p>
             )}
@@ -92,7 +92,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
           </div>
 
           {/* Consultation Types Icons */}
-          <div className="flex gap-3 text-gray-400 mb-4">
+          <div className="flex gap-3 text-outline-variant mb-4">
              {minPrices.clinic !== null && <FaClinicMedical title="Clinic Visit" className="hover:text-primary transition-colors cursor-pointer" />}
              {minPrices.video !== null && <FaVideo title="Video Call" className="hover:text-primary transition-colors cursor-pointer" />}
              {minPrices.call !== null && <FaPhone title="Voice Call" className="hover:text-primary transition-colors cursor-pointer" />}
@@ -100,12 +100,12 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center mt-2 border-t border-gray-100 pt-4 gap-4">
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-gray-700 font-medium w-full sm:w-auto">
-            {!hasAnyPrice && <span className="text-sm text-gray-400">Price not set</span>}
+        <div className="flex flex-col sm:flex-row justify-between items-end sm:items-center mt-2 border-t border-surface-variant/60 pt-4 gap-4">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-on-surface font-medium w-full sm:w-auto">
+            {!hasAnyPrice && <span className="text-sm text-outline-variant">Price not set</span>}
             {hasAnyPrice && (
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 uppercase tracking-wider">Starting From</span>
+                <span className="text-xs font-semibold text-primary-light uppercase tracking-widest">Starting From</span>
                 <span className="text-lg font-extrabold text-primary">
                   {Math.min(...activePrices)} EGP
                 </span>
@@ -118,7 +118,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
                 <button
                   type="button"
                   onClick={handleBookAppointment}
-                  className="w-full sm:w-auto bg-gradient-to-r from-primary to-blue-600 text-white px-6 py-2.5 rounded-full font-medium shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-white px-6 py-2.5 rounded-xl font-medium shadow-floating transform hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <FaCalendarCheck className="text-base" /> Book
                 </button>
@@ -127,7 +127,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
                 <button
                   type="button"
                   onClick={handleStartChat}
-                  className="w-full sm:w-auto bg-white border-2 border-primary text-primary px-6 py-2.5 rounded-full font-medium shadow hover:shadow-md hover:bg-primary/5 transform hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto bg-white border-2 border-primary text-primary px-6 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md hover:bg-primary/5 transform hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <FaCommentDots className="text-base" /> Chat
                 </button>

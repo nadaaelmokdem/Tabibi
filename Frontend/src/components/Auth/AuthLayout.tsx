@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { MdMedicalServices } from "react-icons/md";
+import { FaStethoscope } from "react-icons/fa6";
 
 import type { AuthLayoutProps } from "../../types/props";
 
@@ -18,16 +18,18 @@ export default function AuthLayout({
   const navigate = useNavigate();
 
   return (
-    <div className="bg-[#fcf8ff] text-[#1a1345] text-[16px] leading-[24px] font-normal antialiased h-screen overflow-hidden flex flex-col selection:bg-[#6a5acd] selection:text-[#f0ebff]">
+    <div className="bg-surface-bright text-on-surface text-[16px] leading-[24px] font-normal antialiased h-screen overflow-hidden flex flex-col selection:bg-primary selection:text-surface-container">
       <main className="flex-grow flex w-full h-full relative">
         {/* Brand Header (visible on md+ screens) */}
         <header className="absolute top-4 left-15 z-50 flex items-center md:block hidden">
           <button
             onClick={() => navigate("/")}
-            className="cursor-pointer flex items-center gap-2 text-[#5140b3] hover:opacity-80 transition-opacity duration-200"
+            className="cursor-pointer flex items-center gap-2.5 hover:opacity-80 transition-opacity duration-200"
           >
-            <MdMedicalServices className="text-3xl" />
-            <span className="text-2xl font-bold tracking-tight">Tabibi</span>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-gradient-to-br from-primary to-primary-light shadow-floating">
+              <FaStethoscope size={15} className="text-white" />
+            </div>
+            <span className="text-2xl font-extrabold tracking-tight text-white drop-shadow-md">Tabibi</span>
           </button>
         </header>
 
@@ -63,7 +65,7 @@ export default function AuthLayout({
           {/* Right Side: Form Card */}
           <div className="w-full lg:w-[60%] h-full flex items-center justify-center p-4 lg:p-6 lg:p-8 ml-auto">
             <div
-              className={`overflow-y-auto min-h-0 max-h-[98vh] w-full ${cardMaxWidth} flex flex-col gap-3 lg:gap-4 bg-white/95 backdrop-blur-md p-4 lg:p-6 rounded-3xl shadow-2xl border border-white/20`}
+              className={`overflow-y-auto min-h-0 max-h-[98vh] w-full ${cardMaxWidth} flex flex-col gap-3 lg:gap-4 bg-white/95 backdrop-blur-md p-4 lg:p-6 rounded-3xl shadow-floating border border-white/20`}
             >
               {children}
             </div>

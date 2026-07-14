@@ -112,7 +112,7 @@ export default function TabibiLogin({
             popup: 'bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full border border-gray-100',
             title: 'text-2xl font-bold mb-4 text-gray-800 text-left w-full',
             htmlContainer: 'w-full m-0 text-left',
-            confirmButton: 'w-full bg-[#6a5acd] hover:bg-[#5b4eb8] text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5',
+            confirmButton: 'w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5',
             cancelButton: 'w-full mt-3 py-3.5 border-2 border-gray-200 text-gray-600 font-bold hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50 rounded-xl transition-colors',
             actions: 'flex flex-col w-full m-0 mt-4'
           }
@@ -168,22 +168,22 @@ export default function TabibiLogin({
   const getInputBorderClass = (hasError: boolean) =>
     hasError
       ? "border-red-400 focus:ring-red-400 focus:border-red-400"
-      : "border-[#e5deff] focus:ring-[#b8a7ff] focus:border-[#b8a7ff]";
+      : "border-surface-variant focus:ring-primary-light focus:border-primary-light";
 
   return (
     <AuthLayout background={background} headerText={headerText} pText={pText}>
       {/* Toggle */}
-      <div className="flex w-full bg-[#f0ebff] rounded-full p-1 mb-0.5">
+      <div className="flex w-full bg-surface-container rounded-full p-1 mb-0.5">
         <button
           type="button"
-          className="flex-1 py-1.5 text-[13px] lg:text-[14px] font-semibold rounded-full transition-all bg-[#6a5acd] text-white shadow-sm"
+          className="flex-1 py-1.5 text-[13px] lg:text-[14px] font-semibold rounded-full transition-all bg-primary text-white shadow-sm"
         >
           Login
         </button>
         <button
           type="button"
           onClick={() => navigate(`/${registerLink}`)}
-          className="flex-1 py-1.5 text-[13px] lg:text-[14px] font-semibold rounded-full transition-all text-[#6a5acd] hover:bg-[#e5deff] cursor-pointer"
+          className="flex-1 py-1.5 text-[13px] lg:text-[14px] font-semibold rounded-full transition-all text-primary hover:bg-surface-variant cursor-pointer"
         >
           Register
         </button>
@@ -209,7 +209,7 @@ export default function TabibiLogin({
           id="email"
           label="Email Address"
           icon={
-            <MdOutlineMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#c9c4d5] pointer-events-none text-lg" />
+            <MdOutlineMail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none text-lg" />
           }
           placeholder="name@example.com"
           type="email"
@@ -234,10 +234,10 @@ export default function TabibiLogin({
 
         <button
           disabled={isLoading}
-          className={`w-full h-9 lg:h-10 flex items-center justify-center gap-2 bg-[#6a5acd] text-[#f0ebff] rounded-full text-[14px] leading-[20px] tracking-[0.01em] font-semibold transition-all shadow-md ${
+          className={`w-full h-9 lg:h-10 flex items-center justify-center gap-2 bg-primary text-white rounded-xl text-[14px] leading-[20px] tracking-[0.01em] font-semibold transition-all shadow-floating ${
             isLoading
               ? "opacity-70 cursor-not-allowed"
-              : "hover:bg-[#5140b3] hover:text-[#ffffff] cursor-pointer"
+              : "hover:bg-primary-dark hover:-translate-y-0.5 cursor-pointer"
           }`}
           type="submit"
         >

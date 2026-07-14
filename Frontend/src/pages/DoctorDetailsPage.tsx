@@ -464,7 +464,7 @@ export default function DoctorDetailsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
+      <div className="min-h-screen flex justify-center items-center bg-background">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
       </div>
     );
@@ -472,8 +472,8 @@ export default function DoctorDetailsPage() {
 
   if (error || !doctor) {
     return (
-      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50">
-        <h2 className="text-2xl font-bold text-gray-700 mb-4">{error || "Doctor not found"}</h2>
+      <div className="min-h-screen flex flex-col justify-center items-center bg-background">
+        <h2 className="text-2xl font-bold text-primary-dark mb-4">{error || "Doctor not found"}</h2>
         <button onClick={() => navigate(-1)} className="text-primary hover:underline flex items-center gap-2">
           <FaChevronLeft /> Go Back
         </button>
@@ -484,21 +484,30 @@ export default function DoctorDetailsPage() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen relative py-8 px-4 sm:px-6 lg:px-8">
+      <div
+        className="absolute inset-0 pointer-events-none -z-10"
+        style={{
+          backgroundImage: `
+            radial-gradient(ellipse 70% 50% at 95% 0%, rgba(184,167,255,0.18) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 40% at 0% 100%, rgba(230,225,255,0.35) 0%, transparent 50%)
+          `,
+        }}
+      />
       <div className="max-w-5xl mx-auto space-y-8">
-        
+
         {/* Navigation */}
-        <button 
-          onClick={() => navigate('/doctors')} 
-          className="text-gray-500 hover:text-primary font-medium flex items-center gap-2 transition-colors cursor-pointer"
+        <button
+          onClick={() => navigate('/doctors')}
+          className="text-text-muted hover:text-primary font-medium flex items-center gap-2 transition-colors cursor-pointer"
         >
           <FaChevronLeft /> Back to Doctors
         </button>
 
         {/* Header / Basic Info */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-primary/10 p-8 flex flex-col md:flex-row gap-8 items-start relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
-          
+
           <div className="shrink-0 relative">
             {doctor.profilePictureUrl ? (
               <CachedImage
@@ -512,7 +521,7 @@ export default function DoctorDetailsPage() {
               </div>
             )}
             {isSelf && (
-              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md uppercase tracking-wider">
+              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-primary to-primary-light text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md uppercase tracking-wider">
                 You
               </div>
             )}
@@ -521,7 +530,7 @@ export default function DoctorDetailsPage() {
           <div className="flex-1 space-y-4">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
+                <h1 className="text-3xl md:text-4xl font-extrabold text-primary-dark tracking-tight mb-2">
                   Dr. {doctor.fullName}
                 </h1>
                 <div className="flex flex-wrap gap-2">
@@ -536,11 +545,11 @@ export default function DoctorDetailsPage() {
                 <div className="flex items-center text-yellow-500 font-bold text-xl gap-1">
                   <FaStar /> {doctor.averageRating.toFixed(1)}
                 </div>
-                <span className="text-xs text-gray-500 font-medium">Rating</span>
+                <span className="text-xs text-text-muted font-medium">Rating</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-gray-600 font-medium text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-text-muted font-medium text-sm">
               {doctor.yearsOfExperience !== undefined && doctor.yearsOfExperience !== null && (
                 <div className="flex items-center gap-2">
                   <FaBriefcase className="text-primary/70 text-lg" /> {doctor.yearsOfExperience} Years Experience
@@ -555,8 +564,8 @@ export default function DoctorDetailsPage() {
 
             {doctor.bio && (
               <div className="mt-4">
-                <h3 className="font-bold text-gray-800 mb-1">About</h3>
-                <p className="text-gray-600 leading-relaxed">{doctor.bio}</p>
+                <h3 className="font-bold text-primary-dark mb-1">About</h3>
+                <p className="text-text-muted leading-relaxed">{doctor.bio}</p>
               </div>
             )}
           </div>
@@ -568,38 +577,38 @@ export default function DoctorDetailsPage() {
           <div className="lg:col-span-2 space-y-8">
             
             {/* Specialties & Pricing Matrix */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Services & Pricing</h2>
+            <div className="bg-white rounded-3xl shadow-sm border border-primary/10 p-8">
+              <h2 className="text-2xl font-bold text-primary-dark tracking-tight mb-6">Services & Pricing</h2>
               <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                    <h3 className="text-lg font-bold text-primary mb-4 border-b border-gray-200 pb-2">Consultation Prices</h3>
-                    
+                  <div className="bg-surface-container/40 rounded-2xl p-6 border border-primary/10">
+                    <h3 className="text-lg font-bold text-primary mb-4 border-b border-surface-variant pb-2">Consultation Prices</h3>
+
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                       {doctor.isClinicEnabled && (
-                        <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-gray-50 hover:border-primary/30 transition-colors cursor-pointer">
-                          <FaClinicMedical className="text-gray-400 text-xl" />
-                          <div className="text-xs text-gray-500 uppercase font-semibold">Clinic</div>
+                        <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-surface-variant/60 hover:border-primary/30 transition-colors cursor-pointer">
+                          <FaClinicMedical className="text-outline-variant text-xl" />
+                          <div className="text-xs text-primary-light uppercase font-semibold tracking-wide">Clinic</div>
                           <div className="font-bold text-primary">{doctor.clinicPrice} EGP</div>
                         </div>
                       )}
                       {doctor.isVideoEnabled && (
-                        <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-gray-50 hover:border-primary/30 transition-colors cursor-pointer">
-                          <FaVideo className="text-gray-400 text-xl" />
-                          <div className="text-xs text-gray-500 uppercase font-semibold">Video</div>
+                        <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-surface-variant/60 hover:border-primary/30 transition-colors cursor-pointer">
+                          <FaVideo className="text-outline-variant text-xl" />
+                          <div className="text-xs text-primary-light uppercase font-semibold tracking-wide">Video</div>
                           <div className="font-bold text-primary">{doctor.videoPrice} EGP</div>
                         </div>
                       )}
                       {doctor.isCallEnabled && (
-                        <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-gray-50 hover:border-primary/30 transition-colors cursor-pointer">
-                          <FaPhone className="text-gray-400 text-xl" />
-                          <div className="text-xs text-gray-500 uppercase font-semibold">Voice</div>
+                        <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-surface-variant/60 hover:border-primary/30 transition-colors cursor-pointer">
+                          <FaPhone className="text-outline-variant text-xl" />
+                          <div className="text-xs text-primary-light uppercase font-semibold tracking-wide">Voice</div>
                           <div className="font-bold text-primary">{doctor.callPrice} EGP</div>
                         </div>
                       )}
                       {doctor.isChatEnabled && (
-                        <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-gray-50 hover:border-primary/30 transition-colors cursor-pointer">
-                          <FaCommentDots className="text-gray-400 text-xl" />
-                          <div className="text-xs text-gray-500 uppercase font-semibold">Chat</div>
+                        <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-surface-variant/60 hover:border-primary/30 transition-colors cursor-pointer">
+                          <FaCommentDots className="text-outline-variant text-xl" />
+                          <div className="text-xs text-primary-light uppercase font-semibold tracking-wide">Chat</div>
                           <div className="font-bold text-primary">{doctor.chatPrice} EGP</div>
                         </div>
                       )}
@@ -609,11 +618,11 @@ export default function DoctorDetailsPage() {
             </div>
 
             {/* Reviews Section */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+            <div className="bg-white rounded-3xl shadow-sm border border-primary/10 p-8">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Patient Reviews {reviewsTotal > 0 && `(${reviewsTotal})`}</h2>
+                <h2 className="text-2xl font-bold text-primary-dark tracking-tight">Patient Reviews {reviewsTotal > 0 && `(${reviewsTotal})`}</h2>
                 {user?.activeRole?.toLowerCase() === "user" && (
-                  <button 
+                  <button
                     onClick={handleRateDoctor}
                     className="bg-primary hover:bg-primary-dark text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors cursor-pointer shadow-sm"
                   >
@@ -627,50 +636,50 @@ export default function DoctorDetailsPage() {
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
                   </div>
                 ) : !reviews || reviews.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">No reviews available for this doctor yet.</p>
+                  <p className="text-text-muted text-center py-8">No reviews available for this doctor yet.</p>
                 ) : (
                   <>
                     {reviews?.map(review => (
-                      <div key={review.reviewId} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
+                      <div key={review.reviewId} className="border-b border-surface-variant/60 last:border-0 pb-6 last:pb-0">
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <div className="font-bold text-gray-800">{review.patientName}
+                            <div className="font-bold text-on-surface">{review.patientName}
                               {review.consultationType !== undefined && (
                                 <span className="ml-2 px-2 py-0.5 bg-primary/10 text-primary rounded-md text-[10px] uppercase font-bold tracking-wider">
                                   {getConsultationTypeName(review.consultationType)}
                                 </span>
                               )}
                               </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-text-muted">
                               {new Date(review.createdAt).toLocaleDateString()}
                             </div>
                           </div>
                           <div className="flex text-yellow-400 text-sm">
                             {[...Array(5)].map((_, i) => (
-                              <FaStar key={i} className={i < review.rating ? "" : "text-gray-200"} />
+                              <FaStar key={i} className={i < review.rating ? "" : "text-surface-variant"} />
                             ))}
                           </div>
                         </div>
                         {review.comment && (
-                          <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
+                          <p className="text-text-muted text-sm leading-relaxed">{review.comment}</p>
                         )}
                       </div>
                     ))}
-                    
+
                     {reviewsTotal > reviews?.length && (
-                      <div className="flex justify-center pt-4 border-t border-gray-100 gap-4 items-center">
-                         <button 
+                      <div className="flex justify-center pt-4 border-t border-surface-variant/60 gap-4 items-center">
+                         <button
                            onClick={() => setReviewsPage(p => Math.max(1, p - 1))}
                            disabled={reviewsPage === 1}
-                           className="text-sm font-semibold text-primary disabled:text-gray-400 cursor-pointer disabled:cursor-not-allowed hover:underline"
+                           className="text-sm font-semibold text-primary disabled:text-outline-variant cursor-pointer disabled:cursor-not-allowed hover:underline"
                          >
                            Previous
                          </button>
-                         <span className="text-sm text-gray-500">Page {reviewsPage}</span>
-                         <button 
+                         <span className="text-sm text-text-muted">Page {reviewsPage}</span>
+                         <button
                            onClick={() => setReviewsPage(p => p + 1)}
                            disabled={reviewsPage * 5 >= reviewsTotal}
-                           className="text-sm font-semibold text-primary disabled:text-gray-400 cursor-pointer disabled:cursor-not-allowed hover:underline"
+                           className="text-sm font-semibold text-primary disabled:text-outline-variant cursor-pointer disabled:cursor-not-allowed hover:underline"
                          >
                            Next
                          </button>
@@ -688,30 +697,30 @@ export default function DoctorDetailsPage() {
             
             {/* Action Card */}
             {!isSelf && (
-              <div className="bg-white rounded-3xl shadow-xl shadow-primary/5 border border-primary/10 p-6 sticky top-24">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Book an Appointment</h3>
-                
+              <div className="bg-white rounded-3xl shadow-floating border border-primary/10 p-6 sticky top-24">
+                <h3 className="text-xl font-bold text-primary-dark tracking-tight mb-6">Book an Appointment</h3>
+
                 <div className="mb-6">
-                  <button 
+                  <button
                     onClick={handleOpenBookingModal}
-                    className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 rounded-xl transition-all shadow-md hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 rounded-xl transition-all shadow-floating hover:-translate-y-0.5 cursor-pointer flex items-center justify-center gap-2"
                   >
                     <FaRegCalendarAlt /> Book an Appointment
                   </button>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="space-y-3 pt-4 border-t border-surface-variant/60">
                   {doctor.isChatEnabled && (
                     <>
                       <div className="relative flex items-center py-2">
-                        <div className="flex-grow border-t border-gray-200"></div>
-                        <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">or</span>
-                        <div className="flex-grow border-t border-gray-200"></div>
+                        <div className="flex-grow border-t border-surface-variant"></div>
+                        <span className="flex-shrink-0 mx-4 text-outline-variant text-sm">or</span>
+                        <div className="flex-grow border-t border-surface-variant"></div>
                       </div>
 
-                      <button 
+                      <button
                         onClick={handleChatClick}
-                        className="w-full bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold py-3.5 rounded-xl border border-purple-200 transition-colors text-center flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full bg-primary/10 text-primary-dark hover:bg-primary/15 font-bold py-3.5 rounded-xl border border-primary/20 transition-colors text-center flex items-center justify-center gap-2 cursor-pointer"
                       >
                         <FaCommentDots /> Start Chat Consultation
                       </button>
@@ -720,11 +729,11 @@ export default function DoctorDetailsPage() {
                 </div>
               </div>
             )}
-            
+
             {isSelf && (
-              <div className="bg-gray-50 rounded-3xl border border-gray-200 p-6 text-center text-gray-500">
+              <div className="bg-surface-container/40 rounded-3xl border border-surface-variant p-6 text-center text-text-muted">
                 <div className="text-4xl mb-4">👋</div>
-                <h3 className="font-bold text-gray-700 mb-2">This is your public profile</h3>
+                <h3 className="font-bold text-primary-dark mb-2">This is your public profile</h3>
                 <p className="text-sm">Action buttons are hidden when viewing your own profile.</p>
               </div>
             )}

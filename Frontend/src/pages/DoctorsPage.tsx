@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaFilter, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
+import { FaFilter, FaChevronLeft, FaChevronRight, FaStethoscope } from "react-icons/fa6";
 import PublicService from "../services/publicService";
 import type { DoctorListItem, DoctorSearchFilter } from "../types/public";
 import DoctorCard from "../components/Doctor/DoctorCard";
@@ -232,24 +233,36 @@ const DoctorsPage: React.FC = () => {
   // ────────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen relative py-12 px-4 sm:px-6 lg:px-8">
+      <div
+        className="absolute inset-0 pointer-events-none -z-10"
+        style={{
+          backgroundImage: `
+            radial-gradient(ellipse 70% 50% at 95% 0%, rgba(184,167,255,0.18) 0%, transparent 55%),
+            radial-gradient(ellipse 50% 40% at 0% 100%, rgba(230,225,255,0.35) 0%, transparent 50%)
+          `,
+        }}
+      />
       <div className="max-w-7xl mx-auto">
 
         {/* Filters Section */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-10 border border-white/50">
-          <div className="flex items-center gap-2 mb-4 text-primary font-bold text-lg">
-            <FaFilter /> Filters
+        <div className="bg-white rounded-3xl shadow-sm p-6 mb-10 border border-primary/10">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-surface-variant/50">
+              <FaFilter size={13} className="text-primary" />
+            </div>
+            <span className="font-bold text-lg text-primary-dark tracking-tight">Filters</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 mb-6">
             <div className="relative lg:col-span-4">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaSearch className="text-gray-400" />
+                <FaSearch className="text-outline-variant" />
               </div>
               <input
                 type="text"
                 placeholder="Search by name..."
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-gray-50/50 focus:bg-white"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-surface-variant focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-surface-container/40 focus:bg-white"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSearch()}
@@ -257,7 +270,7 @@ const DoctorsPage: React.FC = () => {
             </div>
 
             <select
-              className="w-full lg:col-span-3 px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-gray-50/50 focus:bg-white cursor-pointer"
+              className="w-full lg:col-span-3 px-4 py-3 rounded-xl border border-surface-variant focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-surface-container/40 focus:bg-white cursor-pointer"
               value={selectedSpecialty}
               onChange={e => setSelectedSpecialty(e.target.value as number | "")}
             >
@@ -271,14 +284,14 @@ const DoctorsPage: React.FC = () => {
               <input
                 type="number"
                 placeholder="Min (EGP)"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-gray-50/50 focus:bg-white"
+                className="w-full px-4 py-3 rounded-xl border border-surface-variant focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-surface-container/40 focus:bg-white"
                 value={minPrice}
                 onChange={e => setMinPrice(e.target.value)}
               />
               <input
                 type="number"
                 placeholder="Max (EGP)"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-gray-50/50 focus:bg-white"
+                className="w-full px-4 py-3 rounded-xl border border-surface-variant focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none bg-surface-container/40 focus:bg-white"
                 value={maxPrice}
                 onChange={e => setMaxPrice(e.target.value)}
               />
@@ -286,14 +299,14 @@ const DoctorsPage: React.FC = () => {
 
             <button
               onClick={handleSearch}
-              className="w-full lg:col-span-2 bg-primary hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 cursor-pointer flex justify-center items-center gap-2"
+              className="w-full lg:col-span-2 bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-xl shadow-floating transition-all transform hover:-translate-y-0.5 cursor-pointer flex justify-center items-center gap-2"
             >
               <FaSearch /> Apply
             </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm font-semibold text-gray-500 mr-2">Consultation Types:</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary-light mr-2">Consultation Types</span>
             {consultationTypes.map(type => {
               const isActive = (filter.bookingTypes || []).includes(type.value);
               return (
@@ -302,8 +315,8 @@ const DoctorsPage: React.FC = () => {
                   onClick={() => handleBookingTypeToggle(type.value)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer border ${
                     isActive
-                      ? 'bg-primary text-white border-primary shadow-md'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-primary hover:text-primary'
+                      ? 'bg-primary text-white border-primary shadow-sm'
+                      : 'bg-white text-on-surface-variant border-surface-variant hover:border-primary hover:text-primary'
                   }`}
                 >
                   {type.label}
@@ -315,7 +328,7 @@ const DoctorsPage: React.FC = () => {
 
         {/* Results Section */}
         {error ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-[#E6E1FF] overflow-hidden min-h-[400px] flex items-center justify-center">
+          <div className="bg-white rounded-3xl shadow-sm border border-primary/10 overflow-hidden min-h-[400px] flex items-center justify-center">
             <NetworkError message="Failed to load doctors. Please check your connection and try again." />
           </div>
         ) : isLoading ? (
@@ -324,7 +337,7 @@ const DoctorsPage: React.FC = () => {
           </div>
         ) : doctors.length > 0 ? (
           <div className="space-y-6">
-            <div className="text-gray-500 font-medium px-2">
+            <div className="text-text-muted font-medium px-2">
               Found {totalCount} doctor{totalCount !== 1 ? 's' : ''} matching your criteria
             </div>
             {doctors.map(doctor => (
@@ -344,14 +357,14 @@ const DoctorsPage: React.FC = () => {
                   disabled={(filter.page || 1) === 1}
                   className={`p-3 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                     (filter.page || 1) === 1
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-primary shadow-md hover:shadow-lg hover:bg-blue-50'
+                      ? 'bg-surface-variant/40 text-outline-variant cursor-not-allowed'
+                      : 'bg-white text-primary shadow-sm hover:shadow-md hover:bg-surface-container'
                   }`}
                 >
                   <FaChevronLeft />
                 </button>
 
-                <span className="font-semibold text-gray-700">
+                <span className="font-semibold text-on-surface-variant">
                   Page {filter.page} of {totalPages}
                 </span>
 
@@ -360,8 +373,8 @@ const DoctorsPage: React.FC = () => {
                   disabled={(filter.page || 1) === totalPages}
                   className={`p-3 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                     (filter.page || 1) === totalPages
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-primary shadow-md hover:shadow-lg hover:bg-blue-50'
+                      ? 'bg-surface-variant/40 text-outline-variant cursor-not-allowed'
+                      : 'bg-white text-primary shadow-sm hover:shadow-md hover:bg-surface-container'
                   }`}
                 >
                   <FaChevronRight />
@@ -370,12 +383,12 @@ const DoctorsPage: React.FC = () => {
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm p-16 text-center">
-            <div className="text-gray-300 mb-4 flex justify-center">
-              <FaSearch size={64} />
+          <div className="bg-white rounded-3xl shadow-sm border border-primary/10 p-16 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-surface-variant/50 mb-4 flex items-center justify-center mx-auto">
+              <FaStethoscope size={28} className="text-primary-light" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-700 mb-2">No doctors found</h3>
-            <p className="text-gray-500">Try adjusting your filters to find what you're looking for.</p>
+            <h3 className="text-2xl font-bold text-primary-dark mb-2 tracking-tight">No doctors found</h3>
+            <p className="text-text-muted">Try adjusting your filters to find what you're looking for.</p>
             <button
               onClick={() => {
                 setSearchTerm("");
@@ -384,7 +397,7 @@ const DoctorsPage: React.FC = () => {
                 setMaxPrice("");
                 setFilter({ page: 1, pageSize: 10, bookingTypes: [] });
               }}
-              className="mt-6 text-primary hover:text-blue-700 font-semibold transition-colors cursor-pointer"
+              className="mt-6 text-primary hover:text-primary-dark font-semibold transition-colors cursor-pointer"
             >
               Clear all filters
             </button>
@@ -406,12 +419,12 @@ const DoctorsPage: React.FC = () => {
       {/* ── Chat Modal (unchanged) ── */}
       {selectedDoctorForChat && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl max-w-md w-full border border-gray-100">
+          <div className="bg-white p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full border border-primary/10">
             {isEligibleForFreeGP && freeGpMessages > 0 ? (
               <>
-                <h3 className="text-2xl font-bold mb-3 text-gray-800">Start Consultation</h3>
-                <p className="mb-6 text-gray-600">
-                  You selected Dr. <span className="font-semibold text-gray-800">{selectedDoctorForChat.fullName}</span>.
+                <h3 className="text-2xl font-bold mb-3 text-primary-dark tracking-tight">Start Consultation</h3>
+                <p className="mb-6 text-text-muted">
+                  You selected Dr. <span className="font-semibold text-on-surface">{selectedDoctorForChat.fullName}</span>.
                   How would you like to proceed?
                 </p>
                 <div className="flex flex-col gap-4">
@@ -440,12 +453,12 @@ const DoctorsPage: React.FC = () => {
             ) : (
               <>
                 <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-[var(--color-primary-light)]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-20 h-20 bg-primary-light/30 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                   </div>
-                  <h3 className="text-2xl font-bold mb-3 text-gray-800">Start Chat Consultation</h3>
-                  <p className="text-gray-600 text-lg">
-                    Start a chat with Dr. <span className="font-semibold text-gray-800">{selectedDoctorForChat.fullName}</span> for <span className="font-bold text-primary bg-[var(--color-primary-light)]/20 px-3 py-1 rounded-full">{selectedDoctorForChat.chatPrice} EGP</span>?
+                  <h3 className="text-2xl font-bold mb-3 text-primary-dark tracking-tight">Start Chat Consultation</h3>
+                  <p className="text-text-muted text-lg">
+                    Start a chat with Dr. <span className="font-semibold text-on-surface">{selectedDoctorForChat.fullName}</span> for <span className="font-bold text-primary bg-primary-light/20 px-3 py-1 rounded-full">{selectedDoctorForChat.chatPrice} EGP</span>?
                   </p>
                 </div>
                 <button
@@ -459,7 +472,7 @@ const DoctorsPage: React.FC = () => {
             <div className={`flex gap-3 ${isEligibleForFreeGP && freeGpMessages > 0 ? 'mt-6' : 'mt-3'}`}>
               <button
                 onClick={() => { setSelectedDoctorForChat(null); }}
-                className="w-full py-3 text-gray-500 font-semibold hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+                className="w-full py-3 text-text-muted font-semibold hover:text-on-surface hover:bg-surface-container rounded-xl transition-colors"
               >
                 Cancel
               </button>
