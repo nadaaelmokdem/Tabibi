@@ -32,7 +32,7 @@ namespace Tabibi.Services.Payments
 
         public async Task<string> GeneratePaymentLinkAsync(Payment payment, Appointment appointment)
         {
-            var orderId = $"GEID-{payment.PaymentId}-{DateTime.Now.Ticks}";
+            var orderId = $"GEID-{payment.PaymentId}-{DateTime.UtcNow.Ticks}";
             payment.ExternalOrderId = orderId;
 
             string amountStr = payment.Amount.ToString("0.00", CultureInfo.InvariantCulture);
@@ -40,6 +40,8 @@ namespace Tabibi.Services.Payments
             string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
 
             string signature = GenerateSignature(_merchantPublicKey, amountStr, currency, orderId, _apiPassword, timestamp);
+
+            var baseReturnUrl = _configuration["Payment:ReturnUrl"]?.TrimEnd('/') ?? "http://localhost:5173";
 
             var requestBody = new
             {
@@ -49,7 +51,7 @@ namespace Tabibi.Services.Payments
                 merchantReferenceId = orderId,
                 signature = signature,
                 callbackUrl = _configuration["Payment:WebhookUrl"] ?? "http://localhost:5009/api/Payment/webhook/Geidea",
-                returnUrl = _configuration["Payment:ReturnUrl"] ?? "http://localhost:5173/payment-result",
+                returnUrl = $"{baseReturnUrl}/payment-result?sessionId={appointment.SessionId}&type={(appointment.ConsultationType == ConsultationType.VideoCall ? "video" : "chat")}",
                 language = "en",
                 paymentOperation = "Pay",
                 customer = new

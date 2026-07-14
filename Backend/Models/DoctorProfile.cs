@@ -62,12 +62,8 @@ namespace Tabibi.Models
             public bool IsChatEnabled { get; set; } = true;
 
             [Column(TypeName = "decimal(10,2)")]
-            public decimal VideoPrice { get; set; }
-            public bool IsVideoEnabled { get; set; } = true;
-
-            [Column(TypeName = "decimal(10,2)")]
-            public decimal CallPrice { get; set; }
-            public bool IsCallEnabled { get; set; } = true;
+            public decimal VideoCallPrice { get; set; }
+            public bool IsVideoCallEnabled { get; set; } = true;
 
             // Navigation
             [ForeignKey(nameof(UserId))]

@@ -153,7 +153,7 @@ namespace Tabibi.Services
             if (session == null) throw new Exception("Session not found");
 
             // 24-hour expiry check
-            if (DateTime.Now - session.StartedAt > TimeSpan.FromDays(1))
+            if (DateTime.UtcNow - session.StartedAt > TimeSpan.FromDays(1))
             {
                 throw new Exception("Session has expired. Please follow up or start a new session.");
             }
@@ -169,10 +169,10 @@ namespace Tabibi.Services
                     var patient = await dbContext.PatientProfiles.Include(p => p.Quota).FirstOrDefaultAsync(p => p.PatientId == session.PatientId);
                     if (patient?.Quota != null)
                     {
-                        if (DateTime.Now.Month != patient.Quota.LastFreeGpMessageReset.Month || DateTime.Now.Year != patient.Quota.LastFreeGpMessageReset.Year)
+                        if (DateTime.UtcNow.Month != patient.Quota.LastFreeGpMessageReset.Month || DateTime.UtcNow.Year != patient.Quota.LastFreeGpMessageReset.Year)
                         {
                             patient.Quota.AvailableFreeGpMessages = 2;
-                            patient.Quota.LastFreeGpMessageReset = DateTime.Now;
+                            patient.Quota.LastFreeGpMessageReset = DateTime.UtcNow;
                         }
 
                         if (patient.Quota.AvailableFreeGpMessages <= 0)
@@ -193,7 +193,7 @@ namespace Tabibi.Services
                 SessionId = sessionId,
                 Role = role,
                 Content = content,
-                SentAt = DateTime.Now
+                SentAt = DateTime.UtcNow
             };
 
             dbContext.ChatMessages.Add(message);
@@ -229,7 +229,7 @@ namespace Tabibi.Services
 
             // Check for existing active session first for both paid and unpaid
             var existingSession = await dbContext.ChatSessions
-                .FirstOrDefaultAsync(s => s.PatientId == patient.PatientId && s.DoctorId == doctorId && s.IsCompanyPaid == isCompanyPaid && s.Status == SessionStatus.Active && s.StartedAt >= DateTime.Now.AddDays(-1));
+                .FirstOrDefaultAsync(s => s.PatientId == patient.PatientId && s.DoctorId == doctorId && s.IsCompanyPaid == isCompanyPaid && s.Status == SessionStatus.Active && s.StartedAt >= DateTime.UtcNow.AddDays(-1));
             
             if (existingSession != null)
             {
@@ -252,10 +252,10 @@ namespace Tabibi.Services
                 }
                 
                 // reset logic for GP
-                if (DateTime.Now.Month != patient.Quota.LastFreeGpMessageReset.Month || DateTime.Now.Year != patient.Quota.LastFreeGpMessageReset.Year)
+                if (DateTime.UtcNow.Month != patient.Quota.LastFreeGpMessageReset.Month || DateTime.UtcNow.Year != patient.Quota.LastFreeGpMessageReset.Year)
                 {
                     patient.Quota.AvailableFreeGpMessages = 2;
-                    patient.Quota.LastFreeGpMessageReset = DateTime.Now;
+                    patient.Quota.LastFreeGpMessageReset = DateTime.UtcNow;
                 }
 
                 if (patient.Quota.AvailableFreeGpMessages <= 0)
@@ -272,7 +272,7 @@ namespace Tabibi.Services
                 DoctorId = doctorId,
                 ConsultationType = ConsultationType.Chat,
                 Status = SessionStatus.Active,
-                StartedAt = DateTime.Now,
+                StartedAt = DateTime.UtcNow,
                 IsCompanyPaid = isCompanyPaid,
                 IsFreeMessage = isCompanyPaid
             };
@@ -308,7 +308,7 @@ namespace Tabibi.Services
                 DoctorId = null,
                 ConsultationType = ConsultationType.Chat,
                 Status = SessionStatus.Active,
-                StartedAt = DateTime.Now
+                StartedAt = DateTime.UtcNow
             };
 
             dbContext.ChatSessions.Add(newSession);
@@ -333,7 +333,7 @@ namespace Tabibi.Services
             session.Price = doctorChatPrice * 0.4m;
             session.IsFollowUp = true;
             session.IsCompanyPaid = false; // It's no longer free company paid, it's paid now.
-            session.StartedAt = DateTime.Now; // Reset clock
+            session.StartedAt = DateTime.UtcNow; // Reset clock
 
             await dbContext.SaveChangesAsync();
             return session;

@@ -23,8 +23,7 @@ public class PricingService(AppDbContext dbContext)
         {
             ConsultationType.Clinic when doctor.IsClinicEnabled => doctor.ClinicPrice,
             ConsultationType.Chat   when doctor.IsChatEnabled   => doctor.ChatPrice,
-            ConsultationType.Video  when doctor.IsVideoEnabled   => doctor.VideoPrice,
-            ConsultationType.Call   when doctor.IsCallEnabled    => doctor.CallPrice,
+            ConsultationType.VideoCall when doctor.IsVideoCallEnabled => doctor.VideoCallPrice,
             _ => null
         };
     }

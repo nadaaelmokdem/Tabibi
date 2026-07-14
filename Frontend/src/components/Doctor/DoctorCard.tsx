@@ -9,10 +9,11 @@ import { getFileUrl } from "../../utils/fileUtils";
 interface DoctorCardProps {
   doctor: DoctorListItem;
   onStartChat: (doctorId: number) => void;
+  onStartCall?: (doctorId: number) => void;
   onBookAppointment?: (doctorId: number) => void;
 }
 
-const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppointment }) => {
+const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onStartCall, onBookAppointment }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -38,6 +39,12 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
     e.preventDefault();
     e.stopPropagation();
     onBookAppointment?.(doctor.doctorId);
+  };
+
+  const handleStartCall = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onStartCall?.(doctor.doctorId);
   };
 
   const handleCardClick = () => {
@@ -94,7 +101,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
           {/* Consultation Types Icons */}
           <div className="flex gap-3 text-outline-variant mb-4">
              {minPrices.clinic !== null && <FaClinicMedical title="Clinic Visit" className="hover:text-primary transition-colors cursor-pointer" />}
-             {minPrices.video !== null && <FaVideo title="Video Call" className="hover:text-primary transition-colors cursor-pointer" />}
+             {minPrices.video !== null && <FaVideo title="Video Call" onClick={handleStartCall} className="hover:text-primary transition-colors cursor-pointer" />}
              {minPrices.call !== null && <FaPhone title="Voice Call" className="hover:text-primary transition-colors cursor-pointer" />}
              {minPrices.chat !== null && <FaCommentDots title="Chat" onClick={handleStartChat} className="hover:text-primary transition-colors cursor-pointer" />}
           </div>
@@ -130,6 +137,15 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onBookAppo
                   className="w-full sm:w-auto bg-white border-2 border-primary text-primary px-6 py-2.5 rounded-xl font-medium shadow-sm hover:shadow-md hover:bg-primary/5 transform hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <FaCommentDots className="text-base" /> Chat
+                </button>
+              )}
+              {doctor.isVideoEnabled && (
+                <button
+                  type="button"
+                  onClick={handleStartCall}
+                  className="w-full sm:w-auto bg-green-50 border-2 border-green-500 text-green-600 px-6 py-2.5 rounded-full font-medium shadow hover:shadow-md hover:bg-green-100 transform hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <FaVideo className="text-base" /> Start Call
                 </button>
               )}
             </div>

@@ -341,6 +341,49 @@ export default function DoctorDetailsPage() {
     }
   };
 
+  const handleStartVideoCall = async () => {
+    if (!doctor) return;
+    if (!isAuthenticated) {
+      navigate("/login", { state: { returnUrl: `/doctors/${doctor.doctorId}` } });
+      return;
+    }
+    if (user?.activeRole?.toLowerCase() === "doctor") {
+      alert("Doctors cannot start video calls with other doctors.");
+      return;
+    }
+
+    try {
+      const res: any = await AppointmentService.bookAppointment({
+        doctorId: doctor.doctorId,
+        scheduledAt: new Date().toISOString(),
+        type: 1 as any, // 1 = Video
+        paymentMethod: 1 // 1 = Online
+      });
+      
+      const redirectUrl = res?.paymentUrl || res?.PaymentUrl || res?.sessionUrl || res?.data?.paymentUrl || res?.data?.PaymentUrl;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      } else {
+        if (res?.sessionId) {
+          navigate(`/video-call/${res.sessionId}`);
+        } else {
+          throw new Error("Payment link or session could not be generated.");
+        }
+      }
+    } catch (err: any) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Cannot start Video Call',
+        text: err.response?.data?.message || err.message || err.response?.data || "Failed to start session.",
+        customClass: {
+          popup: 'bg-white p-6 rounded-2xl shadow-xl',
+          confirmButton: 'w-full bg-red-500 text-white font-bold py-3 px-4 rounded-xl',
+        }
+      });
+    }
+  };
+
   const handleChatClick = () => {
     if (!doctor) return;
     
@@ -710,6 +753,14 @@ export default function DoctorDetailsPage() {
                 </div>
 
                 <div className="space-y-3 pt-4 border-t border-surface-variant/60">
+                  {doctor.isVideoEnabled && (
+                    <button 
+                      onClick={handleStartVideoCall}
+                      className="w-full bg-green-50 text-green-700 hover:bg-green-100 font-bold py-3.5 rounded-xl border border-green-200 transition-colors text-center flex items-center justify-center gap-2 cursor-pointer mb-3"
+                    >
+                      <FaVideo /> Start Video Call
+                    </button>
+                  )}
                   {doctor.isChatEnabled && (
                     <>
                       <div className="relative flex items-center py-2">

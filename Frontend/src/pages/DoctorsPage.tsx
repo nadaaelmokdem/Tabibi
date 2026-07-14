@@ -206,6 +206,35 @@ const DoctorsPage: React.FC = () => {
     }
   };
 
+  const handleStartVideoCall = async (doctorId: number) => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { returnUrl: "/doctors" } });
+      return;
+    }
+    if (user?.activeRole?.toLowerCase() === "doctor") {
+      alert("Doctors cannot start video calls with other doctors.");
+      return;
+    }
+
+    try {
+      const res: any = await AppointmentService.bookAppointment({
+        doctorId,
+        scheduledAt: new Date().toISOString(),
+        type: 1 as any, // 1 = Video
+        paymentMethod: 1, // 1 = Online
+      });
+
+      const redirectUrl = res?.paymentUrl || res?.PaymentUrl || res?.sessionUrl || res?.data?.paymentUrl || res?.data?.PaymentUrl;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
+      throw new Error("Payment link could not be generated.");
+    } catch (err: any) {
+      alert(err.response?.data?.message || err.response?.data || err.message || "Failed to start video call session.");
+    }
+  };
+
   const confirmStartChat = async (isCompanyPaid: boolean) => {
     if (!selectedDoctorForChat) return;
 
@@ -345,6 +374,7 @@ const DoctorsPage: React.FC = () => {
                 key={doctor.doctorId}
                 doctor={doctor}
                 onStartChat={(id) => handleStartChat(id, doctor)}
+                onStartCall={(id) => handleStartVideoCall(id)}
                 onBookAppointment={handleBookAppointment}
               />
             ))}

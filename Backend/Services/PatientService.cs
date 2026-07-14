@@ -199,7 +199,7 @@ namespace Tabibi.Services
 
             if (patient == null) return null;
 
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
             var todayStart = now.Date;
             var todayEnd = todayStart.AddDays(1);
 
@@ -223,7 +223,7 @@ namespace Tabibi.Services
 
             var upcomingAppointments = await dbContext.Appointments
                 .Include(a => a.Doctor).ThenInclude(d => d.User)
-                .Where(a => a.PatientId == patient.PatientId && a.ScheduledAt >= DateTime.Now)
+                .Where(a => a.PatientId == patient.PatientId && a.ScheduledAt >= DateTime.UtcNow)
                 .OrderBy(a => a.ScheduledAt)
                 .Take(5)
                 .Select(a => new UpcomingAppointmentDTO

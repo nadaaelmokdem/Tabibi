@@ -108,7 +108,7 @@ namespace Tabibi.Services
                 {
                     BucketName = bucketName,
                     Key = objectKey,
-                    Expires = DateTime.Now.Add(expiration)
+                    Expires = DateTime.UtcNow.Add(expiration)
                 };
                 return client.GetPreSignedURL(request);
             }

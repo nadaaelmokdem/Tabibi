@@ -127,7 +127,7 @@ public class SlotService(AppDbContext dbContext)
     {
         var normalized = TruncateToMinute(scheduledAt);
 
-        if (normalized <= DateTime.Now)
+        if (normalized <= DateTime.UtcNow)
             return SlotValidationResult.Invalid("Cannot book a slot in the past.");
 
         var doctor = await dbContext.DoctorProfiles

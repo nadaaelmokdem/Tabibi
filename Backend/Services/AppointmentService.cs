@@ -54,7 +54,7 @@ public class AppointmentService(
                     availability.SlotDurationMins,
                     blockingAppointments);
 
-                if (start > DateTime.Now)
+                if (start > DateTime.UtcNow)
                 {
                     slots.Add(new AvailableSlotDTO
                     {
@@ -138,13 +138,13 @@ public class AppointmentService(
 
             dbContext.Appointments.Add(appointment);
             
-            if (appointment.Status == AppointmentStatus.Confirmed && appointment.ConsultationType == ConsultationType.Chat)
+            if (appointment.ConsultationType == ConsultationType.Chat || appointment.ConsultationType == ConsultationType.VideoCall)
             {
                 var chatSession = new ChatSession
                 {
                     PatientId = patient.PatientId,
                     DoctorId = request.DoctorId,
-                    ConsultationType = ConsultationType.Chat,
+                    ConsultationType = request.Type,
                     Status = SessionStatus.Active,
                     StartedAt = normalizedScheduledAt,
                     IsCompanyPaid = false,
@@ -225,7 +225,7 @@ public class AppointmentService(
 
     public async Task AutoCompleteTodayAppointmentsAsync(int? patientId = null, int? doctorId = null)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         var todayStart = now.Date;
         var todayEnd = todayStart.AddDays(1);
 

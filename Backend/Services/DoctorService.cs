@@ -230,8 +230,7 @@ namespace Tabibi.Services
 
             if ((profileData.IsClinicEnabled && profileData.ClinicPrice <= 0) ||
                 (profileData.IsChatEnabled && profileData.ChatPrice <= 0) ||
-                (profileData.IsVideoEnabled && profileData.VideoPrice <= 0) ||
-                (profileData.IsCallEnabled && profileData.CallPrice <= 0))
+                (profileData.IsVideoCallEnabled && profileData.VideoCallPrice <= 0))
             {
                 return ServiceResult<DoctorProfileDTO>.Failure("Prices must be greater than 0.");
             }
@@ -350,10 +349,8 @@ namespace Tabibi.Services
                 doctor.IsClinicEnabled = profileData.IsClinicEnabled;
                 doctor.ChatPrice = profileData.ChatPrice;
                 doctor.IsChatEnabled = profileData.IsChatEnabled;
-                doctor.VideoPrice = profileData.VideoPrice;
-                doctor.IsVideoEnabled = profileData.IsVideoEnabled;
-                doctor.CallPrice = profileData.CallPrice;
-                doctor.IsCallEnabled = profileData.IsCallEnabled;
+                doctor.VideoCallPrice = profileData.VideoCallPrice;
+                doctor.IsVideoCallEnabled = profileData.IsVideoCallEnabled;
 
                  bool sensitiveChanged = false;
 
@@ -397,7 +394,7 @@ namespace Tabibi.Services
 
             if (doctor == null) return null;
 
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
             var todayStart = now.Date;
             var todayEnd = todayStart.AddDays(1);
 
@@ -503,7 +500,7 @@ namespace Tabibi.Services
 
             var blockingStatuses = new[] { AppointmentStatus.Confirmed };
             var activeAppointments = await dbContext.Appointments
-                .Where(a => a.DoctorId == doctor.DoctorId && a.ScheduledAt > DateTime.Now && blockingStatuses.Contains(a.Status))
+                .Where(a => a.DoctorId == doctor.DoctorId && a.ScheduledAt > DateTime.UtcNow && blockingStatuses.Contains(a.Status))
                 .ToListAsync();
 
             // Ensure no existing appointments conflict with removed or modified availabilities
@@ -613,7 +610,7 @@ namespace Tabibi.Services
                 FieldName = fieldName,
                 OldValue = oldValue,
                 NewValue = newValue,
-                ChangedAt = DateTime.Now,
+                ChangedAt = DateTime.UtcNow,
                 ChangedByUserId = changedByUserId
             });
         }

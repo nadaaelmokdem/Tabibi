@@ -30,7 +30,7 @@ namespace Tabibi.Models
             [Column(TypeName = "decimal(10,2)")]
             public decimal? Price { get; set; } = null;  // null for free message
 
-            public DateTime StartedAt { get; set; } = DateTime.Now;
+            public DateTime StartedAt { get; set; } = DateTime.UtcNow;
             public DateTime? EndedAt { get; set; }
 
             [Column(TypeName = "datetime2")]

@@ -44,10 +44,8 @@ namespace Tabibi.DTOs
         public bool IsClinicEnabled { get; set; }
         public decimal ChatPrice { get; set; }
         public bool IsChatEnabled { get; set; }
-        public decimal VideoPrice { get; set; }
-        public bool IsVideoEnabled { get; set; }
-        public decimal CallPrice { get; set; }
-        public bool IsCallEnabled { get; set; }
+        public decimal VideoCallPrice { get; set; }
+        public bool IsVideoCallEnabled { get; set; }
 
         public List<SpecialtyDTO> Specialties { get; set; } = new List<SpecialtyDTO>();
     }

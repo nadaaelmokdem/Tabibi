@@ -41,15 +41,14 @@ namespace Tabibi.Services
             // Price & Booking type filtering
             if (filter.MinPrice.HasValue || filter.MaxPrice.HasValue || (filter.BookingTypes != null && filter.BookingTypes.Any()))
             {
-                var types = filter.BookingTypes ?? new List<ConsultationType> { ConsultationType.Clinic, ConsultationType.Chat, ConsultationType.Video, ConsultationType.Call };
+                var types = filter.BookingTypes ?? new List<ConsultationType> { ConsultationType.Clinic, ConsultationType.Chat, ConsultationType.VideoCall };
                 var min = filter.MinPrice ?? 0;
                 var max = filter.MaxPrice ?? decimal.MaxValue;
 
                 query = query.Where(d => 
                     (types.Contains(ConsultationType.Clinic) && d.IsClinicEnabled && d.ClinicPrice >= min && d.ClinicPrice <= max) ||
                     (types.Contains(ConsultationType.Chat) && d.IsChatEnabled && d.ChatPrice >= min && d.ChatPrice <= max) ||
-                    (types.Contains(ConsultationType.Video) && d.IsVideoEnabled && d.VideoPrice >= min && d.VideoPrice <= max) ||
-                    (types.Contains(ConsultationType.Call) && d.IsCallEnabled && d.CallPrice >= min && d.CallPrice <= max)
+                    (types.Contains(ConsultationType.VideoCall) && d.IsVideoCallEnabled && d.VideoCallPrice >= min && d.VideoCallPrice <= max)
                 );
             }
 
@@ -73,10 +72,8 @@ namespace Tabibi.Services
                     IsClinicEnabled = d.IsClinicEnabled,
                     ChatPrice = d.ChatPrice,
                     IsChatEnabled = d.IsChatEnabled,
-                    VideoPrice = d.VideoPrice,
-                    IsVideoEnabled = d.IsVideoEnabled,
-                    CallPrice = d.CallPrice,
-                    IsCallEnabled = d.IsCallEnabled,
+                    VideoCallPrice = d.VideoCallPrice,
+                    IsVideoCallEnabled = d.IsVideoCallEnabled,
                     Specialties = d.DoctorSpecialties.Select(ds => new SpecialtyDTO
                     {
                         SpecialtyId = ds.SpecialtyId,
@@ -117,10 +114,8 @@ namespace Tabibi.Services
                 IsClinicEnabled = d.IsClinicEnabled,
                 ChatPrice = d.ChatPrice,
                 IsChatEnabled = d.IsChatEnabled,
-                VideoPrice = d.VideoPrice,
-                IsVideoEnabled = d.IsVideoEnabled,
-                CallPrice = d.CallPrice,
-                IsCallEnabled = d.IsCallEnabled,
+                VideoCallPrice = d.VideoCallPrice,
+                IsVideoCallEnabled = d.IsVideoCallEnabled,
                 Specialties = d.DoctorSpecialties.Select(ds => new SpecialtyDTO
                 {
                     SpecialtyId = ds.SpecialtyId,

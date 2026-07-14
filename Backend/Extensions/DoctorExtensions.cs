@@ -40,10 +40,8 @@ namespace Tabibi.Extensions
                 IsClinicEnabled = doctor.IsClinicEnabled,
                 ChatPrice = doctor.ChatPrice,
                 IsChatEnabled = doctor.IsChatEnabled,
-                VideoPrice = doctor.VideoPrice,
-                IsVideoEnabled = doctor.IsVideoEnabled,
-                CallPrice = doctor.CallPrice,
-                IsCallEnabled = doctor.IsCallEnabled,
+                VideoCallPrice = doctor.VideoCallPrice,
+                IsVideoCallEnabled = doctor.IsVideoCallEnabled,
                 Specialties = doctor.DoctorSpecialties
                     .Select(s => s.ToDTO())
                     .ToList()

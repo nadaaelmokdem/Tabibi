@@ -1,4 +1,4 @@
-﻿namespace Tabibi.DTOs
+namespace Tabibi.DTOs
 {
     public class PatientExtraDTO
     {

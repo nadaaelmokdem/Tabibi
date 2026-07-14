@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\My Files\\Tabibi\\Backend\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|c:\\my files\\tabibi\\backend\\controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C7176386-DE94-834D-7920-A9E2B3B01587}|Tabibi.csproj|solutionrelative:controllers\\paymentcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -45,7 +53,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -53,17 +61,42 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "dbo.Appointments [Data]",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Tabibi/True/SqlTable/dbo.Appointments.sql",
-              "ToolTip": "dbo.Appointments [Data]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-07-13T19:36:44.973Z",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAEMAAAAAAAAAAAAQwFEAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-14T15:49:46.653Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "appsettings.Development.json",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\appsettings.Development.json",
+              "RelativeToolTip": "appsettings.Development.json",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-07-14T15:33:00.142Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "dbo.Appointments.sql",
+              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Tabibi/True/SqlTable/dbo.Appointments.sql",
+              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/Tabibi/True/SqlTable/dbo.Appointments.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2026-07-13T19:36:44.973Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "GeideaPaymentStrategy.cs",
               "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Services\\Payments\\GeideaPaymentStrategy.cs",
               "RelativeDocumentMoniker": "Services\\Payments\\GeideaPaymentStrategy.cs",
@@ -71,25 +104,24 @@
               "RelativeToolTip": "Services\\Payments\\GeideaPaymentStrategy.cs",
               "ViewState": "AgIAAMUAAAAAAAAAAAAWwLsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-13T19:15:03.269Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-13T19:15:03.269Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "PaymentController.cs",
               "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Controllers\\PaymentController.cs",
               "RelativeDocumentMoniker": "Controllers\\PaymentController.cs",
               "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Controllers\\PaymentController.cs",
               "RelativeToolTip": "Controllers\\PaymentController.cs",
-              "ViewState": "AgIAACkAAAAAAAAAAAAQwDsAAAA6AAAAAAAAAA==",
+              "ViewState": "AgIAACkAAAAAAAAAAAAQwEUAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-07-11T22:48:58.231Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "DashboardDTOs.cs",
               "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\DTOs\\DashboardDTOs.cs",
               "RelativeDocumentMoniker": "DTOs\\DashboardDTOs.cs",
@@ -101,7 +133,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "PatientService.cs",
               "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Services\\PatientService.cs",
               "RelativeDocumentMoniker": "Services\\PatientService.cs",
@@ -113,7 +145,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "S3FileService.cs",
               "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Services\\S3FileService.cs",
               "RelativeDocumentMoniker": "Services\\S3FileService.cs",
@@ -125,7 +157,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 8,
               "Title": "DoctorController.cs",
               "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Controllers\\DoctorController.cs",
               "RelativeDocumentMoniker": "Controllers\\DoctorController.cs",
@@ -137,7 +169,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "PublicController.cs",
               "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Controllers\\PublicController.cs",
               "RelativeDocumentMoniker": "Controllers\\PublicController.cs",
@@ -149,7 +181,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "Appointment.cs",
               "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Models\\Appointment.cs",
               "RelativeDocumentMoniker": "Models\\Appointment.cs",

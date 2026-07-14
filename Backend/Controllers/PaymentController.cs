@@ -46,6 +46,14 @@ namespace Tabibi.Controllers
             {
                 if (payment.Appointment != null)
                 {
+                    if (payment.Appointment.SessionId != null)
+                    {
+                        var session = await dbContext.ChatSessions.FindAsync(payment.Appointment.SessionId);
+                        if (session != null)
+                        {
+                            dbContext.ChatSessions.Remove(session);
+                        }
+                    }
                     dbContext.Appointments.Remove(payment.Appointment);
                 }
                 dbContext.Payments.Remove(payment);
@@ -55,7 +63,7 @@ namespace Tabibi.Controllers
                 payment.Status = result.NewStatus;
                 if (result.NewStatus == PaymentStatus.Paid)
                 {
-                    payment.PaidAt = DateTime.Now;
+                    payment.PaidAt = DateTime.UtcNow;
                     if (payment.Appointment != null)
                     {
                         payment.Appointment.Status = AppointmentStatus.Confirmed;

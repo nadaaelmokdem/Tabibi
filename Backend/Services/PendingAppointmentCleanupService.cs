@@ -33,7 +33,7 @@ namespace Tabibi.Services
                         .Where(p => p.Status == PaymentStatus.Pending)
                         .ToListAsync(stoppingToken);
 
-                    var now = DateTime.Now;
+                    var now = DateTime.UtcNow;
                     foreach (var payment in pendingPayments)
                     {
                         if (payment.ExternalOrderId != null && payment.ExternalOrderId.StartsWith("GEID-"))

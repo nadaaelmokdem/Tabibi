@@ -51,7 +51,7 @@ namespace Tabibi.Models
         public DoctorReview? Review { get; set; }
     }
 
-    public enum ConsultationType { Chat, Video, Call, Clinic }
+    public enum ConsultationType { Chat = 0, VideoCall = 1, Clinic = 2 }
     public enum AppointmentStatus { Confirmed = 1, Completed = 2, Cancelled = 3, Pending = 4 }
     public enum PaymentMethod { Online = 1, OnSite = 2 }
 

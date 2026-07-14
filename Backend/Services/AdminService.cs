@@ -281,7 +281,7 @@ namespace Tabibi.Services
                 doctor.OldSpecialties.Clear();
             }
 
-            doctor.ReviewedAt = DateTime.Now;
+            doctor.ReviewedAt = DateTime.UtcNow;
 
             await dbContext.SaveChangesAsync();
             return ServiceResult.Success();

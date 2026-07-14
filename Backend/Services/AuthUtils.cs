@@ -42,7 +42,7 @@ namespace Tabibi.Services
         issuer: configuration["JwtSettings:ValidIssuer"],
         audience: configuration["JwtSettings:ValidAudience"],
         claims: claims,
-        expires: DateTime.Now.AddMinutes(
+        expires: DateTime.UtcNow.AddMinutes(
             int.Parse(configuration["JwtSettings:DurationInMinutes"] ?? "60")),
         signingCredentials: credentials
     );

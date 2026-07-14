@@ -76,7 +76,8 @@ namespace Tabibi
                                "http://localhost:5173",
                                "http://localhost:5174",
                                "http://127.0.0.1:5500",
-                               "https://bankbook-kleenex-retake.ngrok-free.dev")
+                               "https://bankbook-kleenex-retake.ngrok-free.dev",
+                               "https://gqfah-197-120-163-186.free.pinggy.net")
                                             .AllowAnyHeader()
                                             .AllowAnyMethod()
                                             .AllowCredentials();
@@ -149,6 +150,7 @@ namespace Tabibi
             app.MapControllers();
             app.MapHub<ChatHub>("/hubs/chat");
             app.MapHub<AppointmentHub>("/hubs/appointments");
+            app.MapHub<VideoCallHub>("/hubs/videoCall");
 
             // Seed roles
             using (var scope = app.Services.CreateScope())

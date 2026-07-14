@@ -30,7 +30,7 @@ namespace Tabibi.Models
             [MaxLength(500)]
             public string? Disclaimer { get; set; }
 
-            public DateTime AnalyzedAt { get; set; } = DateTime.Now;
+            public DateTime AnalyzedAt { get; set; } = DateTime.UtcNow;
 
             // Navigation
             [ForeignKey(nameof(SessionId))]

@@ -19,7 +19,7 @@ namespace Tabibi.Extensions
                 HttpOnly = true,
                 Secure = UseSecureCookies,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.Now.AddDays(days)
+                Expires = DateTime.UtcNow.AddDays(days)
             };
 
             cookies.Append(RefreshTokenCookieName, token, cookieOptions);
@@ -32,7 +32,7 @@ namespace Tabibi.Extensions
                 HttpOnly = true,
                 Secure = UseSecureCookies,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.Now.AddDays(-1)
+                Expires = DateTime.UtcNow.AddDays(-1)
             };
 
             cookies.Append(RefreshTokenCookieName, "", cookieOptions);
@@ -45,7 +45,7 @@ namespace Tabibi.Extensions
                 HttpOnly = true,
                 Secure = UseSecureCookies,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.Now.AddMinutes(minutes)
+                Expires = DateTime.UtcNow.AddMinutes(minutes)
             };
 
             cookies.Append(AccessTokenCookieName, token, cookieOptions);
@@ -58,7 +58,7 @@ namespace Tabibi.Extensions
                 HttpOnly = true,
                 Secure = UseSecureCookies,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.Now.AddDays(-1)
+                Expires = DateTime.UtcNow.AddDays(-1)
             };
 
             cookies.Append(AccessTokenCookieName, "", cookieOptions);

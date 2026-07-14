@@ -13,7 +13,7 @@ namespace Tabibi.Models
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation
         public PatientProfile? PatientProfile { get; set; }

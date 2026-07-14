@@ -458,9 +458,6 @@ namespace Tabibi.Migrations
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("CallPrice")
-                        .HasColumnType("decimal(10,2)");
-
                     b.Property<decimal>("ChatPrice")
                         .HasColumnType("decimal(10,2)");
 
@@ -482,16 +479,13 @@ namespace Tabibi.Migrations
                     b.Property<bool>("IsAvailableNow")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsCallEnabled")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsChatEnabled")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsClinicEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsVideoEnabled")
+                    b.Property<bool>("IsVideoCallEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LicenseExpiryDate")
@@ -540,7 +534,7 @@ namespace Tabibi.Migrations
                     b.Property<int>("VerificationStatus")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("VideoPrice")
+                    b.Property<decimal>("VideoCallPrice")
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<int?>("YearsOfExperience")

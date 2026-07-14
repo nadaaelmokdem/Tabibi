@@ -1,4 +1,4 @@
-﻿namespace Tabibi.Shared
+namespace Tabibi.Shared
 {
   public static class UserRoles
   {

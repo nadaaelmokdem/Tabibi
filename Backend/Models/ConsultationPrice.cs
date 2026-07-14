@@ -20,13 +20,10 @@ namespace Tabibi.Models
         public decimal ChatPrice { get; set; }
 
         [Column(TypeName = "decimal(10,2)")]
-        public decimal VideoPrice { get; set; }
+        public decimal VideoCallPrice { get; set; }
 
-        [Column(TypeName = "decimal(10,2)")]
-        public decimal CallPrice { get; set; }
-
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation
         [ForeignKey(nameof(DoctorId))]
@@ -37,8 +34,7 @@ namespace Tabibi.Models
             return type switch
             {
                 ConsultationType.Chat => ChatPrice,
-                ConsultationType.Video => VideoPrice,
-                ConsultationType.Call => CallPrice,
+                ConsultationType.VideoCall => VideoCallPrice,
                 ConsultationType.Clinic => ClinicPrice,
                 _ => 0
             };

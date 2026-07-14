@@ -1,12 +1,26 @@
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaTimesCircle, FaCalendarAlt } from "react-icons/fa";
+import { useEffect } from "react";
 
 export default function PaymentResultPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   
   const orderId = searchParams.get("orderId");
   const successStr = searchParams.get("success");
+  const sessionId = searchParams.get("sessionId");
+  const type = searchParams.get("type");
   const isSuccess = successStr === "true" || successStr === "True";
+
+  useEffect(() => {
+    if (isSuccess && sessionId) {
+      if (type === "video") {
+        navigate(`/video-call/${sessionId}`, { replace: true });
+      } else if (type === "chat") {
+        navigate(`/chat/${sessionId}`, { replace: true });
+      }
+    }
+  }, [isSuccess, sessionId, type, navigate]);
 
   return (
     <div className="min-h-screen bg-surface-container flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">

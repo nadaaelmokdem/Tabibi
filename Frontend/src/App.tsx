@@ -24,6 +24,7 @@ import DoctorAvailabilityPage from "./pages/DoctorAvailabilityPage";
 import DoctorAppointmentsPage from "./pages/DoctorAppointmentsPage";
 import PatientAppointmentsPage from "./pages/PatientAppointmentsPage";
 import PaymentResultPage from "./pages/PaymentResultPage";
+import VideoCallPage from "./pages/VideoCallPage";
 
 function AppointmentsRedirect() {
   const { user } = useAuth();
@@ -120,6 +121,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DoctorChatPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/video-call/:sessionId"
+                element={
+                  <ProtectedRoute>
+                    <VideoCallPage />
                   </ProtectedRoute>
                 }
               />
