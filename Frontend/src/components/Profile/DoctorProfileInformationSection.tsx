@@ -1,9 +1,11 @@
 import type { DoctorProfileSectionProps } from "../../types/profile";
-import { getFileUrl } from "../../utils/fileUtils";
 
 interface Props extends DoctorProfileSectionProps {
   profilePicUrl: string;
+  profilePicFile: File | null;
   setProfilePicFile: (file: File | null) => void;
+  renderProfilePicPreview: (file: File | null, url: string) => React.ReactNode;
+  profilePicInputRef: React.RefObject<HTMLInputElement>;
 }
 
 export default function DoctorProfileInformationSection({
@@ -12,7 +14,10 @@ export default function DoctorProfileInformationSection({
   errors,
   isLoading,
   profilePicUrl,
+  profilePicFile,
   setProfilePicFile,
+  renderProfilePicPreview,
+  profilePicInputRef,
 }: Props) {
   return (
     <section className="bg-white p-6 rounded-2xl shadow-sm border border-surface-variant space-y-5">
@@ -31,13 +36,10 @@ export default function DoctorProfileInformationSection({
               </label>
               <span className="text-[11px] text-outline">You can add it later</span>
             </div>
+            {renderProfilePicPreview(profilePicFile, profilePicUrl)}
           </div>
-          {profilePicUrl && (
-            <div className="mb-3 text-[12px]">
-              Current picture: <a href={getFileUrl(profilePicUrl)} target="_blank" rel="noreferrer" className="text-primary-dark font-medium underline">View Picture</a>
-            </div>
-          )}
           <input
+            ref={profilePicInputRef}
             type="file"
             accept="image/*"
             onChange={(e) => setProfilePicFile(e.target.files?.[0] || null)}

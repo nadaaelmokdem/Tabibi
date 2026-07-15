@@ -32,7 +32,7 @@ namespace Tabibi.Application.Services
                 .Take(pageSize)
                 .Select(r => new DoctorReviewDTO
                 {
-                    ReviewId = r.ReviewId,
+                    ReviewId = r.Id,
                     Rating = r.Rating,
                     Comment = r.Comment,
                     PatientName = r.Appointment.Patient.User.FullName,

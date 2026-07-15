@@ -6,7 +6,7 @@ namespace Tabibi.Core.Models
     public class Payment
     {
         [Key]
-        public long PaymentId { get; set; }
+        public long Id { get; set; }
 
         public long AppointmentId { get; set; }
 

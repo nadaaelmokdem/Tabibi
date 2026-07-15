@@ -40,8 +40,8 @@ export default function DoctorActionsCard({
       </div>
 
       <div className="space-y-3 pt-4 border-t border-surface-variant/60">
-        {doctor.isVideoEnabled && (
-          <button 
+        {doctor.isVideoCallEnabled && (
+          <button
             onClick={handleStartVideoCall}
             className="w-full bg-green-50 text-green-700 hover:bg-green-100 font-bold py-3.5 rounded-xl border border-green-200 transition-colors text-center flex items-center justify-center gap-2 cursor-pointer mb-3"
           >

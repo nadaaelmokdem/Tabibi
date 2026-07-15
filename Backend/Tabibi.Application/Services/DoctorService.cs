@@ -133,19 +133,19 @@ namespace Tabibi.Application.Services
                         var oldSpecialties = FormatSpecialties(doctor.DoctorSpecialties);
 
                         var allSpecialties = await unitOfWork.Specialties.Query().Where(s => names.Contains(s.Name)).ToListAsync();
-                        var newSpecialtyIds = allSpecialties.Select(s => s.SpecialtyId).ToList();
+                        var newSpecialtyIds = allSpecialties.Select(s => s.Id).ToList();
 
                         var currentSpecialties = doctor.DoctorSpecialties.ToList();
-                        var currentSpecialtyIds = currentSpecialties.Select(ds => ds.SpecialtyId).ToList();
+                        var currentSpecialtyIds = currentSpecialties.Select(ds => ds.Id).ToList();
 
-                        var toRemove = currentSpecialties.Where(ds => !newSpecialtyIds.Contains(ds.SpecialtyId)).ToList();
+                        var toRemove = currentSpecialties.Where(ds => !newSpecialtyIds.Contains(ds.Id)).ToList();
                         var toAddIds = newSpecialtyIds.Where(id => !currentSpecialtyIds.Contains(id)).ToList();
                         
                         if (toRemove.Any() || toAddIds.Any())
                         {
                             BackupApprovedDataIfNeeded(doctor);
                             var newSpecialties = string.Join(", ", allSpecialties
-                                .Where(s => newSpecialtyIds.Contains(s.SpecialtyId))
+                                .Where(s => newSpecialtyIds.Contains(s.Id))
                                 .Select(s => s.Name)
                                 .OrderBy(n => n));
                             await LogSensitiveChange(doctor.DoctorId, userId, "Specialties", oldSpecialties, newSpecialties);
@@ -196,6 +196,114 @@ namespace Tabibi.Application.Services
                         }
                         doctor.ProfilePictureUrl = value;
                         break;
+                    case "clinicprice":
+                        if (decimal.TryParse(value, out decimal clinicPrice))
+                        {
+                            if (doctor.IsClinicEnabled && clinicPrice <= 0)
+                            {
+                                return ServiceResult.Failure("Prices must be greater than 0.");
+                            }
+                            if (doctor.IsChatEnabled && doctor.ChatPrice > clinicPrice)
+                            {
+                                return ServiceResult.Failure($"Remote consultation prices cannot exceed clinic price ({clinicPrice} EGP).");
+                            }
+                            if (doctor.IsVideoCallEnabled && doctor.VideoCallPrice > clinicPrice)
+                            {
+                                return ServiceResult.Failure($"Remote consultation prices cannot exceed clinic price ({clinicPrice} EGP).");
+                            }
+                            doctor.ClinicPrice = clinicPrice;
+                        }
+                        else
+                        {
+                            return ServiceResult.Failure("Invalid price value.");
+                        }
+                        break;
+                    case "chatprice":
+                        if (decimal.TryParse(value, out decimal chatPrice))
+                        {
+                            if (doctor.IsChatEnabled && chatPrice <= 0)
+                            {
+                                return ServiceResult.Failure("Prices must be greater than 0.");
+                            }
+                            if (doctor.IsChatEnabled && chatPrice > doctor.ClinicPrice)
+                            {
+                                return ServiceResult.Failure($"Remote consultation prices cannot exceed clinic price ({doctor.ClinicPrice} EGP).");
+                            }
+                            doctor.ChatPrice = chatPrice;
+                        }
+                        else
+                        {
+                            return ServiceResult.Failure("Invalid price value.");
+                        }
+                        break;
+                    case "videocallprice":
+                        if (decimal.TryParse(value, out decimal videoCallPrice))
+                        {
+                            if (doctor.IsVideoCallEnabled && videoCallPrice <= 0)
+                            {
+                                return ServiceResult.Failure("Prices must be greater than 0.");
+                            }
+                            if (doctor.IsVideoCallEnabled && videoCallPrice > doctor.ClinicPrice)
+                            {
+                                return ServiceResult.Failure($"Remote consultation prices cannot exceed clinic price ({doctor.ClinicPrice} EGP).");
+                            }
+                            doctor.VideoCallPrice = videoCallPrice;
+                        }
+                        else
+                        {
+                            return ServiceResult.Failure("Invalid price value.");
+                        }
+                        break;
+                    case "isclinicenabled":
+                        if (bool.TryParse(value, out bool isClinicEnabled))
+                        {
+                            if (isClinicEnabled && doctor.ClinicPrice <= 0)
+                            {
+                                return ServiceResult.Failure("Prices must be greater than 0.");
+                            }
+                            doctor.IsClinicEnabled = isClinicEnabled;
+                        }
+                        else
+                        {
+                            return ServiceResult.Failure("Invalid boolean value.");
+                        }
+                        break;
+                    case "ischatenabled":
+                        if (bool.TryParse(value, out bool isChatEnabled))
+                        {
+                            if (isChatEnabled && doctor.ChatPrice <= 0)
+                            {
+                                return ServiceResult.Failure("Prices must be greater than 0.");
+                            }
+                            if (isChatEnabled && doctor.ChatPrice > doctor.ClinicPrice)
+                            {
+                                return ServiceResult.Failure($"Remote consultation prices cannot exceed clinic price ({doctor.ClinicPrice} EGP).");
+                            }
+                            doctor.IsChatEnabled = isChatEnabled;
+                        }
+                        else
+                        {
+                            return ServiceResult.Failure("Invalid boolean value.");
+                        }
+                        break;
+                    case "isvideocallenabled":
+                        if (bool.TryParse(value, out bool isVideoCallEnabled))
+                        {
+                            if (isVideoCallEnabled && doctor.VideoCallPrice <= 0)
+                            {
+                                return ServiceResult.Failure("Prices must be greater than 0.");
+                            }
+                            if (isVideoCallEnabled && doctor.VideoCallPrice > doctor.ClinicPrice)
+                            {
+                                return ServiceResult.Failure($"Remote consultation prices cannot exceed clinic price ({doctor.ClinicPrice} EGP).");
+                            }
+                            doctor.IsVideoCallEnabled = isVideoCallEnabled;
+                        }
+                        else
+                        {
+                            return ServiceResult.Failure("Invalid boolean value.");
+                        }
+                        break;
                     default:
                         return ServiceResult.Failure("Field doesn't exist or cannot be updated via this endpoint!");
                 }
@@ -233,6 +341,16 @@ namespace Tabibi.Application.Services
                 (profileData.IsVideoCallEnabled && profileData.VideoCallPrice <= 0))
             {
                 return ServiceResult<DoctorProfileDTO>.Failure("Prices must be greater than 0.");
+            }
+
+            if (profileData.IsChatEnabled && profileData.ChatPrice > profileData.ClinicPrice)
+            {
+                return ServiceResult<DoctorProfileDTO>.Failure($"Remote consultation prices cannot exceed clinic price ({profileData.ClinicPrice} EGP).");
+            }
+
+            if (profileData.IsVideoCallEnabled && profileData.VideoCallPrice > profileData.ClinicPrice)
+            {
+                return ServiceResult<DoctorProfileDTO>.Failure($"Remote consultation prices cannot exceed clinic price ({profileData.ClinicPrice} EGP).");
             }
 
             try
@@ -318,10 +436,10 @@ namespace Tabibi.Application.Services
                             .Where(s => lowerRequestedNames.Contains(s.Name.ToLower()))
                             .ToListAsync();
 
-                        var existingDbSpecialtyIds = existingDbSpecialties.Select(s => s.SpecialtyId).ToList();
-                        var currentSpecialtyIds = doctor.DoctorSpecialties.Select(ds => ds.SpecialtyId).ToList();
+                        var existingDbSpecialtyIds = existingDbSpecialties.Select(s => s.Id).ToList();
+                        var currentSpecialtyIds = doctor.DoctorSpecialties.Select(ds => ds.Id).ToList();
 
-                        var toRemove = doctor.DoctorSpecialties.Where(ds => !existingDbSpecialtyIds.Contains(ds.SpecialtyId)).ToList();
+                        var toRemove = doctor.DoctorSpecialties.Where(ds => !existingDbSpecialtyIds.Contains(ds.Id)).ToList();
                         var toAddIds = existingDbSpecialtyIds.Except(currentSpecialtyIds).ToList();
 
                         foreach (var ds in toRemove)
@@ -476,7 +594,7 @@ namespace Tabibi.Application.Services
                 .Where(a => a.DoctorId == doctor.DoctorId)
                 .Select(a => new DoctorAvailabilityDTO
                 {
-                    AvailabilityId = a.AvailabilityId,
+                    AvailabilityId = a.Id,
                     DayOfWeek = a.DayOfWeek,
                     StartTime = a.StartTime.ToString(@"hh\:mm"),
                     EndTime = a.EndTime.ToString(@"hh\:mm"),
@@ -640,7 +758,7 @@ namespace Tabibi.Application.Services
                     doctor.OldSpecialties.Add(new DoctorOldSpecialty
                     {
                         DoctorId = doctor.DoctorId,
-                        SpecialtyId = ds.SpecialtyId
+                        SpecialtyId = ds.Id
                     });
                 }
             }

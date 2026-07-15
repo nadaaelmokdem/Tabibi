@@ -23,8 +23,7 @@ const getConsultationTypeName = (type: number | string | undefined) => {
   switch (type) {
     case 0: return 'Chat';
     case 1: return 'Video';
-    case 2: return 'Call';
-    case 3: return 'Clinic visit';
+    case 2: return 'Clinic visit';
     default: return 'Appointment';
   }
 };

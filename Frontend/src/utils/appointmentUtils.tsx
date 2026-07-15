@@ -3,13 +3,12 @@ import {
   MdAccessTime,
   MdLocalHospital,
   MdVideocam,
-  MdPhone,
   MdChat,
   MdCircle,
 } from "react-icons/md";
 import type { ReactNode } from "react";
 
-export type ConsultationTypeName = "Chat" | "Video" | "Call" | "Clinic";
+export type ConsultationTypeName = "Chat" | "Video" | "Clinic";
 export type AppointmentStatusName = "Confirmed" | "Completed" | "Cancelled";
 
 export interface AppointmentListItem {
@@ -32,7 +31,6 @@ export const CONSULTATION_TYPE_OPTIONS = [
   { value: "", label: "All", icon: <MdAccessTime size={13} /> },
   { value: "Chat", label: "Chat", icon: <MdChat size={13} /> },
   { value: "Video", label: "Video", icon: <MdVideocam size={13} /> },
-  { value: "Call", label: "Call", icon: <MdPhone size={13} /> },
   { value: "Clinic", label: "Clinic", icon: <MdLocalHospital size={13} /> },
 ] as const;
 
@@ -45,8 +43,10 @@ export const STATUS_OPTIONS = [
 
 export function getConsultationTypeLabel(type: string | number): string {
   if (typeof type === "string" && type) return type;
-  const labels = ["Chat", "Video", "Call", "Clinic"];
-  if (typeof type === "number" && type >= 0 && type < labels.length) return labels[type];
+  const labels = ["Chat", "Video", "Clinic"];
+  if (typeof type === "number" && type >= 0 && type < labels.length) {
+    return labels[type];
+  }
   return "—";
 }
 
@@ -68,8 +68,6 @@ export function getConsultationTypeIcon(type: string | number, size = 13): React
       return <MdChat size={size} />;
     case "Video":
       return <MdVideocam size={size} />;
-    case "Call":
-      return <MdPhone size={size} />;
     case "Clinic":
       return <MdLocalHospital size={size} />;
     default:

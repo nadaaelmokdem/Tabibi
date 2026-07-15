@@ -22,12 +22,11 @@ export interface AppointmentBooked {
   paymentUrl?: string;
 }
 
-/** Matches backend ConsultationType enum: Chat=0, Video=1, Call=2, Clinic=3 */
-export type ConsultationType = 0 | 1 | 2 | 3;
+/** Matches backend ConsultationType enum: Chat=0, VideoCall=1, Clinic=2 */
+export type ConsultationType = 0 | 1 | 2;
 
 export const ConsultationType = {
   Chat: 0,
-  Video: 1,
-  Call: 2,
-  Clinic: 3,
+  VideoCall: 1,
+  Clinic: 2,
 } as const;

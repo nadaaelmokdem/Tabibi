@@ -10,7 +10,6 @@ import {
   FaCalendarCheck,
   FaClinicMedical,
   FaVideo,
-  FaPhone,
   FaCommentDots,
   FaClock,
 } from "react-icons/fa";
@@ -29,20 +28,19 @@ import { getFileUrl } from "../../utils/fileUtils";
 import AppointmentService from "../../services/appointmentService";
 import Swal from "sweetalert2";
 
-type ConsultationType = "clinic" | "video" | "call" | "chat";
+type ConsultationType = "clinic" | "video" | "chat";
 
 interface ConsultTypeConfig {
   id: ConsultationType;
   label: string;
   icon: React.ReactNode;
-  priceKey: "clinicPrice" | "videoPrice" | "callPrice" | "chatPrice";
-  enabledKey: "isClinicEnabled" | "isVideoEnabled" | "isCallEnabled" | "isChatEnabled";
+  priceKey: "clinicPrice" | "videoCallPrice" | "chatPrice";
+  enabledKey: "isClinicEnabled" | "isVideoCallEnabled" | "isChatEnabled";
 }
 
 const CONSULT_TYPES: ConsultTypeConfig[] = [
   { id: "clinic", label: "Clinic", icon: <FaClinicMedical size={14} className="shrink-0" />, priceKey: "clinicPrice", enabledKey: "isClinicEnabled" },
-  { id: "video",  label: "Video",  icon: <FaVideo size={14} className="shrink-0" />,          priceKey: "videoPrice",  enabledKey: "isVideoEnabled"  },
-  { id: "call",   label: "Phone",  icon: <FaPhone size={14} className="shrink-0" />,          priceKey: "callPrice",   enabledKey: "isCallEnabled"   },
+  { id: "video",  label: "Video",  icon: <FaVideo size={14} className="shrink-0" />,          priceKey: "videoCallPrice",  enabledKey: "isVideoCallEnabled"  },
   { id: "chat",   label: "Chat",   icon: <FaCommentDots size={14} className="shrink-0" />,    priceKey: "chatPrice",   enabledKey: "isChatEnabled"   },
 ];
 
@@ -153,8 +151,8 @@ const BookingScheduleModal: React.FC<BookingScheduleModalProps> = ({
     setIsBooking(true);
 
     try {
-      const typeMap: Record<string, number> = { chat: 0, video: 1, call: 2, clinic: 3 };
-      const apiType = typeMap[consultType] ?? 3;
+      const typeMap: Record<string, number> = { chat: 0, video: 1, clinic: 2 };
+      const apiType = typeMap[consultType] ?? 2;
       const apiPaymentMethod = consultType === "clinic" ? paymentMethod : 1;
 
       const res: any = await AppointmentService.bookAppointment({

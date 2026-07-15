@@ -81,10 +81,8 @@ const ProfilePage: React.FC = () => {
           clinicPrice: DoctorProfileData.clinicPrice, isClinicEnabled: DoctorProfileData.isClinicEnabled,
           
           chatPrice: DoctorProfileData.chatPrice, isChatEnabled: DoctorProfileData.isChatEnabled,
-          
-          videoPrice: DoctorProfileData.videoPrice, isVideoEnabled: DoctorProfileData.isVideoEnabled,
-          
-          callPrice: DoctorProfileData.callPrice, isCallEnabled: DoctorProfileData.isCallEnabled,
+
+          videoCallPrice: DoctorProfileData.videoCallPrice, isVideoCallEnabled: DoctorProfileData.isVideoCallEnabled,
         }));
       } catch (error) {
         console.log("Error: " + error);
@@ -107,10 +105,8 @@ const ProfilePage: React.FC = () => {
         clinicPrice: updatedProfile.clinicPrice, isClinicEnabled: updatedProfile.isClinicEnabled,
         
         chatPrice: updatedProfile.chatPrice, isChatEnabled: updatedProfile.isChatEnabled,
-        
-        videoPrice: updatedProfile.videoPrice, isVideoEnabled: updatedProfile.isVideoEnabled,
-        
-        callPrice: updatedProfile.callPrice, isCallEnabled: updatedProfile.isCallEnabled,
+
+        videoCallPrice: updatedProfile.videoCallPrice, isVideoCallEnabled: updatedProfile.isVideoCallEnabled,
       };
       await DoctorService.bulkUpdateProfile(payload);
       setProfile(updatedProfile);

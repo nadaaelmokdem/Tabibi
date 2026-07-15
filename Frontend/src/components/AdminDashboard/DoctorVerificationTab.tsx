@@ -10,6 +10,7 @@ import type {
 } from "../../types/admin";
 import Skeleton from "../common/Skeleton";
 import NetworkError from "../common/NetworkError";
+import { getFileUrl } from "../../utils/fileUtils";
 
 const STATUS_STYLES: Record<string, string> = {
   Pending: "bg-yellow-50 text-yellow-600",
@@ -94,10 +95,62 @@ export default function DoctorVerificationTab() {
     }
   }
 
+  function validateDoctorData(detail: AdminDoctorDetail): string[] {
+    const missingFields: string[] = [];
+
+    if (!detail.nationalIdNumber) missingFields.push("National ID Number");
+    if (!detail.licenseNumber) missingFields.push("License Number");
+    if (!detail.licenseExpiryDate) missingFields.push("License Expiry Date");
+    if (detail.yearsOfExperience == null) missingFields.push("Years of Experience");
+    if (!detail.licenseProofUrl) missingFields.push("License Proof Document");
+    if (!detail.idProofUrl) missingFields.push("ID Proof Document");
+    if (!detail.degreeProofUrl) missingFields.push("Degree Proof Document");
+    if (!detail.specialties || detail.specialties.length === 0) missingFields.push("Specialties");
+
+    return missingFields;
+  }
+
   async function handleDecision(doctor: AdminDoctor, decision: DoctorDecision) {
     let comment: string | undefined;
 
-    if (decision !== "Approved") {
+    if (decision === "Approved") {
+      const detail = details[doctor.doctorId];
+      if (detail) {
+        const missingFields = validateDoctorData(detail);
+        if (missingFields.length > 0) {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Cannot Approve Doctor',
+            text: `Missing required fields: ${missingFields.join(", ")}`,
+            buttonsStyling: false,
+            customClass: {
+              popup: 'bg-white p-6 rounded-2xl shadow-xl max-w-md w-full border border-surface-variant',
+              title: 'text-2xl font-bold mb-2 text-primary-dark',
+              htmlContainer: 'text-on-surface-variant mb-6 m-0',
+              confirmButton: 'w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl transition-colors cursor-pointer',
+            }
+          });
+          return;
+        }
+      }
+
+      const { isConfirmed } = await Swal.fire({
+        title: `Approve ${doctor.fullName}?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Approve",
+        cancelButtonText: 'Cancel',
+        buttonsStyling: false,
+        customClass: {
+          popup: 'bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full border border-surface-variant',
+          title: 'text-xl font-bold mb-2 text-primary-dark',
+          confirmButton: 'w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition-colors cursor-pointer',
+          cancelButton: 'w-full mt-3 py-3 text-text-muted font-semibold hover:text-on-surface hover:bg-surface-variant rounded-xl transition-colors cursor-pointer',
+          actions: 'flex flex-col w-full m-0'
+        }
+      });
+      if (!isConfirmed) return;
+    } else {
       const { value, isConfirmed } = await Swal.fire({
         title: decision === "Rejected" ? "Reject application" : "Request changes",
         input: "textarea",
@@ -120,23 +173,6 @@ export default function DoctorVerificationTab() {
       });
       if (!isConfirmed) return;
       comment = value;
-    } else {
-      const { isConfirmed } = await Swal.fire({
-        title: `Approve ${doctor.fullName}?`,
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "Approve",
-        cancelButtonText: 'Cancel',
-        buttonsStyling: false,
-        customClass: {
-          popup: 'bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full border border-surface-variant',
-          title: 'text-xl font-bold mb-2 text-primary-dark',
-          confirmButton: 'w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition-colors cursor-pointer',
-          cancelButton: 'w-full mt-3 py-3 text-text-muted font-semibold hover:text-on-surface hover:bg-surface-variant rounded-xl transition-colors cursor-pointer',
-          actions: 'flex flex-col w-full m-0'
-        }
-      });
-      if (!isConfirmed) return;
     }
 
     setActioningId(doctor.doctorId);
@@ -175,7 +211,46 @@ export default function DoctorVerificationTab() {
   async function handleAdvancedAction(doctor: AdminDoctor, action: "revert" | "ban") {
     let comment: string | undefined;
 
-    if (action === "ban") {
+    if (action === "revert") {
+      const detail = details[doctor.doctorId];
+      if (detail) {
+        const missingFields = validateDoctorData(detail);
+        if (missingFields.length > 0) {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Cannot Revert & Approve',
+            text: `Missing required fields in current data: ${missingFields.join(", ")}`,
+            buttonsStyling: false,
+            customClass: {
+              popup: 'bg-white p-6 rounded-2xl shadow-xl max-w-md w-full border border-surface-variant',
+              title: 'text-2xl font-bold mb-2 text-primary-dark',
+              htmlContainer: 'text-on-surface-variant mb-6 m-0',
+              confirmButton: 'w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl transition-colors cursor-pointer',
+            }
+          });
+          return;
+        }
+      }
+
+      const { isConfirmed } = await Swal.fire({
+        title: `Revert changes for ${doctor.fullName}?`,
+        text: "This will restore their last approved data and re-approve their profile.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Revert & Approve",
+        cancelButtonText: 'Cancel',
+        buttonsStyling: false,
+        customClass: {
+          popup: 'bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full border border-surface-variant',
+          title: 'text-xl font-bold mb-2 text-primary-dark',
+          htmlContainer: 'text-on-surface-variant mb-6 m-0',
+          confirmButton: 'w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-xl transition-colors cursor-pointer',
+          cancelButton: 'w-full mt-3 py-3 text-text-muted font-semibold hover:text-on-surface hover:bg-surface-variant rounded-xl transition-colors cursor-pointer',
+          actions: 'flex flex-col w-full m-0'
+        }
+      });
+      if (!isConfirmed) return;
+    } else {
       const { value, isConfirmed } = await Swal.fire({
         title: "Ban Doctor",
         input: "textarea",
@@ -198,25 +273,6 @@ export default function DoctorVerificationTab() {
       });
       if (!isConfirmed) return;
       comment = value;
-    } else {
-      const { isConfirmed } = await Swal.fire({
-        title: `Revert changes for ${doctor.fullName}?`,
-        text: "This will restore their last approved data and re-approve their profile.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Revert & Approve",
-        cancelButtonText: 'Cancel',
-        buttonsStyling: false,
-        customClass: {
-          popup: 'bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full border border-surface-variant',
-          title: 'text-xl font-bold mb-2 text-primary-dark',
-          htmlContainer: 'text-on-surface-variant mb-6 m-0',
-          confirmButton: 'w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-xl transition-colors cursor-pointer',
-          cancelButton: 'w-full mt-3 py-3 text-text-muted font-semibold hover:text-on-surface hover:bg-surface-variant rounded-xl transition-colors cursor-pointer',
-          actions: 'flex flex-col w-full m-0'
-        }
-      });
-      if (!isConfirmed) return;
     }
 
     setActioningId(doctor.doctorId);
@@ -458,15 +514,43 @@ export default function DoctorVerificationTab() {
 }
 
 function ProofLink({ label, url }: { label: string; url: string }) {
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const fullUrl = getFileUrl(url);
+  
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-surface-variant text-sm font-medium text-primary hover:bg-surface-container"
-    >
-      {label}
-      <MdOpenInNew size={14} />
-    </a>
+    <>
+      <button
+        onClick={() => setIsFullScreen(true)}
+        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-surface-variant text-sm font-medium text-primary hover:bg-surface-container cursor-pointer"
+      >
+        {label}
+        <MdOpenInNew size={14} />
+      </button>
+      {isFullScreen && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsFullScreen(false);
+          }}
+        >
+          <img 
+            src={fullUrl} 
+            alt={label} 
+            className="max-w-full max-h-full object-contain cursor-default rounded-md shadow-2xl" 
+            onClick={(e) => e.stopPropagation()} 
+          />
+          <button 
+            className="absolute top-4 right-4 text-white/70 hover:text-white p-2 transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsFullScreen(false);
+            }}
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      )}
+    </>
   );
 }

@@ -213,6 +213,34 @@ namespace Tabibi.Application.Services
                 return ServiceResult.Failure("Doctor not found!");
             }
 
+            // Validate required fields before approving
+            if (request.Decision == DoctorVerificationStatus.Approved || request.RevertToOldData)
+            {
+                var missingFields = new List<string>();
+
+                if (string.IsNullOrWhiteSpace(doctor.NationalIdNumber))
+                    missingFields.Add("National ID Number");
+                if (string.IsNullOrWhiteSpace(doctor.LicenseNumber))
+                    missingFields.Add("License Number");
+                if (!doctor.LicenseExpiryDate.HasValue)
+                    missingFields.Add("License Expiry Date");
+                if (!doctor.YearsOfExperience.HasValue)
+                    missingFields.Add("Years of Experience");
+                if (string.IsNullOrWhiteSpace(doctor.LicenseProofUrl))
+                    missingFields.Add("License Proof Document");
+                if (string.IsNullOrWhiteSpace(doctor.IdProofUrl))
+                    missingFields.Add("ID Proof Document");
+                if (string.IsNullOrWhiteSpace(doctor.DegreeProofUrl))
+                    missingFields.Add("Degree Proof Document");
+                if (doctor.DoctorSpecialties == null || doctor.DoctorSpecialties.Count == 0)
+                    missingFields.Add("Specialties");
+
+                if (missingFields.Count > 0)
+                {
+                    return ServiceResult.Failure($"Cannot approve doctor. Missing required fields: {string.Join(", ", missingFields)}.");
+                }
+            }
+
             if (request.BanDoctor)
             {
                 doctor.VerificationStatus = DoctorVerificationStatus.Rejected;
@@ -228,8 +256,15 @@ namespace Tabibi.Application.Services
                 doctor.DegreeProofUrl = doctor.OldDegreeProofUrl;
                 doctor.LicenseExpiryDate = doctor.OldLicenseExpiryDate;
 
-                unitOfWork.DoctorSpecialties.RemoveRange(doctor.DoctorSpecialties);
-                doctor.DoctorSpecialties.Clear();
+                if (doctor.DoctorSpecialties != null)
+                {
+                    unitOfWork.DoctorSpecialties.RemoveRange(doctor.DoctorSpecialties);
+                    doctor.DoctorSpecialties.Clear();
+                }
+                else
+                {
+                    doctor.DoctorSpecialties = new List<DoctorSpecialty>();
+                }
 
                 foreach (var ds in doctor.OldSpecialties)
                 {

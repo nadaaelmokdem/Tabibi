@@ -1,4 +1,4 @@
-import { FaVideo, FaCommentDots, FaPhone, FaClinicMedical } from "react-icons/fa";
+import { FaVideo, FaCommentDots, FaClinicMedical } from "react-icons/fa";
 import type { DoctorListItem } from "../../types/public";
 
 interface DoctorPricingMatrixProps {
@@ -21,18 +21,11 @@ export default function DoctorPricingMatrix({ doctor }: DoctorPricingMatrixProps
                   <div className="font-bold text-primary">{doctor.clinicPrice} EGP</div>
                 </div>
               )}
-              {doctor.isVideoEnabled && (
+              {doctor.isVideoCallEnabled && (
                 <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-surface-variant/60 hover:border-primary/30 transition-colors cursor-pointer">
                   <FaVideo className="text-outline-variant text-xl" />
                   <div className="text-xs text-primary-light uppercase font-semibold tracking-wide">Video</div>
-                  <div className="font-bold text-primary">{doctor.videoPrice} EGP</div>
-                </div>
-              )}
-              {doctor.isCallEnabled && (
-                <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col items-center justify-center text-center gap-2 border border-surface-variant/60 hover:border-primary/30 transition-colors cursor-pointer">
-                  <FaPhone className="text-outline-variant text-xl" />
-                  <div className="text-xs text-primary-light uppercase font-semibold tracking-wide">Voice</div>
-                  <div className="font-bold text-primary">{doctor.callPrice} EGP</div>
+                  <div className="font-bold text-primary">{doctor.videoCallPrice} EGP</div>
                 </div>
               )}
               {doctor.isChatEnabled && (

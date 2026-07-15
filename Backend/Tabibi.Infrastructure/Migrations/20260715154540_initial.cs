@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Tabibi.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -58,13 +58,12 @@ namespace Tabibi.Infrastructure.Migrations
                 name: "Specialties",
                 columns: table => new
                 {
-                    SpecialtyId = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Specialties", x => x.SpecialtyId);
+                    table.PrimaryKey("PK_Specialties", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -180,8 +179,8 @@ namespace Tabibi.Infrastructure.Migrations
                     DoctorId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LicenseNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NationalIdNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LicenseNumber = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    NationalIdNumber = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     ClinicLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClinicPhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LicenseProofUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -250,7 +249,7 @@ namespace Tabibi.Infrastructure.Migrations
                 name: "DoctorAvailabilities",
                 columns: table => new
                 {
-                    AvailabilityId = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     DoctorId = table.Column<long>(type: "bigint", nullable: false),
                     DayOfWeek = table.Column<int>(type: "int", nullable: false),
@@ -262,7 +261,7 @@ namespace Tabibi.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DoctorAvailabilities", x => x.AvailabilityId);
+                    table.PrimaryKey("PK_DoctorAvailabilities", x => x.Id);
                     table.ForeignKey(
                         name: "FK_DoctorAvailabilities_DoctorProfiles_DoctorId",
                         column: x => x.DoctorId,
@@ -293,7 +292,7 @@ namespace Tabibi.Infrastructure.Migrations
                         name: "FK_DoctorOldSpecialties_Specialties_SpecialtyId",
                         column: x => x.SpecialtyId,
                         principalTable: "Specialties",
-                        principalColumn: "SpecialtyId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -343,7 +342,7 @@ namespace Tabibi.Infrastructure.Migrations
                         name: "FK_DoctorSpecialties_Specialties_SpecialtyId",
                         column: x => x.SpecialtyId,
                         principalTable: "Specialties",
-                        principalColumn: "SpecialtyId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -351,7 +350,7 @@ namespace Tabibi.Infrastructure.Migrations
                 name: "PatientQuotas",
                 columns: table => new
                 {
-                    QuotaId = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PatientId = table.Column<long>(type: "bigint", nullable: false),
                     AvailableAiMessages = table.Column<int>(type: "int", nullable: false),
@@ -362,7 +361,7 @@ namespace Tabibi.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PatientQuotas", x => x.QuotaId);
+                    table.PrimaryKey("PK_PatientQuotas", x => x.Id);
                     table.ForeignKey(
                         name: "FK_PatientQuotas_PatientProfiles_PatientId",
                         column: x => x.PatientId,
@@ -409,7 +408,7 @@ namespace Tabibi.Infrastructure.Migrations
                 name: "DoctorReviews",
                 columns: table => new
                 {
-                    ReviewId = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     AppointmentId = table.Column<long>(type: "bigint", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
@@ -418,7 +417,7 @@ namespace Tabibi.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DoctorReviews", x => x.ReviewId);
+                    table.PrimaryKey("PK_DoctorReviews", x => x.Id);
                     table.ForeignKey(
                         name: "FK_DoctorReviews_Appointments_AppointmentId",
                         column: x => x.AppointmentId,
@@ -431,7 +430,7 @@ namespace Tabibi.Infrastructure.Migrations
                 name: "Payments",
                 columns: table => new
                 {
-                    PaymentId = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     AppointmentId = table.Column<long>(type: "bigint", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
@@ -444,7 +443,7 @@ namespace Tabibi.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Payments", x => x.PaymentId);
+                    table.PrimaryKey("PK_Payments", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Payments_Appointments_AppointmentId",
                         column: x => x.AppointmentId,
@@ -492,7 +491,7 @@ namespace Tabibi.Infrastructure.Migrations
                         name: "FK_ChatSessions_Payments_PaymentId",
                         column: x => x.PaymentId,
                         principalTable: "Payments",
-                        principalColumn: "PaymentId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -622,6 +621,20 @@ namespace Tabibi.Infrastructure.Migrations
                 name: "IX_DoctorProfileChangeLogs_DoctorId",
                 table: "DoctorProfileChangeLogs",
                 column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DoctorProfiles_LicenseNumber",
+                table: "DoctorProfiles",
+                column: "LicenseNumber",
+                unique: true,
+                filter: "[LicenseNumber] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DoctorProfiles_NationalIdNumber",
+                table: "DoctorProfiles",
+                column: "NationalIdNumber",
+                unique: true,
+                filter: "[NationalIdNumber] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DoctorProfiles_UserId",

@@ -5,14 +5,20 @@ interface Props extends Pick<DoctorProfileSectionProps, "errors" | "isLoading"> 
   licenseProofFile: File | null;
   licenseProofUrl: string;
   setLicenseProofFile: (file: File | null) => void;
+  setLicenseProofUrl: (url: string) => void;
+  licenseProofInputRef: React.RefObject<HTMLInputElement>;
   idProofFile: File | null;
   idProofUrl: string;
   setIdProofFile: (file: File | null) => void;
+  setIdProofUrl: (url: string) => void;
+  idProofInputRef: React.RefObject<HTMLInputElement>;
   degreeProofFile: File | null;
   degreeProofUrl: string;
   setDegreeProofFile: (file: File | null) => void;
+  setDegreeProofUrl: (url: string) => void;
+  degreeProofInputRef: React.RefObject<HTMLInputElement>;
   handleProofChange: (e: React.ChangeEvent<HTMLInputElement>, setFile: (file: File | null) => void, errorKey: string) => void;
-  renderProofPreview: (file: File | null, url: string) => React.ReactNode;
+  renderProofPreview: (file: File | null, url: string, setFile: (file: File | null) => void, setUrl: (url: string) => void, inputRef?: React.RefObject<HTMLInputElement>) => React.ReactNode;
 }
 
 export default function DoctorPaperworkSection({
@@ -21,12 +27,18 @@ export default function DoctorPaperworkSection({
   licenseProofFile,
   licenseProofUrl,
   setLicenseProofFile,
+  setLicenseProofUrl,
+  licenseProofInputRef,
   idProofFile,
   idProofUrl,
   setIdProofFile,
+  setIdProofUrl,
+  idProofInputRef,
   degreeProofFile,
   degreeProofUrl,
   setDegreeProofFile,
+  setDegreeProofUrl,
+  degreeProofInputRef,
   handleProofChange,
   renderProofPreview,
 }: Props) {
@@ -48,8 +60,9 @@ export default function DoctorPaperworkSection({
               <span className="text-[11px] text-outline">Required: Upload PDF or image</span>
             </div>
           </div>
-          {renderProofPreview(licenseProofFile, licenseProofUrl)}
+          {renderProofPreview(licenseProofFile, licenseProofUrl, setLicenseProofFile, setLicenseProofUrl, licenseProofInputRef)}
           <input
+            ref={licenseProofInputRef}
             type="file"
             accept=".pdf,image/*"
             onChange={(e) => handleProofChange(e, setLicenseProofFile, "licenseProof")}
@@ -71,8 +84,9 @@ export default function DoctorPaperworkSection({
               <span className="text-[11px] text-outline">Required: Accepted formats: PDF or image</span>
             </div>
           </div>
-          {renderProofPreview(idProofFile, idProofUrl)}
+          {renderProofPreview(idProofFile, idProofUrl, setIdProofFile, setIdProofUrl, idProofInputRef)}
           <input
+            ref={idProofInputRef}
             type="file"
             accept=".pdf,image/*"
             onChange={(e) => handleProofChange(e, setIdProofFile, "idProof")}
@@ -94,8 +108,9 @@ export default function DoctorPaperworkSection({
               <span className="text-[11px] text-outline">Required: Accepted formats: PDF or image</span>
             </div>
           </div>
-          {renderProofPreview(degreeProofFile, degreeProofUrl)}
+          {renderProofPreview(degreeProofFile, degreeProofUrl, setDegreeProofFile, setDegreeProofUrl, degreeProofInputRef)}
           <input
+            ref={degreeProofInputRef}
             type="file"
             accept=".pdf,image/*"
             onChange={(e) => handleProofChange(e, setDegreeProofFile, "degreeProof")}

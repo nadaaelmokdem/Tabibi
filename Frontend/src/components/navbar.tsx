@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FaStethoscope,
-  FaBrain,
 } from "react-icons/fa6";
 import { MdMenu, MdClose } from "react-icons/md";
 
@@ -47,7 +46,6 @@ const Navbar = () => {
             to="/doctor-login"
             className="text-sm font-semibold px-4 py-2 rounded-xl text-primary hover:bg-surface-variant/40 transition-colors duration-150 flex items-center gap-1.5"
           >
-            <FaBrain size={13} className="opacity-70" />
             Doctor Login
           </Link>
           <Link
@@ -64,13 +62,21 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <button
-          className="md:hidden p-2 rounded-lg text-primary cursor-pointer"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label={isOpen ? "Close menu" : "Open menu"}
-        >
-          {isOpen ? <MdClose size={22} /> : <MdMenu size={22} />}
-        </button>
+        <div className="md:hidden flex items-center gap-2">
+          <Link
+            to="/register"
+            className="text-xs font-semibold px-3 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark shadow-md transition-all duration-200"
+          >
+            Get Started Free
+          </Link>
+          <button
+            className="p-2 rounded-lg text-primary cursor-pointer"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+          >
+            {isOpen ? <MdClose size={22} /> : <MdMenu size={22} />}
+          </button>
+        </div>
       </nav>
 
       {isOpen && (

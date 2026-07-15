@@ -57,8 +57,12 @@ export const ServicesAndPricingManager: React.FC<Props> = ({
     if (typeof value === "boolean") {
       setFormData({ ...formData, [field]: value });
     } else {
-      const numValue = Number(value);
-      setFormData({ ...formData, [field]: numValue < 0 ? 0 : numValue });
+      if (value === "") {
+        setFormData({ ...formData, [field]: "" as any });
+      } else {
+        const numValue = Number(value);
+        setFormData({ ...formData, [field]: numValue < 0 ? 0 : numValue });
+      }
     }
   };
 
@@ -77,18 +81,14 @@ export const ServicesAndPricingManager: React.FC<Props> = ({
     
     if ((formData.isClinicEnabled && formData.clinicPrice <= 0) ||
         (formData.isChatEnabled && formData.chatPrice <= 0) ||
-        (formData.isVideoEnabled && formData.videoPrice <= 0) ||
-        (formData.isCallEnabled && formData.callPrice <= 0)) {
+        (formData.isVideoCallEnabled && formData.videoCallPrice <= 0)) {
       setError("Prices must be greater than 0.");
       return;
     }
 
     if ((formData.chatPrice > formData.clinicPrice && formData.isChatEnabled) ||
-        
-        (formData.videoPrice > formData.clinicPrice && formData.isVideoEnabled) ||
-        
-        (formData.callPrice > formData.clinicPrice && formData.isCallEnabled)) {
-      
+        (formData.videoCallPrice > formData.clinicPrice && formData.isVideoCallEnabled)) {
+
       setError(`Remote consultation prices cannot exceed clinic price (${formData.clinicPrice} EGP).`);
       return;
     }
@@ -142,15 +142,10 @@ export const ServicesAndPricingManager: React.FC<Props> = ({
 
                   <span className="text-sm font-semibold">{formData.isChatEnabled ? `${formData.chatPrice} EGP` : 'Disabled'}</span>
                 </div>
-                <div className={`flex flex-col items-start px-3 py-1.5 rounded-md border ${formData.isVideoEnabled ? 'bg-primary/10 border-primary/15 text-primary-dark' : 'bg-surface-container border-surface-variant text-outline-variant'}`}>
+                <div className={`flex flex-col items-start px-3 py-1.5 rounded-md border ${formData.isVideoCallEnabled ? 'bg-primary/10 border-primary/15 text-primary-dark' : 'bg-surface-container border-surface-variant text-outline-variant'}`}>
                   <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 mb-0.5">Video</span>
 
-                  <span className="text-sm font-semibold">{formData.isVideoEnabled ? `${formData.videoPrice} EGP` : 'Disabled'}</span>
-                </div>
-                <div className={`flex flex-col items-start px-3 py-1.5 rounded-md border ${formData.isCallEnabled ? 'bg-primary/10 border-primary/15 text-primary-dark' : 'bg-surface-container border-surface-variant text-outline-variant'}`}>
-                  <span className="text-[10px] font-bold uppercase tracking-wider opacity-70 mb-0.5">Call</span>
-
-                  <span className="text-sm font-semibold">{formData.isCallEnabled ? `${formData.callPrice} EGP` : 'Disabled'}</span>
+                  <span className="text-sm font-semibold">{formData.isVideoCallEnabled ? `${formData.videoCallPrice} EGP` : 'Disabled'}</span>
                 </div>
               </div>
             </div>
@@ -243,8 +238,7 @@ export const ServicesAndPricingManager: React.FC<Props> = ({
             <input
               type="number"
               min="1"
-              
-              value={formData.clinicPrice || 0}
+              value={formData.clinicPrice || ""}
               onChange={(e) => handlePriceChange("clinicPrice", e.target.value)}
               placeholder="EGP"
               className="w-full bg-background border border-primary rounded px-2 py-2 text-sm text-primary-dark"
@@ -265,8 +259,7 @@ export const ServicesAndPricingManager: React.FC<Props> = ({
             <input
               type="number"
               min="1"
-              
-              value={formData.chatPrice || 0}
+              value={formData.chatPrice || ""}
               onChange={(e) => handlePriceChange("chatPrice", e.target.value)}
               placeholder="EGP"
               className="w-full bg-background border border-primary rounded px-2 py-2 text-sm text-primary-dark"
@@ -278,45 +271,23 @@ export const ServicesAndPricingManager: React.FC<Props> = ({
           <div className="flex items-center gap-1.5 mb-2">
             <label className="flex items-center gap-1.5 cursor-pointer">
 
-              <input type="checkbox" checked={formData.isVideoEnabled ?? true} onChange={(e) => handlePriceChange("isVideoEnabled", e.target.checked)} className="w-4 h-4 cursor-pointer text-primary accent-primary" />
+              <input type="checkbox" checked={formData.isVideoCallEnabled ?? true} onChange={(e) => handlePriceChange("isVideoCallEnabled", e.target.checked)} className="w-4 h-4 cursor-pointer text-primary accent-primary" />
               <span className="block text-xs font-bold text-primary-light">Video</span>
             </label>
           </div>
 
-          {formData.isVideoEnabled !== false && (
+          {formData.isVideoCallEnabled !== false && (
             <input
               type="number"
               min="1"
-              
-              value={formData.videoPrice || 0}
-              onChange={(e) => handlePriceChange("videoPrice", e.target.value)}
+              value={formData.videoCallPrice || ""}
+              onChange={(e) => handlePriceChange("videoCallPrice", e.target.value)}
               placeholder="EGP"
               className="w-full bg-background border border-primary rounded px-2 py-2 text-sm text-primary-dark"
             />
           )}
         </div>
 
-        <div className="bg-white p-3 rounded border border-surface-variant">
-          <div className="flex items-center gap-1.5 mb-2">
-            <label className="flex items-center gap-1.5 cursor-pointer">
-
-              <input type="checkbox" checked={formData.isCallEnabled ?? true} onChange={(e) => handlePriceChange("isCallEnabled", e.target.checked)} className="w-4 h-4 cursor-pointer text-primary accent-primary" />
-              <span className="block text-xs font-bold text-primary-light">Call</span>
-            </label>
-          </div>
-
-          {formData.isCallEnabled !== false && (
-            <input
-              type="number"
-              min="1"
-              
-              value={formData.callPrice || 0}
-              onChange={(e) => handlePriceChange("callPrice", e.target.value)}
-              placeholder="EGP"
-              className="w-full bg-background border border-primary rounded px-2 py-2 text-sm text-primary-dark"
-            />
-          )}
-        </div>
       </div>
     </div>
   );

@@ -68,11 +68,6 @@ namespace Tabibi.API.Controllers
                 return Unauthorized("User not authenticated");
             }
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var res = await doctorService.BulkUpdateProfile(userId, profileData);
             if (!res.IsSuccess)
             {

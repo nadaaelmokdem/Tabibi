@@ -1,6 +1,6 @@
 import { MdAssignment } from "react-icons/md";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import DoctorService from '../../services/doctorService';
 import { AxiosError } from "axios";
@@ -41,21 +41,24 @@ export default function DoctorAdditionalData() {
     yearsOfExperience: "",
     bio: "",
     specialties: [""],
-    clinicPrice: "0",
+    clinicPrice: "",
     isClinicEnabled: true,
-    chatPrice: "0",
+    chatPrice: "",
     isChatEnabled: true,
-    videoPrice: "0",
-    isVideoEnabled: true,
-    callPrice: "0",
-    isCallEnabled: true,
+    videoCallPrice: "",
+    isVideoCallEnabled: true,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState("");
 
+  const profilePicInputRef = useRef<HTMLInputElement>(null);
+  const licenseProofInputRef = useRef<HTMLInputElement>(null);
+  const idProofInputRef = useRef<HTMLInputElement>(null);
+  const degreeProofInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    if (!location.state?.fromSignIn) return;
+    let isMounted = true;
     
     const fetchProfile = async () => {
       try {
@@ -63,6 +66,19 @@ export default function DoctorAdditionalData() {
           DoctorService.getProfile(),
           DoctorService.getSpecialties()
         ]);
+        
+        if (!isMounted) return;
+
+        // Guard: if the doctor required data is null, don't bypass the DoctorAdditionalData page
+        const isDataMissing = !profile.licenseNumber || !profile.nationalIdNumber || !profile.licenseProofUrl;
+        if (!location.state?.fromSignIn) {
+          if (isDataMissing) {
+            setHasAccess(true);
+          } else {
+            setHasAccess(false);
+          }
+        }
+
         setAvailableSpecialties(specialtiesList.map(s => s.name));
         setFormData({
           id: user?.id || "",
@@ -77,14 +93,12 @@ export default function DoctorAdditionalData() {
           specialties: profile.specialties && profile.specialties.length > 0 
             ? profile.specialties.map((ds: any) => ds.specialtyName)
             : [""],
-          clinicPrice: profile.clinicPrice?.toString() || "0",
+          clinicPrice: profile.clinicPrice?.toString() || "",
           isClinicEnabled: profile.isClinicEnabled ?? true,
-          chatPrice: profile.chatPrice?.toString() || "0",
+          chatPrice: profile.chatPrice?.toString() || "",
           isChatEnabled: profile.isChatEnabled ?? true,
-          videoPrice: profile.videoPrice?.toString() || "0",
-          isVideoEnabled: profile.isVideoEnabled ?? true,
-          callPrice: profile.callPrice?.toString() || "0",
-          isCallEnabled: profile.isCallEnabled ?? true,
+          videoCallPrice: profile.videoCallPrice?.toString() || "",
+          isVideoCallEnabled: profile.isVideoCallEnabled ?? true,
         });
 
         if (profile.licenseProofUrl) {
@@ -102,12 +116,19 @@ export default function DoctorAdditionalData() {
           setProfilePicUrl(picUrl);
         }
       } catch (err) {
+        if (!isMounted) return;
         console.error("Failed to fetch profile", err);
+        if (!location.state?.fromSignIn) {
+          setHasAccess(false);
+        }
       }
     };
     fetchProfile();
-  }, [location.state?.fromSignIn, user?.id]);
-  const [hasAccess] = useState(location.state?.fromSignIn);
+    
+    return () => { isMounted = false; };
+  }, [user?.id]); // fetch profile once when component mounts
+
+  const [hasAccess, setHasAccess] = useState<boolean | null>(location.state?.fromSignIn ? true : null);
 
   useEffect(() => {
     if (location.state?.fromSignIn) {
@@ -117,8 +138,16 @@ export default function DoctorAdditionalData() {
     }
   }, [location.pathname, location.state, navigate]);
 
-  if (!hasAccess) {
+  if (hasAccess === false) {
     return <Navigate to="/doctor-profile" replace />;
+  }
+
+  if (hasAccess === null) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
 
@@ -142,20 +171,120 @@ export default function DoctorAdditionalData() {
     }
   };
 
-  const renderProofPreview = (file: File | null, url: string) => {
+  const renderProofPreview = (file: File | null, url: string, setFile: (file: File | null) => void, setUrl: (url: string) => void, inputRef?: React.RefObject<HTMLInputElement>) => {
+    const handleRemove = () => {
+      setFile(null);
+      setUrl("");
+      if (inputRef?.current) {
+        inputRef.current.value = "";
+      }
+    };
+
     if (file) {
       if (file.type.startsWith("image/")) {
-        return <img src={URL.createObjectURL(file)} alt="Preview" className="h-16 w-16 object-cover rounded mt-2 border border-surface-variant" />;
+        return (
+          <div className="relative mt-2">
+            <img src={URL.createObjectURL(file)} alt="Preview" className="h-24 w-24 object-cover rounded-lg border border-surface-variant" />
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+              disabled={isLoading}
+            >
+              ×
+            </button>
+          </div>
+        );
       }
       if (file.type === "application/pdf") {
-        return <div className="mt-2 flex items-center gap-2 text-primary-dark font-medium"><MdAssignment className="text-xl" /> <span>{file.name}</span></div>;
+        return (
+          <div className="mt-2 flex items-center gap-2 text-primary-dark font-medium">
+            <MdAssignment className="text-xl" /> <span>{file.name}</span>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="ml-2 text-red-500 hover:text-red-600 text-xs underline"
+              disabled={isLoading}
+            >
+              Remove
+            </button>
+          </div>
+        );
       }
     }
     if (url) {
       if (url.toLowerCase().endsWith(".pdf") || url.includes(".pdf?")) {
-        return <div className="mt-2 text-[12px] flex items-center gap-2">Current proof: <a href={getFileUrl(url)} target="_blank" rel="noreferrer" className="text-primary-dark font-medium underline flex items-center gap-1"><MdAssignment/> View PDF</a></div>;
+        return (
+          <div className="mt-2 text-[12px] flex items-center gap-2">
+            Current proof: <a href={getFileUrl(url)} target="_blank" rel="noreferrer" className="text-primary-dark font-medium underline flex items-center gap-1"><MdAssignment/> View PDF</a>
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="ml-2 text-red-500 hover:text-red-600 text-xs underline"
+              disabled={isLoading}
+            >
+              Remove
+            </button>
+          </div>
+        );
       }
-      return <div className="mt-2 text-[12px] flex items-center gap-2">Current proof: <a href={getFileUrl(url)} target="_blank" rel="noreferrer" className="text-primary-dark font-medium underline"><CachedImage src={url} alt="Current Preview" className="h-16 w-16 object-cover rounded border border-surface-variant" /></a></div>;
+      return (
+        <div className="relative mt-2 text-[12px] flex items-center gap-2">
+          Current proof: <a href={getFileUrl(url)} target="_blank" rel="noreferrer" className="text-primary-dark font-medium underline"><CachedImage src={url} alt="Current Preview" className="h-24 w-24 object-cover rounded-lg border border-surface-variant" /></a>
+          <button
+            type="button"
+            onClick={handleRemove}
+            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+            disabled={isLoading}
+          >
+            ×
+          </button>
+        </div>
+      );
+    }
+    return null;
+  };
+
+
+
+  const renderProfilePicPreview = (file: File | null, url: string) => {
+    const handleRemove = () => {
+      setProfilePicFile(null);
+      setProfilePicUrl("");
+      if (profilePicInputRef.current) {
+        profilePicInputRef.current.value = "";
+      }
+    };
+
+    if (file) {
+      return (
+        <div className="relative mt-3">
+          <img src={URL.createObjectURL(file)} alt="Profile Preview" className="h-24 w-24 object-cover rounded-full border-2 border-surface-variant" />
+          <button
+            type="button"
+            onClick={handleRemove}
+            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+            disabled={isLoading}
+          >
+            ×
+          </button>
+        </div>
+      );
+    }
+    if (url) {
+      return (
+        <div className="relative mt-3">
+          <img src={getFileUrl(url)} alt="Current Profile" className="h-24 w-24 object-cover rounded-full border-2 border-surface-variant" />
+          <button
+            type="button"
+            onClick={handleRemove}
+            className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+            disabled={isLoading}
+          >
+            ×
+          </button>
+        </div>
+      );
     }
     return null;
   };
@@ -229,8 +358,7 @@ export default function DoctorAdditionalData() {
     };
     validatePrice(formData.clinicPrice, formData.isClinicEnabled, "clinicPrice");
     validatePrice(formData.chatPrice, formData.isChatEnabled, "chatPrice");
-    validatePrice(formData.videoPrice, formData.isVideoEnabled, "videoPrice");
-    validatePrice(formData.callPrice, formData.isCallEnabled, "callPrice");
+    validatePrice(formData.videoCallPrice, formData.isVideoCallEnabled, "videoCallPrice");
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -322,10 +450,8 @@ export default function DoctorAdditionalData() {
         isClinicEnabled: formData.isClinicEnabled,
         chatPrice: parseFloat(formData.chatPrice || "0"),
         isChatEnabled: formData.isChatEnabled,
-        videoPrice: parseFloat(formData.videoPrice || "0"),
-        isVideoEnabled: formData.isVideoEnabled,
-        callPrice: parseFloat(formData.callPrice || "0"),
-        isCallEnabled: formData.isCallEnabled,
+        videoCallPrice: parseFloat(formData.videoCallPrice || "0"),
+        isVideoCallEnabled: formData.isVideoCallEnabled,
       };
 
       await DoctorService.bulkUpdateProfile(bulkData);
@@ -420,7 +546,10 @@ export default function DoctorAdditionalData() {
                   errors={errors}
                   isLoading={isLoading}
                   profilePicUrl={profilePicUrl}
+                  profilePicFile={profilePicFile}
                   setProfilePicFile={setProfilePicFile}
+                  renderProfilePicPreview={renderProfilePicPreview}
+                  profilePicInputRef={profilePicInputRef}
                 />
 
                 <DoctorClinicInformationSection
@@ -436,12 +565,18 @@ export default function DoctorAdditionalData() {
                   licenseProofFile={licenseProofFile}
                   licenseProofUrl={licenseProofUrl}
                   setLicenseProofFile={setLicenseProofFile}
+                  setLicenseProofUrl={setLicenseProofUrl}
+                  licenseProofInputRef={licenseProofInputRef}
                   idProofFile={idProofFile}
                   idProofUrl={idProofUrl}
                   setIdProofFile={setIdProofFile}
+                  setIdProofUrl={setIdProofUrl}
+                  idProofInputRef={idProofInputRef}
                   degreeProofFile={degreeProofFile}
                   degreeProofUrl={degreeProofUrl}
                   setDegreeProofFile={setDegreeProofFile}
+                  setDegreeProofUrl={setDegreeProofUrl}
+                  degreeProofInputRef={degreeProofInputRef}
                   handleProofChange={handleProofChange}
                   renderProofPreview={renderProofPreview}
                 />

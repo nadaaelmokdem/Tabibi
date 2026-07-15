@@ -20,7 +20,7 @@ const isImageUrl = (url: string | undefined | null): boolean => {
   if (!url) return false;
   const trimmed = url.trim().toLowerCase();
   if (trimmed.endsWith(".pdf") || trimmed.includes(".pdf?")) return false;
-  return /\.(jpg|jpeg|png|webp|heic|heif)($|\?)/.test(trimmed) || trimmed.startsWith("data:image/") || (trimmed.includes("/uploads/proof-") && !trimmed.endsWith(".pdf"));
+  return /\.(jpg|jpeg|png|webp|heic|heif|jfif)($|\?)/.test(trimmed) || trimmed.startsWith("data:image/") || (trimmed.includes("/uploads/proof-") && !trimmed.endsWith(".pdf"));
 };
 
 export const EditableDetailItem: React.FC<EditableDetailItemProps> = ({

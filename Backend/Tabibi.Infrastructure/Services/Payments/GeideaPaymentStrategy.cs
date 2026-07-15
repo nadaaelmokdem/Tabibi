@@ -32,7 +32,7 @@ namespace Tabibi.Infrastructure.Services.Payments
 
         public async Task<string> GeneratePaymentLinkAsync(Payment payment, Appointment appointment)
         {
-            var orderId = $"GEID-{payment.PaymentId}-{DateTime.UtcNow.Ticks}";
+            var orderId = $"GEID-{payment.Id}-{DateTime.UtcNow.Ticks}";
             payment.ExternalOrderId = orderId;
 
             string amountStr = payment.Amount.ToString("0.00", CultureInfo.InvariantCulture);
@@ -155,10 +155,10 @@ namespace Tabibi.Infrastructure.Services.Payments
                     return Task.FromResult(isFailedState);
                     
                 string amountStr = amount.ToString("0.00", CultureInfo.InvariantCulture);
-                string expectedSignature = GenerateWebhookSignature(_merchantPublicKey, amountStr, currency, orderId, status, externalOrderId, _apiPassword, timestamp);
+                string expectedSignature = GenerateWebhookSignature(_merchantPublicKey, amountStr, currency ?? "", orderId ?? "", status ?? "", externalOrderId ?? "", _apiPassword, timestamp ?? "");
                 if (actualSignature == expectedSignature) return Task.FromResult(true);
 
-                string expectedSignature2 = GenerateWebhookSignature(_merchantPublicKey, amountStr, currency, orderId, detailedStatus, externalOrderId, _apiPassword, timestamp);
+                string expectedSignature2 = GenerateWebhookSignature(_merchantPublicKey, amountStr, currency ?? "", orderId ?? "", detailedStatus ?? "", externalOrderId ?? "", _apiPassword, timestamp ?? "");
                 if (actualSignature == expectedSignature2) return Task.FromResult(true);
 
                 return Task.FromResult(isFailedState);
@@ -202,8 +202,8 @@ namespace Tabibi.Infrastructure.Services.Payments
                 if (!string.IsNullOrEmpty(signature) && !string.IsNullOrEmpty(timestamp))
                 {
                     string amountStr = amount.ToString("0.00", CultureInfo.InvariantCulture);
-                    string expectedSignature = GenerateWebhookSignature(_merchantPublicKey, amountStr, currency, orderId, status, externalOrderId, _apiPassword, timestamp);
-                    string expectedSignature2 = GenerateWebhookSignature(_merchantPublicKey, amountStr, currency, orderId, detailedStatus, externalOrderId, _apiPassword, timestamp);
+                    string expectedSignature = GenerateWebhookSignature(_merchantPublicKey, amountStr, currency ?? "", orderId ?? "", status ?? "", externalOrderId ?? "", _apiPassword, timestamp ?? "");
+                    string expectedSignature2 = GenerateWebhookSignature(_merchantPublicKey, amountStr, currency ?? "", orderId ?? "", detailedStatus ?? "", externalOrderId ?? "", _apiPassword, timestamp ?? "");
                     
                     if (signature != expectedSignature && signature != expectedSignature2 && !isFailedState)
                     {

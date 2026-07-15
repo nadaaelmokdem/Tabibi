@@ -53,6 +53,16 @@ namespace Tabibi.Infrastructure.Data
                 }
             }
 
+            modelBuilder.Entity<DoctorProfile>()
+                .HasIndex(d => d.LicenseNumber)
+                .IsUnique()
+                .HasFilter("[LicenseNumber] IS NOT NULL");
+
+            modelBuilder.Entity<DoctorProfile>()
+                .HasIndex(d => d.NationalIdNumber)
+                .IsUnique()
+                .HasFilter("[NationalIdNumber] IS NOT NULL");
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
     }

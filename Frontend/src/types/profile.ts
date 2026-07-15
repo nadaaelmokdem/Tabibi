@@ -12,10 +12,8 @@ export interface DoctorProfileFormData {
   isClinicEnabled: boolean;
   chatPrice: string;
   isChatEnabled: boolean;
-  videoPrice: string;
-  isVideoEnabled: boolean;
-  callPrice: string;
-  isCallEnabled: boolean;
+  videoCallPrice: string;
+  isVideoCallEnabled: boolean;
 }
 
 export interface DoctorProfileSectionProps {

@@ -137,21 +137,21 @@ export default function DoctorSpecialtiesPricingSection({
               <label className="text-[14px] font-semibold text-on-surface">Video Call</label>
               <input
                 type="checkbox"
-                name="isVideoEnabled"
-                checked={formData.isVideoEnabled}
+                name="isVideoCallEnabled"
+                checked={formData.isVideoCallEnabled}
                 onChange={handleInputChange}
                 disabled={isLoading}
                 className="w-4 h-4 text-primary-dark rounded cursor-pointer"
               />
             </div>
-            {formData.isVideoEnabled && (
+            {formData.isVideoCallEnabled && (
               <>
                 <div className="flex items-center gap-2 bg-surface-container rounded-md border border-surface-variant px-3 focus-within:ring-1 focus-within:ring-primary-dark focus-within:border-primary-dark overflow-hidden transition-all">
                   <span className="text-outline text-[13px] font-semibold select-none">EGP</span>
                   <input
                     type="number"
-                    name="videoPrice"
-                    value={formData.videoPrice}
+                    name="videoCallPrice"
+                    value={formData.videoCallPrice}
                     onChange={handleInputChange}
                     disabled={isLoading}
                     placeholder="0.00"
@@ -160,7 +160,7 @@ export default function DoctorSpecialtiesPricingSection({
                     className="flex-1 h-10 bg-transparent text-[14px] font-medium outline-none text-on-surface"
                   />
                 </div>
-                {errors.videoPrice && <p className="text-red-500 text-[11px] mt-1.5 font-medium">{errors.videoPrice}</p>}
+                {errors.videoCallPrice && <p className="text-red-500 text-[11px] mt-1.5 font-medium">{errors.videoCallPrice}</p>}
               </>
             )}
           </div>
@@ -199,39 +199,6 @@ export default function DoctorSpecialtiesPricingSection({
             )}
           </div>
 
-          {/* Voice Call */}
-          <div className="bg-white p-4 border border-surface-variant rounded-lg shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <label className="text-[14px] font-semibold text-on-surface">Voice Call</label>
-              <input
-                type="checkbox"
-                name="isCallEnabled"
-                checked={formData.isCallEnabled}
-                onChange={handleInputChange}
-                disabled={isLoading}
-                className="w-4 h-4 text-primary-dark rounded cursor-pointer"
-              />
-            </div>
-            {formData.isCallEnabled && (
-              <>
-                <div className="flex items-center gap-2 bg-surface-container rounded-md border border-surface-variant px-3 focus-within:ring-1 focus-within:ring-primary-dark focus-within:border-primary-dark overflow-hidden transition-all">
-                  <span className="text-outline text-[13px] font-semibold select-none">EGP</span>
-                  <input
-                    type="number"
-                    name="callPrice"
-                    value={formData.callPrice}
-                    onChange={handleInputChange}
-                    disabled={isLoading}
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    className="flex-1 h-10 bg-transparent text-[14px] font-medium outline-none text-on-surface"
-                  />
-                </div>
-                {errors.callPrice && <p className="text-red-500 text-[11px] mt-1.5 font-medium">{errors.callPrice}</p>}
-              </>
-            )}
-          </div>
         </div>
       </div>
     </section>

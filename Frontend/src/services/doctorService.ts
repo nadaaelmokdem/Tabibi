@@ -48,7 +48,20 @@ export default class DoctorService {
   }
 
   static async bulkUpdateProfile(profileData: any): Promise<void> {
-    await api.put("doctor/profile", profileData, { withCredentials: true });
+    try {
+      await api.put("doctor/profile", profileData, { withCredentials: true });
+    } catch (error: unknown) {
+      if (isAxiosError(error) && error.response) {
+        if (error.response.status === 404) {
+          throw new Error("Doctor profile not found!");
+        } else if (error.response.status === 400) {
+          throw new Error(typeof error.response.data === "string" ? error.response.data : "Invalid data provided!");
+        }
+      }
+
+      console.error("An unexpected error occurred:", error);
+      throw new Error("An unexpected error occurred.");
+    }
   }
 
   static async getProfile(): Promise<DoctorProfileData> {

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { FaStethoscope, FaBrain, FaCreditCard, FaWallet, FaBolt, FaCheck, FaArrowRight } from "react-icons/fa6";
+import { FaStethoscope, FaCreditCard, FaWallet, FaBolt, FaCheck, FaArrowRight } from "react-icons/fa6";
+import { MdAutoAwesome } from "react-icons/md";
 
 const PAYMENT_FEATURES = [
   { icon: FaCreditCard, label: "Visa / Mastercard", sub: "Credit & debit" },
@@ -51,9 +52,9 @@ export default function PricingSection() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3.5 p-5 rounded-2xl bg-white border-[1.5px] border-primary shadow-md">
+          <div className="flex flex-col gap-3.5 p-5 rounded-2xl bg-white shadow-md">
             <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-surface-variant/50">
-              <FaBrain size={18} className="text-primary" />
+              <MdAutoAwesome size={18} className="text-primary" />
             </div>
             <div>
               <p className="text-xs font-semibold mb-1 text-primary-light">AI Health Messages</p>

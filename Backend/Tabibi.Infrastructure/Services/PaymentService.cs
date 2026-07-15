@@ -21,7 +21,7 @@ public class PaymentService(PaymentGatewayResolver paymentGatewayResolver, AppDb
         var strategy = paymentGatewayResolver.Resolve(gateway);
 
         var result = await strategy.ProcessWebhookAsync(payload);
-        if (!result.IsSuccess) return ServiceResult.Failure(result.ErrorMessage);
+        if (!result.IsSuccess) return ServiceResult.Failure(result.ErrorMessage ?? "Unknown error");
 
         var payment = await dbContext.Payments
             .Include(p => p.Appointment)

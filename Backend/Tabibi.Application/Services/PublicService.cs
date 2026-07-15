@@ -15,7 +15,7 @@ namespace Tabibi.Application.Services
                 .OrderBy(s => s.Name)
                 .Select(s => new SpecialtyDTO
                 {
-                    SpecialtyId = s.SpecialtyId,
+                    SpecialtyId = s.Id,
                     Name = s.Name
                 })
                 .ToListAsync();

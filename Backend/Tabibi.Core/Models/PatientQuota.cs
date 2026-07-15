@@ -7,7 +7,7 @@ namespace Tabibi.Core.Models
     public class PatientQuota
     {
         [Key]
-        public long QuotaId { get; set; }
+        public long Id { get; set; }
 
         [Required]
         public long PatientId { get; set; }

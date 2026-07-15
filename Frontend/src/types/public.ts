@@ -36,8 +36,6 @@ export interface DoctorListItem {
   isClinicEnabled: boolean;
   chatPrice: number;
   isChatEnabled: boolean;
-  videoPrice: number;
-  isVideoEnabled: boolean;
-  callPrice: number;
-  isCallEnabled: boolean;
+  videoCallPrice: number;
+  isVideoCallEnabled: boolean;
 }

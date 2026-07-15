@@ -1,6 +1,6 @@
 import { CachedImage } from "../common/CachedImage";
 import React from "react";
-import { FaStar, FaMapMarkerAlt, FaBriefcase, FaVideo, FaCommentDots, FaPhone, FaClinicMedical, FaCalendarCheck } from "react-icons/fa";
+import { FaStar, FaMapMarkerAlt, FaBriefcase, FaVideo, FaCommentDots, FaClinicMedical, FaCalendarCheck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import type { DoctorListItem } from "../../types/public";
@@ -21,12 +21,11 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onStartCal
   // Use prices directly from the doctor profile
   const minPrices = {
     clinic: doctor.isClinicEnabled && doctor.clinicPrice != null ? doctor.clinicPrice : null,
-    video: doctor.isVideoEnabled && doctor.videoPrice != null ? doctor.videoPrice : null,
-    call: doctor.isCallEnabled && doctor.callPrice != null ? doctor.callPrice : null,
+    video: doctor.isVideoCallEnabled && doctor.videoCallPrice != null ? doctor.videoCallPrice : null,
     chat: doctor.isChatEnabled && doctor.chatPrice != null ? doctor.chatPrice : null,
   };
 
-  const activePrices = [minPrices.clinic, minPrices.video, minPrices.call, minPrices.chat].filter((p): p is number => p !== null);
+  const activePrices = [minPrices.clinic, minPrices.video, minPrices.chat].filter((p): p is number => p !== null);
   const hasAnyPrice = activePrices.length > 0;
 
   const handleStartChat = (e: React.MouseEvent) => {
@@ -102,7 +101,6 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onStartCal
           <div className="flex gap-3 text-outline-variant mb-4">
              {minPrices.clinic !== null && <FaClinicMedical title="Clinic Visit" className="hover:text-primary transition-colors cursor-pointer" />}
              {minPrices.video !== null && <FaVideo title="Video Call" onClick={handleStartCall} className="hover:text-primary transition-colors cursor-pointer" />}
-             {minPrices.call !== null && <FaPhone title="Voice Call" className="hover:text-primary transition-colors cursor-pointer" />}
              {minPrices.chat !== null && <FaCommentDots title="Chat" onClick={handleStartChat} className="hover:text-primary transition-colors cursor-pointer" />}
           </div>
         </div>
@@ -119,9 +117,9 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onStartCal
               </div>
             )}
           </div>
-          {!isSelf && (doctor.isChatEnabled || doctor.isClinicEnabled || doctor.isVideoEnabled || doctor.isCallEnabled) && (
+          {!isSelf && (doctor.isChatEnabled || doctor.isClinicEnabled || doctor.isVideoCallEnabled) && (
             <div className="flex gap-2 w-full sm:w-auto shrink-0 mt-2 sm:mt-0">
-              {onBookAppointment && (doctor.isClinicEnabled || doctor.isVideoEnabled || doctor.isCallEnabled) && (
+              {onBookAppointment && (doctor.isClinicEnabled || doctor.isVideoCallEnabled) && (
                 <button
                   type="button"
                   onClick={handleBookAppointment}
@@ -139,7 +137,7 @@ const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onStartChat, onStartCal
                   <FaCommentDots className="text-base" /> Chat
                 </button>
               )}
-              {doctor.isVideoEnabled && (
+              {doctor.isVideoCallEnabled && (
                 <button
                   type="button"
                   onClick={handleStartCall}

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Tabibi.Core.Models
 {
- 
+
         public class DoctorProfile
         {
             [Key]

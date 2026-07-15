@@ -1,7 +1,8 @@
-import { FaBrain, FaStethoscope, FaShieldHalved, FaClock, FaBolt } from "react-icons/fa6";
+import { FaStethoscope, FaShieldHalved, FaClock, FaBolt } from "react-icons/fa6";
+import { MdAutoAwesome } from "react-icons/md";
 
 const FREE_PERKS = [
-  { icon: FaBrain, title: "15 daily", sub: "Free AI consultations — every single day" },
+  { icon: MdAutoAwesome, title: "15 daily", sub: "Free AI consultations — every single day" },
   { icon: FaStethoscope, title: "2 monthly", sub: "Free GP messages — no booking required" },
   { icon: FaShieldHalved, title: "Encrypted", sub: "All sessions are end-to-end protected" },
   { icon: FaClock, title: "24 / 7", sub: "Verified doctors always available" },
@@ -16,15 +17,13 @@ export default function FreePerksSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-primary-light">
-              No subscription. No lock-in.
-            </p>
+
             <h2 className="font-heading font-extrabold text-primary-dark leading-[1.15] tracking-tight text-3xl sm:text-4xl mb-4">
               Serious healthcare{" "}
               <span className="text-primary">that puts you first</span>
             </h2>
             <p className="text-sm leading-relaxed mb-5 text-text-muted max-w-lg mx-auto lg:mx-0">
-              Tabibi gives every patient daily free AI consultations and two free monthly GP messages —
+              Tabibi gives every patient 15 daily free AI consultations and two free monthly General Practitioner messages —
               built into the platform, no strings attached. When you need a doctor, you pay only for that booking.
               Nothing more.
             </p>
