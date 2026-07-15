@@ -6,7 +6,7 @@ namespace Tabibi.Application.DTOs;
 
 public class DoctorAvailabilityDTO
 {
-    public int AvailabilityId { get; set; }
+    public long AvailabilityId { get; set; }
     public DayOfWeek DayOfWeek { get; set; }
     public string StartTime { get; set; } = string.Empty;
     public string EndTime { get; set; } = string.Empty;

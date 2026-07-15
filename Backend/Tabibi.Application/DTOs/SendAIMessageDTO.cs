@@ -4,6 +4,6 @@ namespace Tabibi.Application.DTOs
     {
         public required string RequestText { get; set; }
         public required string ContextText { get; set; } = "";
-        public int? SessionId { get; set; }
+        public long? SessionId { get; set; }
     }
 }

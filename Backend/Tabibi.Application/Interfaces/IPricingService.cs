@@ -4,5 +4,5 @@ namespace Tabibi.Application.Interfaces;
 
 public interface IPricingService
 {
-    Task<decimal?> GetPriceAsync(int doctorId, ConsultationType type);
+    Task<decimal?> GetPriceAsync(long doctorId, ConsultationType type);
 }

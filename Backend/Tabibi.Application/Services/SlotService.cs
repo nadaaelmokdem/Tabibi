@@ -31,7 +31,7 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
     }
 
     public async Task<List<DoctorAvailability>> GetActiveAvailabilitiesAsync(
-        int doctorId,
+        long doctorId,
         DateOnly date)
     {
         // First, check if there are any specific-date overrides for this exact date.
@@ -82,7 +82,7 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
     }
 
     public async Task<List<Appointment>> GetBlockingAppointmentsAsync(
-        int doctorId,
+        long doctorId,
         DateOnly date)
     {
         var dayStart = date.ToDateTime(TimeOnly.MinValue);
@@ -113,7 +113,7 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
     }
 
     public async Task<bool> IsSlotAvailableAsync(
-        int doctorId,
+        long doctorId,
         DateTime scheduledAt,
         int durationMins = DefaultSlotDurationMins)
     {
@@ -122,7 +122,7 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
     }
 
     public async Task<SlotValidationResult> ValidateSlotAsync(
-        int doctorId,
+        long doctorId,
         DateTime scheduledAt,
         int durationMins = DefaultSlotDurationMins)
     {

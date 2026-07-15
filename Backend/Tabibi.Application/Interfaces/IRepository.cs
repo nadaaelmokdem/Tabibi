@@ -4,7 +4,7 @@ namespace Tabibi.Application.Interfaces;
 
 public interface IRepository<T> where T : class
 {
-    Task<T?> GetByIdAsync(int id);
+    Task<T?> GetByIdAsync(long id);
     Task<T?> GetByIdAsync(string id);
     Task<IEnumerable<T>> GetAllAsync();
     Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);

@@ -14,7 +14,7 @@ namespace Tabibi.API.Hubs
     [Authorize]
     public class ChatHub(IChatService chatService, IPresenceTracker presenceTracker) : Hub
     {
-        private static string GroupName(int sessionId) => $"session-{sessionId}";
+        private static string GroupName(long sessionId) => $"session-{sessionId}";
         private static string UserGroupName(string userId) => $"user-{userId}";
 
         private string? GetUserId() => Context.User?.GetId();
@@ -73,7 +73,7 @@ namespace Tabibi.API.Hubs
 
         // Client calls this right after the connection starts, once it
         // knows which session it wants to chat in.
-        public async Task JoinSession(int sessionId)
+        public async Task JoinSession(long sessionId)
         {
             var userId = GetUserId();
             if (userId == null)
@@ -95,7 +95,7 @@ namespace Tabibi.API.Hubs
             await Clients.Caller.SendAsync("JoinedSession", new { sessionId, role = access.Role });
         }
 
-        public async Task LeaveSession(int sessionId)
+        public async Task LeaveSession(long sessionId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, GroupName(sessionId));
         }

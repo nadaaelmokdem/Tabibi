@@ -10,9 +10,9 @@ namespace Tabibi.Core.Models
         public class DoctorReview
         {
             [Key]
-            public int ReviewId { get; set; }
+            public long ReviewId { get; set; }
 
-            public int AppointmentId { get; set; }
+            public long AppointmentId { get; set; }
 
             [Range(1, 5)]
             public int Rating { get; set; }

@@ -10,10 +10,10 @@ namespace Tabibi.Core.Models
         public class DoctorSpecialty
         {
             [Key]
-            public int Id { get; set; }
+            public long Id { get; set; }
 
-            public int DoctorId { get; set; }
-            public int SpecialtyId { get; set; }
+            public long DoctorId { get; set; }
+            public long SpecialtyId { get; set; }
 
 
             // Navigation

@@ -11,7 +11,7 @@ namespace Tabibi.Application.Services
         // Confirms this user is actually one of the two participants in the
         // session before letting them join the SignalR group, read history,
         // or send a message. Never trust a sessionId from the client alone.
-        public async Task<ChatAccessResult> ValidateAccess(int sessionId, string userId)
+        public async Task<ChatAccessResult> ValidateAccess(long sessionId, string userId)
         {
             var session = await unitOfWork.ChatSessions.Query()
                 .Include(s => s.Patient).ThenInclude(p => p.User)
@@ -56,7 +56,7 @@ namespace Tabibi.Application.Services
 
         }
 
-        public async Task<List<ChatMessageDTO>> GetHistory(int sessionId)
+        public async Task<List<ChatMessageDTO>> GetHistory(long sessionId)
         {
             return await unitOfWork.ChatMessages.Query()
                 .Where(m => m.SessionId == sessionId)
@@ -78,7 +78,7 @@ namespace Tabibi.Application.Services
                 .ToListAsync();
         }
 
-        public async Task<ChatSessionDetailsDTO?> GetSessionDetails(int sessionId)
+        public async Task<ChatSessionDetailsDTO?> GetSessionDetails(long sessionId)
         {
             return await unitOfWork.ChatSessions.Query()
                 .Where(s => s.SessionId == sessionId)
@@ -147,7 +147,7 @@ namespace Tabibi.Application.Services
             .ToList();
         }
 
-        public async Task<ChatMessage> SaveMessage(int sessionId, string role, string content, bool isSystemMessage = false)
+        public async Task<ChatMessage> SaveMessage(long sessionId, string role, string content, bool isSystemMessage = false)
         {
             var session = await unitOfWork.ChatSessions.Query().FirstOrDefaultAsync(s => s.SessionId == sessionId);
             if (session == null) throw new Exception("Session not found");
@@ -202,7 +202,7 @@ namespace Tabibi.Application.Services
             return message;
         }
 
-        public async Task<ChatSession> StartOrGetSessionAsync(string patientUserId, int doctorId, bool isCompanyPaid = false)
+        public async Task<ChatSession> StartOrGetSessionAsync(string patientUserId, long doctorId, bool isCompanyPaid = false)
         {
             var patient = await unitOfWork.PatientProfiles.Query().Include(p => p.Quota).FirstOrDefaultAsync(p => p.UserId == patientUserId);
             if (patient == null)
@@ -282,7 +282,7 @@ namespace Tabibi.Application.Services
             return newSession;
         }
 
-        public async Task<ChatSession> StartOrGetAISessionAsync(string patientUserId, int? sessionId = null)
+        public async Task<ChatSession> StartOrGetAISessionAsync(string patientUserId, long? sessionId = null)
         {
             var patient = await unitOfWork.PatientProfiles.Query().FirstOrDefaultAsync(p => p.UserId == patientUserId);
             if (patient == null)
@@ -316,7 +316,7 @@ namespace Tabibi.Application.Services
             return newSession;
         }
 
-        public async Task<ChatSession> FollowUpSessionAsync(int sessionId, string patientUserId)
+        public async Task<ChatSession> FollowUpSessionAsync(long sessionId, string patientUserId)
         {
             var session = await unitOfWork.ChatSessions.Query()
                 .Include(s => s.Patient)

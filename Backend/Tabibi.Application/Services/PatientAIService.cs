@@ -146,7 +146,7 @@ namespace Tabibi.Application.Services
             return ServiceResult<string>.Success(aiResponseString);
         }
 
-        public async Task<ServiceResult<ChatHistoryResponseDTO>> GetHistoryAsync(string userId, int sessionId)
+        public async Task<ServiceResult<ChatHistoryResponseDTO>> GetHistoryAsync(string userId, long sessionId)
         {
             var patient = await unitOfWork.PatientProfiles.Query().FirstOrDefaultAsync(p => p.UserId == userId);
             if (patient == null) return ServiceResult<ChatHistoryResponseDTO>.Failure("Patient not found");

@@ -7,10 +7,10 @@ namespace Tabibi.Core.Models
     public class Appointment
     {
         [Key]
-        public int AppointmentId { get; set; }
+        public long AppointmentId { get; set; }
 
-        public int PatientId { get; set; }
-        public int DoctorId { get; set; }
+        public long PatientId { get; set; }
+        public long DoctorId { get; set; }
 
         public DateTime ScheduledAt { get; set; }
         public int DurationMins { get; set; } = 30;
@@ -27,7 +27,7 @@ namespace Tabibi.Core.Models
 
         public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Online;
 
-        public int? SessionId { get; set; }
+        public long? SessionId { get; set; }
 
         // Navigation
         [ForeignKey(nameof(PatientId))]

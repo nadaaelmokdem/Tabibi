@@ -10,12 +10,12 @@ namespace Tabibi.Core.Models
         public class ChatSession
         {
             [Key]
-            public int SessionId { get; set; }
+            public long SessionId { get; set; }
 
             [Required]
-            public int PatientId { get; set; }
+            public long PatientId { get; set; }
 
-            public int? DoctorId { get; set; }
+            public long? DoctorId { get; set; }
 
 
             [Required]

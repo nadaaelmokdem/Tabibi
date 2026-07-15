@@ -4,7 +4,7 @@ namespace Tabibi.Application.DTOs
 {
     public class AdminDoctorDTO
     {
-        public int DoctorId { get; set; }
+        public long DoctorId { get; set; }
         public string UserId { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
@@ -21,7 +21,7 @@ namespace Tabibi.Application.DTOs
 
     public class AdminDoctorDetailDTO
     {
-        public int DoctorId { get; set; }
+        public long DoctorId { get; set; }
         public string UserId { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
@@ -50,7 +50,7 @@ namespace Tabibi.Application.DTOs
 
     public class DoctorProfileChangeLogDTO
     {
-        public int ChangeLogId { get; set; }
+        public long ChangeLogId { get; set; }
         public string FieldName { get; set; } = string.Empty;
         public string? OldValue { get; set; }
         public string? NewValue { get; set; }
@@ -84,7 +84,7 @@ namespace Tabibi.Application.DTOs
 
     public class AdminAppointmentDTO
     {
-        public int AppointmentId { get; set; }
+        public long AppointmentId { get; set; }
         public string PatientName { get; set; } = string.Empty;
         public string DoctorName { get; set; } = string.Empty;
         public DateTime ScheduledAt { get; set; }

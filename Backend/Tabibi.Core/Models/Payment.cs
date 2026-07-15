@@ -6,9 +6,9 @@ namespace Tabibi.Core.Models
     public class Payment
     {
         [Key]
-        public int PaymentId { get; set; }
+        public long PaymentId { get; set; }
 
-        public int AppointmentId { get; set; }
+        public long AppointmentId { get; set; }
 
         [Column(TypeName = "decimal(10,2)")]
         public decimal Amount { get; set; }

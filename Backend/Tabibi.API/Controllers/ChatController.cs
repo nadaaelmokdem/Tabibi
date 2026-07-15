@@ -13,7 +13,7 @@ namespace Tabibi.API.Controllers
     {
         [HttpPost("start/{doctorId}")]
         [Authorize(Roles = UserRoles.Patient)]
-        public async Task<IActionResult> StartSession(int doctorId, [FromQuery] bool isCompanyPaid = false, [FromBody] StartSessionRequest? request = null)
+        public async Task<IActionResult> StartSession(long doctorId, [FromQuery] bool isCompanyPaid = false, [FromBody] StartSessionRequest? request = null)
         {
             var userId = User.GetId();
             if (string.IsNullOrEmpty(userId))
@@ -39,7 +39,7 @@ namespace Tabibi.API.Controllers
 
         [HttpGet("{sessionId}/messages")]
         [Authorize]
-        public async Task<IActionResult> GetMessages(int sessionId)
+        public async Task<IActionResult> GetMessages(long sessionId)
         {
             var userId = User.GetId();
             if (string.IsNullOrEmpty(userId))
@@ -58,7 +58,7 @@ namespace Tabibi.API.Controllers
         }
         [HttpGet("{sessionId}/details")]
         [Authorize]
-        public async Task<IActionResult> GetSessionDetails(int sessionId)
+        public async Task<IActionResult> GetSessionDetails(long sessionId)
         {
             var userId = User.GetId();
             if (string.IsNullOrEmpty(userId))
@@ -96,7 +96,7 @@ namespace Tabibi.API.Controllers
 
         [HttpPost("{sessionId}/followup")]
         [Authorize(Roles = UserRoles.Patient)]
-        public async Task<IActionResult> FollowUp(int sessionId)
+        public async Task<IActionResult> FollowUp(long sessionId)
         {
             var userId = User.GetId();
             if (string.IsNullOrEmpty(userId)) return Unauthorized();

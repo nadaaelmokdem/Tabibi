@@ -6,7 +6,7 @@ namespace Tabibi.Application.Services;
 
 public class PricingService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces.IPricingService
 {
-    public async Task<decimal?> GetPriceAsync(int doctorId, ConsultationType type)
+    public async Task<decimal?> GetPriceAsync(long doctorId, ConsultationType type)
     {
         var doctor = await unitOfWork.DoctorProfiles.Query()
             .AsNoTracking()

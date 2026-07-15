@@ -90,7 +90,7 @@ namespace Tabibi.Application.Services
                 PageSize = filter.PageSize
             };
         }
-        public async Task<DoctorListDTO?> GetDoctorByIdAsync(int doctorId)
+        public async Task<DoctorListDTO?> GetDoctorByIdAsync(long doctorId)
         {
             var d = await unitOfWork.DoctorProfiles.Query()
                 .Include(dp => dp.User)

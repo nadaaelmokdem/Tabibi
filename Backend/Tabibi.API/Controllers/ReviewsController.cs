@@ -16,7 +16,7 @@ namespace Tabibi.API.Controllers
     public class ReviewsController(IReviewService reviewService) : ControllerBase
     {
         [HttpGet("doctor/{doctorId}")]
-        public async Task<IActionResult> GetDoctorReviews(int doctorId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetDoctorReviews(long doctorId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var res = await reviewService.GetDoctorReviewsAsync(doctorId, page, pageSize);
             if (!res.IsSuccess)

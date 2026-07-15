@@ -8,7 +8,7 @@ namespace Tabibi.Core.Models
         public class DoctorProfile
         {
             [Key]
-            public int DoctorId { get; set; }
+            public long DoctorId { get; set; }
 
             [Required]
             public string UserId { get; set; } = "";

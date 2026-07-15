@@ -10,9 +10,9 @@ namespace Tabibi.Core.Models
         public class DoctorAvailability
         {
             [Key]
-            public int AvailabilityId { get; set; }
+            public long AvailabilityId { get; set; }
 
-            public int DoctorId { get; set; }
+            public long DoctorId { get; set; }
 
             public DayOfWeek DayOfWeek { get; set; }
 

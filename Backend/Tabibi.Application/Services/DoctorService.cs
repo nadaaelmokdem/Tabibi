@@ -599,7 +599,7 @@ namespace Tabibi.Application.Services
                 .OrderBy(n => n));
         }
 
-        private async Task LogSensitiveChange(int doctorId, string changedByUserId, string fieldName, string? oldValue, string? newValue)
+        private async Task LogSensitiveChange(long doctorId, string changedByUserId, string fieldName, string? oldValue, string? newValue)
         {
             if (string.Equals(oldValue ?? "", newValue ?? "", StringComparison.Ordinal)) return;
 
@@ -614,7 +614,7 @@ namespace Tabibi.Application.Services
             });
         }
 
-        private async Task<bool> LogIfChanged(int doctorId, string changedByUserId, string fieldName, string? oldValue, string? newValue)
+        private async Task<bool> LogIfChanged(long doctorId, string changedByUserId, string fieldName, string? oldValue, string? newValue)
         {
             if (string.Equals(oldValue ?? "", newValue ?? "", StringComparison.Ordinal)) return false;
             await LogSensitiveChange(doctorId, changedByUserId, fieldName, oldValue, newValue);

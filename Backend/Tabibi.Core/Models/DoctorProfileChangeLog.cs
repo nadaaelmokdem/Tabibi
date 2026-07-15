@@ -5,9 +5,9 @@ namespace Tabibi.Core.Models
     public class DoctorProfileChangeLog
     {
         [Key]
-        public int ChangeLogId { get; set; }
+        public long ChangeLogId { get; set; }
 
-        public int DoctorId { get; set; }
+        public long DoctorId { get; set; }
 
         public string FieldName { get; set; } = string.Empty;
 

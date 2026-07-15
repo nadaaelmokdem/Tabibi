@@ -6,14 +6,14 @@ namespace Tabibi.Application.DTOs
 {
     public class SpecialtyDTO
     {
-        public int SpecialtyId { get; set; }
+        public long SpecialtyId { get; set; }
         public string Name { get; set; } = "";
     }
 
     public class DoctorSearchFilterDTO
     {
         public string? Name { get; set; }
-        public int? SpecialtyId { get; set; }
+        public long? SpecialtyId { get; set; }
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
         public List<ConsultationType>? BookingTypes { get; set; }
@@ -32,7 +32,7 @@ namespace Tabibi.Application.DTOs
 
     public class DoctorListDTO
     {
-        public int DoctorId { get; set; }
+        public long DoctorId { get; set; }
         public string UserId { get; set; } = "";
         public string FullName { get; set; } = "";
         public string? ProfilePictureUrl { get; set; }

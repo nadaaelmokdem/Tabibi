@@ -7,7 +7,7 @@ namespace Tabibi.Application.Services
 {
     public class ReviewService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces.IReviewService
     {
-        public async Task<ServiceResult<PagedReviewsDTO>> GetDoctorReviewsAsync(int doctorId, int page = 1, int pageSize = 10)
+        public async Task<ServiceResult<PagedReviewsDTO>> GetDoctorReviewsAsync(long doctorId, int page = 1, int pageSize = 10)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 10;

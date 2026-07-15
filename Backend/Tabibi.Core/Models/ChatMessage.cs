@@ -10,9 +10,9 @@ namespace Tabibi.Core.Models
         public class ChatMessage
         {
             [Key]
-            public int MessageId { get; set; }
+            public long MessageId { get; set; }
 
-            public int SessionId { get; set; }
+            public long SessionId { get; set; }
 
             [Required, MaxLength(10)]
             public string Role { get; set; } = "";  

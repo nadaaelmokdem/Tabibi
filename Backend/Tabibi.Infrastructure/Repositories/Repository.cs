@@ -10,7 +10,7 @@ public class Repository<T>(AppDbContext context) : IRepository<T> where T : clas
     protected readonly AppDbContext _context = context;
     protected readonly DbSet<T> _dbSet = context.Set<T>();
 
-    public async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
+    public async Task<T?> GetByIdAsync(long id) => await _dbSet.FindAsync(id);
 
     public async Task<T?> GetByIdAsync(string id) => await _dbSet.FindAsync(id);
 

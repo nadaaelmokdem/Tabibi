@@ -49,7 +49,7 @@ namespace Tabibi.API.Controllers
         }
 
         [HttpGet("history/{sessionId}")]
-        public async Task<IActionResult> GetHistory(int sessionId)
+        public async Task<IActionResult> GetHistory(long sessionId)
         {
             var userId = User.GetId();
             var result = await patientAIService.GetHistoryAsync(userId!, sessionId);

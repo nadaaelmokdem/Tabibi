@@ -16,7 +16,7 @@ public class AppointmentController(
 {
     [HttpGet("available-slots")]
     public async Task<IActionResult> GetAvailableSlots(
-        int doctorId,
+        long doctorId,
         DateOnly date,
         ConsultationType? type = null)
     {
@@ -87,7 +87,7 @@ public class AppointmentController(
 
     [HttpPatch("{appointmentId}/cancel")]
     [Authorize(Roles = UserRoles.Doctor)]
-    public async Task<IActionResult> CancelAppointment(int appointmentId)
+    public async Task<IActionResult> CancelAppointment(long appointmentId)
     {
         var userId = User.GetId();
         if (string.IsNullOrEmpty(userId)) return Unauthorized("User not authenticated");

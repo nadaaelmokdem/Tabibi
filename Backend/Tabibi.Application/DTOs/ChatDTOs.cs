@@ -2,8 +2,8 @@ namespace Tabibi.Application.DTOs
 {
     public class ChatMessageDTO
     {
-        public int MessageId { get; set; }
-        public int SessionId { get; set; }
+        public long MessageId { get; set; }
+        public long SessionId { get; set; }
         public string SenderRole { get; set; } = string.Empty;
         public string SenderUserId { get; set; } = string.Empty;
         public string SenderName { get; set; } = string.Empty;
@@ -13,7 +13,7 @@ namespace Tabibi.Application.DTOs
 
     public class SendMessageRequestDTO
     {
-        public int SessionId { get; set; }
+        public long SessionId { get; set; }
         public string Content { get; set; } = string.Empty;
     }
 
@@ -21,8 +21,8 @@ namespace Tabibi.Application.DTOs
     // frontend knows which side to render the bubble on.
     public class ReceiveMessagePayload
     {
-        public int MessageId { get; set; }
-        public int SessionId { get; set; }
+        public long MessageId { get; set; }
+        public long SessionId { get; set; }
         public string SenderRole { get; set; } = string.Empty;
         public string SenderUserId { get; set; } = string.Empty;
         public string SenderName { get; set; } = string.Empty;

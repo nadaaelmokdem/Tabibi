@@ -6,7 +6,7 @@ namespace Tabibi.Application.DTOs
     public class BookAppointmentDTO
     {
         [Required]
-        public int DoctorId { get; set; }
+        public long DoctorId { get; set; }
 
         [Required]
         public DateTime ScheduledAt { get; set; }

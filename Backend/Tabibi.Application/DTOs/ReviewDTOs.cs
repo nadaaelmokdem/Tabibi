@@ -4,7 +4,7 @@ namespace Tabibi.Application.DTOs
 {
     public class DoctorReviewDTO
     {
-        public int ReviewId { get; set; }
+        public long ReviewId { get; set; }
         public int Rating { get; set; }
         public string? Comment { get; set; }
         public string PatientName { get; set; } = string.Empty;
@@ -14,7 +14,7 @@ namespace Tabibi.Application.DTOs
 
     public class CreateReviewDTO
     {
-        public int AppointmentId { get; set; }
+        public long AppointmentId { get; set; }
         public int Rating { get; set; }
         public string? Comment { get; set; }
     }

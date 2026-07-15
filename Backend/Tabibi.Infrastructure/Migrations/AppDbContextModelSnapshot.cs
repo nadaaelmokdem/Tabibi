@@ -240,17 +240,17 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.Appointment", b =>
                 {
-                    b.Property<int>("AppointmentId")
+                    b.Property<long>("AppointmentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AppointmentId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("AppointmentId"));
 
                     b.Property<int>("ConsultationType")
                         .HasColumnType("int");
 
-                    b.Property<int>("DoctorId")
-                        .HasColumnType("int");
+                    b.Property<long>("DoctorId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("DurationMins")
                         .HasColumnType("int");
@@ -258,8 +258,8 @@ namespace Tabibi.Infrastructure.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<long>("PatientId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
@@ -270,8 +270,8 @@ namespace Tabibi.Infrastructure.Migrations
                     b.Property<DateTime>("ScheduledAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("SessionId")
-                        .HasColumnType("int");
+                    b.Property<long?>("SessionId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -291,11 +291,11 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.ChatMessage", b =>
                 {
-                    b.Property<int>("MessageId")
+                    b.Property<long>("MessageId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("MessageId"));
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -309,8 +309,8 @@ namespace Tabibi.Infrastructure.Migrations
                     b.Property<DateTime>("SentAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("SessionId")
-                        .HasColumnType("int");
+                    b.Property<long>("SessionId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("MessageId");
 
@@ -321,17 +321,17 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.ChatSession", b =>
                 {
-                    b.Property<int>("SessionId")
+                    b.Property<long>("SessionId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SessionId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("SessionId"));
 
                     b.Property<int>("ConsultationType")
                         .HasColumnType("int");
 
-                    b.Property<int?>("DoctorId")
-                        .HasColumnType("int");
+                    b.Property<long?>("DoctorId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DoctorResponseAt")
                         .HasColumnType("datetime2");
@@ -348,11 +348,11 @@ namespace Tabibi.Infrastructure.Migrations
                     b.Property<bool>("IsFreeMessage")
                         .HasColumnType("bit");
 
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<long>("PatientId")
+                        .HasColumnType("bigint");
 
-                    b.Property<int?>("PaymentId")
-                        .HasColumnType("int");
+                    b.Property<long?>("PaymentId")
+                        .HasColumnType("bigint");
 
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(10,2)");
@@ -379,17 +379,17 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.DoctorAvailability", b =>
                 {
-                    b.Property<int>("AvailabilityId")
+                    b.Property<long>("AvailabilityId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AvailabilityId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("AvailabilityId"));
 
                     b.Property<int>("DayOfWeek")
                         .HasColumnType("int");
 
-                    b.Property<int>("DoctorId")
-                        .HasColumnType("int");
+                    b.Property<long>("DoctorId")
+                        .HasColumnType("bigint");
 
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time");
@@ -415,17 +415,17 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.DoctorOldSpecialty", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("DoctorId")
-                        .HasColumnType("int");
+                    b.Property<long>("DoctorId")
+                        .HasColumnType("bigint");
 
-                    b.Property<int>("SpecialtyId")
-                        .HasColumnType("int");
+                    b.Property<long>("SpecialtyId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -438,11 +438,11 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.DoctorProfile", b =>
                 {
-                    b.Property<int>("DoctorId")
+                    b.Property<long>("DoctorId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DoctorId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("DoctorId"));
 
                     b.Property<string>("AdminComment")
                         .HasColumnType("nvarchar(max)");
@@ -542,11 +542,11 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.DoctorProfileChangeLog", b =>
                 {
-                    b.Property<int>("ChangeLogId")
+                    b.Property<long>("ChangeLogId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ChangeLogId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ChangeLogId"));
 
                     b.Property<DateTime>("ChangedAt")
                         .HasColumnType("datetime2");
@@ -555,8 +555,8 @@ namespace Tabibi.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("DoctorId")
-                        .HasColumnType("int");
+                    b.Property<long>("DoctorId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FieldName")
                         .IsRequired()
@@ -577,14 +577,14 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.DoctorReview", b =>
                 {
-                    b.Property<int>("ReviewId")
+                    b.Property<long>("ReviewId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ReviewId"));
 
-                    b.Property<int>("AppointmentId")
-                        .HasColumnType("int");
+                    b.Property<long>("AppointmentId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Comment")
                         .HasMaxLength(1000)
@@ -606,17 +606,17 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.DoctorSpecialty", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("DoctorId")
-                        .HasColumnType("int");
+                    b.Property<long>("DoctorId")
+                        .HasColumnType("bigint");
 
-                    b.Property<int>("SpecialtyId")
-                        .HasColumnType("int");
+                    b.Property<long>("SpecialtyId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -629,11 +629,11 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.PatientProfile", b =>
                 {
-                    b.Property<int>("PatientId")
+                    b.Property<long>("PatientId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("PatientId"));
 
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
@@ -672,11 +672,11 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.PatientQuota", b =>
                 {
-                    b.Property<int>("QuotaId")
+                    b.Property<long>("QuotaId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuotaId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("QuotaId"));
 
                     b.Property<int>("AvailableAiMessages")
                         .HasColumnType("int");
@@ -693,8 +693,8 @@ namespace Tabibi.Infrastructure.Migrations
                     b.Property<DateTime>("LastFreeGpMessageReset")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
+                    b.Property<long>("PatientId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("QuotaId");
 
@@ -706,17 +706,17 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.Payment", b =>
                 {
-                    b.Property<int>("PaymentId")
+                    b.Property<long>("PaymentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("PaymentId"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<int>("AppointmentId")
-                        .HasColumnType("int");
+                    b.Property<long>("AppointmentId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -750,11 +750,11 @@ namespace Tabibi.Infrastructure.Migrations
 
             modelBuilder.Entity("Tabibi.Core.Models.Specialty", b =>
                 {
-                    b.Property<int>("SpecialtyId")
+                    b.Property<long>("SpecialtyId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SpecialtyId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("SpecialtyId"));
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -7,10 +7,10 @@ namespace Tabibi.Core.Models
     public class ConsultationPrice
     {
         [Key]
-        public int PriceId { get; set; }
+        public long PriceId { get; set; }
 
         [Required]
-        public int DoctorId { get; set; }
+        public long DoctorId { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]

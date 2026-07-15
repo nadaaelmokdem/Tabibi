@@ -82,7 +82,7 @@ namespace Tabibi.Application.Services
                 })
                 .ToDictionaryAsync(x => x.DoctorId, x => x.LastChangedAt);
 
-            var pendingChangeCounts = new Dictionary<int, int>();
+            var pendingChangeCounts = new Dictionary<long, int>();
             foreach (var doctor in doctors)
             {
                 var pendingQuery = unitOfWork.DoctorProfileChangeLogs.Query()
@@ -114,7 +114,7 @@ namespace Tabibi.Application.Services
             }).ToList();
         }
 
-        public async Task<AdminDoctorDetailDTO?> GetDoctorDetail(int doctorId)
+        public async Task<AdminDoctorDetailDTO?> GetDoctorDetail(long doctorId)
         {
             var doctor = await unitOfWork.DoctorProfiles.Query()
                 .Include(d => d.User)
@@ -164,7 +164,7 @@ namespace Tabibi.Application.Services
             };
         }
 
-        public async Task<List<DoctorProfileChangeLogDTO>> GetDoctorChanges(int doctorId)
+        public async Task<List<DoctorProfileChangeLogDTO>> GetDoctorChanges(long doctorId)
         {
             var doctor = await unitOfWork.DoctorProfiles.Query().FirstOrDefaultAsync(d => d.DoctorId == doctorId);
             if (doctor == null) return new List<DoctorProfileChangeLogDTO>();
@@ -190,7 +190,7 @@ namespace Tabibi.Application.Services
                 .ToListAsync();
         }
 
-        public async Task<ServiceResult> VerifyDoctor(int doctorId, ReviewDoctorRequestDTO request)
+        public async Task<ServiceResult> VerifyDoctor(long doctorId, ReviewDoctorRequestDTO request)
         {
             if (request.Decision == DoctorVerificationStatus.Pending)
             {

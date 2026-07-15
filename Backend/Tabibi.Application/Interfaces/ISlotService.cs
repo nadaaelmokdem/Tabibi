@@ -5,10 +5,10 @@ namespace Tabibi.Application.Interfaces;
 
 public interface ISlotService
 {
-    Task<List<DoctorAvailability>> GetActiveAvailabilitiesAsync(int doctorId, DateOnly date);
-    Task<List<Appointment>> GetBlockingAppointmentsAsync(int doctorId, DateOnly date);
+    Task<List<DoctorAvailability>> GetActiveAvailabilitiesAsync(long doctorId, DateOnly date);
+    Task<List<Appointment>> GetBlockingAppointmentsAsync(long doctorId, DateOnly date);
     bool IsBlockedByExistingAppointment(DateTime slotStart, int slotDurationMins, IReadOnlyList<Appointment> blockingAppointments);
-    Task<bool> IsSlotAvailableAsync(int doctorId, DateTime scheduledAt, int durationMins = 30);
-    Task<SlotValidationResult> ValidateSlotAsync(int doctorId, DateTime scheduledAt, int durationMins = 30);
+    Task<bool> IsSlotAvailableAsync(long doctorId, DateTime scheduledAt, int durationMins = 30);
+    Task<SlotValidationResult> ValidateSlotAsync(long doctorId, DateTime scheduledAt, int durationMins = 30);
 }
 

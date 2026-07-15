@@ -8,7 +8,7 @@ namespace Tabibi.Core.Models
         public class Specialty
         {
             [Key]
-            public int SpecialtyId { get; set; }
+            public long SpecialtyId { get; set; }
 
             [Required, MaxLength(100)]
             public string Name { get; set; } = "";

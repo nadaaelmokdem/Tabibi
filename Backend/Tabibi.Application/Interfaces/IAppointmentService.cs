@@ -6,11 +6,11 @@ namespace Tabibi.Application.Interfaces;
 
 public interface IAppointmentService
 {
-    Task<List<AvailableSlotDTO>> GetAvailableSlots(int doctorId, DateOnly date, ConsultationType? consultationType = null);
-    Task<bool> IsSlotAvailableAsync(int doctorId, DateTime scheduledAt, int durationMins = 30);
+    Task<List<AvailableSlotDTO>> GetAvailableSlots(long doctorId, DateOnly date, ConsultationType? consultationType = null);
+    Task<bool> IsSlotAvailableAsync(long doctorId, DateTime scheduledAt, int durationMins = 30);
     Task<ServiceResult<AppointmentBookedDTO>> BookAppointmentAsync(string patientUserId, BookAppointmentDTO request);
-    Task AutoCompleteTodayAppointmentsAsync(int? patientId = null, int? doctorId = null);
+    Task AutoCompleteTodayAppointmentsAsync(long? patientId = null, long? doctorId = null);
     Task<List<AppointmentListDTO>> GetDoctorAppointmentsAsync(string doctorUserId, AppointmentFilterDTO filters);
     Task<List<AppointmentListDTO>> GetPatientAppointmentsAsync(string patientUserId, AppointmentFilterDTO filters);
-    Task<ServiceResult<AppointmentListDTO>> CancelAppointmentAsync(string doctorUserId, int appointmentId);
+    Task<ServiceResult<AppointmentListDTO>> CancelAppointmentAsync(string doctorUserId, long appointmentId);
 }

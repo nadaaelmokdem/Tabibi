@@ -4,9 +4,9 @@ namespace Tabibi.Application.DTOs
 {
     public class AppointmentBookedDTO
     {
-        public int AppointmentId { get; set; }
+        public long AppointmentId { get; set; }
 
-        public int DoctorId { get; set; }
+        public long DoctorId { get; set; }
 
         public DateTime ScheduledAt { get; set; }
 

@@ -11,7 +11,7 @@ namespace Tabibi.Application.DTOs
 
     public class UpcomingAppointmentDTO
     {
-        public int AppointmentId { get; set; }
+        public long AppointmentId { get; set; }
         public string DoctorName { get; set; } = string.Empty;
         public string PatientName { get; set; } = string.Empty;
         public DateTime ScheduledAt { get; set; }
@@ -22,8 +22,8 @@ namespace Tabibi.Application.DTOs
 
     public class UnreviewedAppointmentDTO
     {
-        public int AppointmentId { get; set; }
-        public int DoctorId { get; set; }
+        public long AppointmentId { get; set; }
+        public long DoctorId { get; set; }
         public string? DoctorProfilePictureUrl { get; set; }
         public string DoctorName { get; set; } = string.Empty;
         public DateTime ScheduledAt { get; set; }
@@ -44,7 +44,7 @@ namespace Tabibi.Application.DTOs
 
     public class ChatSessionDTO
     {
-        public int SessionId { get; set; }
+        public long SessionId { get; set; }
         public string PatientName { get; set; } = string.Empty;
         public string? SessionSummary { get; set; }
         public DateTime StartedAt { get; set; }
@@ -62,7 +62,7 @@ namespace Tabibi.Application.DTOs
     public class PendingDoctorDTO
     {
         public string UserId { get; set; } = string.Empty;
-        public int DoctorId { get; set; }
+        public long DoctorId { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string? LicenseNumber { get; set; }
         public string? ClinicLocation { get; set; }

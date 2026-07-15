@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Tabibi.API.Migrations
+namespace Tabibi.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -42,7 +42,7 @@ namespace Tabibi.API.Migrations
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -58,12 +58,9 @@ namespace Tabibi.API.Migrations
                 name: "Specialties",
                 columns: table => new
                 {
-                    SpecialtyId = table.Column<int>(type: "int", nullable: false)
+                    SpecialtyId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Keywords = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    IconUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -180,21 +177,37 @@ namespace Tabibi.API.Migrations
                 name: "DoctorProfiles",
                 columns: table => new
                 {
-                    DoctorId = table.Column<int>(type: "int", nullable: false)
+                    DoctorId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LicenseNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NationalIdNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ClinicLocation = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ClinicPhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LicenseProofUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LicenseExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    YearsOfExperience = table.Column<int>(type: "int", nullable: false),
+                    LicenseNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NationalIdNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClinicLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClinicPhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LicenseProofUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IdProofUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DegreeProofUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LicenseExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    YearsOfExperience = table.Column<int>(type: "int", nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProfilePictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AverageRating = table.Column<decimal>(type: "decimal(3,2)", nullable: false),
-                    IsVerified = table.Column<bool>(type: "bit", nullable: false),
-                    IsAvailableNow = table.Column<bool>(type: "bit", nullable: false)
+                    ReviewCount = table.Column<int>(type: "int", nullable: false),
+                    VerificationStatus = table.Column<int>(type: "int", nullable: false),
+                    AdminComment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReviewedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ClinicPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    IsClinicEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    ChatPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    IsChatEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    VideoCallPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    IsVideoCallEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    OldLicenseNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OldNationalIdNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OldLicenseProofUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OldIdProofUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OldDegreeProofUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    OldLicenseExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -211,7 +224,7 @@ namespace Tabibi.API.Migrations
                 name: "PatientProfiles",
                 columns: table => new
                 {
-                    PatientId = table.Column<int>(type: "int", nullable: false)
+                    PatientId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -219,6 +232,7 @@ namespace Tabibi.API.Migrations
                     Weight = table.Column<double>(type: "float", nullable: true),
                     Height = table.Column<double>(type: "float", nullable: true),
                     Gender = table.Column<int>(type: "int", maxLength: 10, nullable: true),
+                    ProfilePictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmergencyContact = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true)
                 },
                 constraints: table =>
@@ -236,14 +250,15 @@ namespace Tabibi.API.Migrations
                 name: "DoctorAvailabilities",
                 columns: table => new
                 {
-                    AvailabilityId = table.Column<int>(type: "int", nullable: false)
+                    AvailabilityId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DoctorId = table.Column<int>(type: "int", nullable: false),
+                    DoctorId = table.Column<long>(type: "bigint", nullable: false),
                     DayOfWeek = table.Column<int>(type: "int", nullable: false),
                     StartTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     EndTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     SlotDurationMins = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    SpecificDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -257,23 +272,63 @@ namespace Tabibi.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DoctorOldSpecialties",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DoctorId = table.Column<long>(type: "bigint", nullable: false),
+                    SpecialtyId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DoctorOldSpecialties", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DoctorOldSpecialties_DoctorProfiles_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "DoctorProfiles",
+                        principalColumn: "DoctorId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DoctorOldSpecialties_Specialties_SpecialtyId",
+                        column: x => x.SpecialtyId,
+                        principalTable: "Specialties",
+                        principalColumn: "SpecialtyId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DoctorProfileChangeLogs",
+                columns: table => new
+                {
+                    ChangeLogId = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DoctorId = table.Column<long>(type: "bigint", nullable: false),
+                    FieldName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OldValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NewValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ChangedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ChangedByUserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DoctorProfileChangeLogs", x => x.ChangeLogId);
+                    table.ForeignKey(
+                        name: "FK_DoctorProfileChangeLogs_DoctorProfiles_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "DoctorProfiles",
+                        principalColumn: "DoctorId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DoctorSpecialties",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DoctorId = table.Column<int>(type: "int", nullable: false),
-                    SpecialtyId = table.Column<int>(type: "int", nullable: false),
-                    IsPrimary = table.Column<bool>(type: "bit", nullable: false),
-                    ClinicPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    ChatPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    VideoPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    CallPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    IsCustomChatPrice = table.Column<bool>(type: "bit", nullable: false),
-                    IsCustomVideoPrice = table.Column<bool>(type: "bit", nullable: false),
-                    IsCustomCallPrice = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DoctorId = table.Column<long>(type: "bigint", nullable: false),
+                    SpecialtyId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -293,21 +348,45 @@ namespace Tabibi.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PatientQuotas",
+                columns: table => new
+                {
+                    QuotaId = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PatientId = table.Column<long>(type: "bigint", nullable: false),
+                    AvailableAiMessages = table.Column<int>(type: "int", nullable: false),
+                    AvailablePremiumAiMessages = table.Column<int>(type: "int", nullable: false),
+                    LastAiMessageReset = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AvailableFreeGpMessages = table.Column<int>(type: "int", nullable: false),
+                    LastFreeGpMessageReset = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PatientQuotas", x => x.QuotaId);
+                    table.ForeignKey(
+                        name: "FK_PatientQuotas_PatientProfiles_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "PatientProfiles",
+                        principalColumn: "PatientId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Appointments",
                 columns: table => new
                 {
-                    AppointmentId = table.Column<int>(type: "int", nullable: false)
+                    AppointmentId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PatientId = table.Column<int>(type: "int", nullable: false),
-                    DoctorId = table.Column<int>(type: "int", nullable: false),
+                    PatientId = table.Column<long>(type: "bigint", nullable: false),
+                    DoctorId = table.Column<long>(type: "bigint", nullable: false),
                     ScheduledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DurationMins = table.Column<int>(type: "int", nullable: false),
                     ConsultationType = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    ChiefComplaint = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    SessionId = table.Column<int>(type: "int", nullable: true)
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PaymentMethod = table.Column<int>(type: "int", nullable: false),
+                    SessionId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -330,9 +409,9 @@ namespace Tabibi.API.Migrations
                 name: "DoctorReviews",
                 columns: table => new
                 {
-                    ReviewId = table.Column<int>(type: "int", nullable: false)
+                    ReviewId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AppointmentId = table.Column<int>(type: "int", nullable: false),
+                    AppointmentId = table.Column<long>(type: "bigint", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -352,14 +431,15 @@ namespace Tabibi.API.Migrations
                 name: "Payments",
                 columns: table => new
                 {
-                    PaymentId = table.Column<int>(type: "int", nullable: false)
+                    PaymentId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AppointmentId = table.Column<int>(type: "int", nullable: false),
+                    AppointmentId = table.Column<long>(type: "bigint", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(3)", maxLength: 3, nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Gateway = table.Column<int>(type: "int", nullable: false),
                     GatewayTransactionId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    ExternalOrderId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -374,47 +454,24 @@ namespace Tabibi.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Prescriptions",
-                columns: table => new
-                {
-                    PrescriptionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    AppointmentId = table.Column<int>(type: "int", nullable: false),
-                    Diagnosis = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    IssuedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    PdfUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Prescriptions", x => x.PrescriptionId);
-                    table.ForeignKey(
-                        name: "FK_Prescriptions_Appointments_AppointmentId",
-                        column: x => x.AppointmentId,
-                        principalTable: "Appointments",
-                        principalColumn: "AppointmentId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ChatSessions",
                 columns: table => new
                 {
-                    SessionId = table.Column<int>(type: "int", nullable: false)
+                    SessionId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    PatientId = table.Column<int>(type: "int", nullable: false),
-                    DoctorId = table.Column<int>(type: "int", nullable: false),
+                    PatientId = table.Column<long>(type: "bigint", nullable: false),
+                    DoctorId = table.Column<long>(type: "bigint", nullable: true),
                     ConsultationType = table.Column<int>(type: "int", nullable: false),
                     IsFreeMessage = table.Column<bool>(type: "bit", nullable: false),
-                    DoctorAccepted = table.Column<bool>(type: "bit", nullable: true),
+                    IsFollowUp = table.Column<bool>(type: "bit", nullable: false),
+                    IsCompanyPaid = table.Column<bool>(type: "bit", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
                     StartedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DoctorResponseAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    SessionSummary = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    PaymentId = table.Column<int>(type: "int", nullable: true)
+                    SessionSummary = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PaymentId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -439,40 +496,15 @@ namespace Tabibi.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PrescriptionItems",
-                columns: table => new
-                {
-                    ItemId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PrescriptionId = table.Column<int>(type: "int", nullable: false),
-                    MedicationName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Dosage = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Frequency = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DurationDays = table.Column<int>(type: "int", nullable: false),
-                    Instructions = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PrescriptionItems", x => x.ItemId);
-                    table.ForeignKey(
-                        name: "FK_PrescriptionItems_Prescriptions_PrescriptionId",
-                        column: x => x.PrescriptionId,
-                        principalTable: "Prescriptions",
-                        principalColumn: "PrescriptionId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ChatMessages",
                 columns: table => new
                 {
-                    MessageId = table.Column<int>(type: "int", nullable: false)
+                    MessageId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SessionId = table.Column<int>(type: "int", nullable: false),
+                    SessionId = table.Column<long>(type: "bigint", nullable: false),
                     Role = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TokensUsed = table.Column<int>(type: "int", nullable: false)
+                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -483,38 +515,6 @@ namespace Tabibi.API.Migrations
                         principalTable: "ChatSessions",
                         principalColumn: "SessionId",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SymptomAnalyses",
-                columns: table => new
-                {
-                    AnalysisId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SessionId = table.Column<int>(type: "int", nullable: false),
-                    SymptomsJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SuggestedSpecialty = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    UrgencyLevel = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    AiConfidenceScore = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
-                    RoutedDoctorId = table.Column<int>(type: "int", nullable: true),
-                    Disclaimer = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    AnalyzedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SymptomAnalyses", x => x.AnalysisId);
-                    table.ForeignKey(
-                        name: "FK_SymptomAnalyses_ChatSessions_SessionId",
-                        column: x => x.SessionId,
-                        principalTable: "ChatSessions",
-                        principalColumn: "SessionId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SymptomAnalyses_DoctorProfiles_RoutedDoctorId",
-                        column: x => x.RoutedDoctorId,
-                        principalTable: "DoctorProfiles",
-                        principalColumn: "DoctorId",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -570,6 +570,13 @@ namespace Tabibi.API.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_PhoneNumber",
+                table: "AspNetUsers",
+                column: "PhoneNumber",
+                unique: true,
+                filter: "[PhoneNumber] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
@@ -602,6 +609,21 @@ namespace Tabibi.API.Migrations
                 column: "DoctorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DoctorOldSpecialties_DoctorId",
+                table: "DoctorOldSpecialties",
+                column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DoctorOldSpecialties_SpecialtyId",
+                table: "DoctorOldSpecialties",
+                column: "SpecialtyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DoctorProfileChangeLogs_DoctorId",
+                table: "DoctorProfileChangeLogs",
+                column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DoctorProfiles_UserId",
                 table: "DoctorProfiles",
                 column: "UserId",
@@ -630,31 +652,15 @@ namespace Tabibi.API.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_PatientQuotas_PatientId",
+                table: "PatientQuotas",
+                column: "PatientId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Payments_AppointmentId",
                 table: "Payments",
                 column: "AppointmentId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PrescriptionItems_PrescriptionId",
-                table: "PrescriptionItems",
-                column: "PrescriptionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Prescriptions_AppointmentId",
-                table: "Prescriptions",
-                column: "AppointmentId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SymptomAnalyses_RoutedDoctorId",
-                table: "SymptomAnalyses",
-                column: "RoutedDoctorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SymptomAnalyses_SessionId",
-                table: "SymptomAnalyses",
-                column: "SessionId",
                 unique: true);
 
             migrationBuilder.AddForeignKey(
@@ -694,25 +700,25 @@ namespace Tabibi.API.Migrations
                 name: "DoctorAvailabilities");
 
             migrationBuilder.DropTable(
+                name: "DoctorOldSpecialties");
+
+            migrationBuilder.DropTable(
+                name: "DoctorProfileChangeLogs");
+
+            migrationBuilder.DropTable(
                 name: "DoctorReviews");
 
             migrationBuilder.DropTable(
                 name: "DoctorSpecialties");
 
             migrationBuilder.DropTable(
-                name: "PrescriptionItems");
-
-            migrationBuilder.DropTable(
-                name: "SymptomAnalyses");
+                name: "PatientQuotas");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Specialties");
-
-            migrationBuilder.DropTable(
-                name: "Prescriptions");
 
             migrationBuilder.DropTable(
                 name: "ChatSessions");
@@ -734,4 +740,3 @@ namespace Tabibi.API.Migrations
         }
     }
 }
-

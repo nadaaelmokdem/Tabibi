@@ -14,7 +14,7 @@ public class AppointmentService(
     IPaymentService paymentService) : IAppointmentService
 {
     public async Task<List<AvailableSlotDTO>> GetAvailableSlots(
-        int doctorId,
+        long doctorId,
         DateOnly date,
         ConsultationType? consultationType = null)
     {
@@ -77,7 +77,7 @@ public class AppointmentService(
     }
 
     public Task<bool> IsSlotAvailableAsync(
-        int doctorId,
+        long doctorId,
         DateTime scheduledAt,
         int durationMins = SlotService.DefaultSlotDurationMins) =>
         slotService.IsSlotAvailableAsync(doctorId, scheduledAt, durationMins);
@@ -221,7 +221,7 @@ public class AppointmentService(
         }
     }
 
-    public async Task AutoCompleteTodayAppointmentsAsync(int? patientId = null, int? doctorId = null)
+    public async Task AutoCompleteTodayAppointmentsAsync(long? patientId = null, long? doctorId = null)
     {
         var now = DateTime.UtcNow;
         var todayStart = now.Date;
@@ -351,7 +351,7 @@ public class AppointmentService(
         return query;
     }
 
-    public async Task<ServiceResult<AppointmentListDTO>> CancelAppointmentAsync(string doctorUserId, int appointmentId)
+    public async Task<ServiceResult<AppointmentListDTO>> CancelAppointmentAsync(string doctorUserId, long appointmentId)
     {
         var doctor = await unitOfWork.DoctorProfiles.Query()
             .Include(d => d.User)
