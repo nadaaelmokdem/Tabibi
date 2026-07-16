@@ -64,7 +64,7 @@ class AuthService {
 
     const response = await api.post<AuthResponse>(
       `${AUTH_API}/google-auth-code`,
-      { code, redirectUri: import.meta.env.VITE_API_BASE_URL+"/auth/callback", role },
+      { code, redirectUri: "https://tabibi.dpdns.org/auth/callback", role },
       { withCredentials: true },
     );
 
