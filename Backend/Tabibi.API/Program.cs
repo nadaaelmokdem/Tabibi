@@ -185,6 +185,8 @@ namespace Tabibi.API
 
             app.UseCors("React Frontend");
 
+            app.UseWebSockets();
+
             //app.UseHttpsRedirection();
 
             app.UseAuthentication();

@@ -131,7 +131,7 @@ export default function ActiveChatPane({
         </button>
         {!isSidebarOpen && (
           <button
-            className="hidden md:block cursor-pointer p-2 -ml-2 mr-1 text-on-surface-variant hover:text-primary-dark hover:bg-surface-container-high rounded-lg transition-colors"
+            className="cursor-pointer p-2 -ml-2 mr-1 text-on-surface-variant hover:text-primary-dark hover:bg-surface-container-high rounded-lg transition-colors"
             onClick={onOpenSidebar}
           >
             <TbLayoutSidebarRightCollapse className="text-[24px]" />

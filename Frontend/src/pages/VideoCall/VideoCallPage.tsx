@@ -14,16 +14,18 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { useVideoCall } from "../../hooks/useVideoCall";
 import { videoCallHubService } from "../../services/videoCallHubService";
+import authService from "../../services/authService";
 import type { ChatMessage } from "../../types/chat";
 
 export default function VideoCallPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isRemoteVideoOff, setIsRemoteVideoOff] = useState(true);
   
   const [callDurationSeconds, setCallDurationSeconds] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
@@ -31,6 +33,11 @@ export default function VideoCallPage() {
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef(user);
+
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const parsedSessionId = sessionId ? parseInt(sessionId, 10) : undefined;
 
@@ -38,6 +45,7 @@ export default function VideoCallPage() {
     callState,
     isMuted,
     isVideoOff,
+    peerJoined,
     toggleMute,
     toggleVideo,
     initLocalStream,
@@ -49,13 +57,42 @@ export default function VideoCallPage() {
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = stream;
       }
+
+      const checkTrack = () => {
+        const videoTrack = stream.getVideoTracks()[0];
+        setIsRemoteVideoOff(!videoTrack || !videoTrack.enabled || videoTrack.muted);
+      };
+
+      checkTrack();
+
+      stream.onaddtrack = checkTrack;
+      stream.onremovetrack = checkTrack;
+
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.onmute = () => setIsRemoteVideoOff(true);
+        videoTrack.onunmute = () => setIsRemoteVideoOff(false);
+        videoTrack.onended = () => setIsRemoteVideoOff(true);
+      }
     },
     onCallEnded: () => {
-      navigate("/");
+      const currentUser = authService.getUser() || userRef.current;
+      const isDoctor = currentUser?.activeRole === "Doctor" || currentUser?.roles?.some(r => r.toLowerCase() === "doctor");
+      navigate(isDoctor ? "/doctor-appointments" : "/patient-appointments");
     }
   });
 
+  // Keep remote video status reset when not active
   useEffect(() => {
+    if (callState !== "ACTIVE") {
+      setIsRemoteVideoOff(true);
+    }
+  }, [callState]);
+
+  // Main stream and peer initialization (guarded by auth loading)
+  useEffect(() => {
+    if (isLoading || !user?.id) return;
+
     let active = true;
     const start = async () => {
       if (parsedSessionId && active) {
@@ -73,39 +110,65 @@ export default function VideoCallPage() {
     start();
     return () => {
       active = false;
-      cleanupCall();
     };
-  }, [parsedSessionId, initLocalStream, initializePeer, cleanupCall]);
+  }, [parsedSessionId, isLoading, user?.id, initLocalStream, initializePeer]);
 
-  // Handle SignalR Chat Messages
+  // Handle explicit Peer End Call signal
+  useEffect(() => {
+    const handleCallEndedByPeer = () => {
+      cleanupCall();
+      const currentUser = authService.getUser() || userRef.current;
+      const isDoctor = currentUser?.activeRole === "Doctor" || currentUser?.roles?.some(r => r.toLowerCase() === "doctor");
+      navigate(isDoctor ? "/doctor-appointments" : "/patient-appointments");
+    };
+
+    videoCallHubService.on("CallEndedByPeer", handleCallEndedByPeer);
+    return () => {
+      videoCallHubService.off("CallEndedByPeer", handleCallEndedByPeer);
+    };
+  }, [navigate, cleanupCall]);
+
+  // Handle SignalR Chat Messages (only from remote users to avoid duplicates)
   useEffect(() => {
     const handleReceiveMessage = (userId: string, message: string) => {
+      if (userId === user?.id) return;
+
+      const currentUser = userRef.current;
+      const isLocalDoctor = currentUser?.activeRole === "Doctor" || currentUser?.roles?.some(r => r.toLowerCase() === "doctor");
+      const senderName = isLocalDoctor ? "Patient" : "Doctor";
+
       setMessages((prev) => [
         ...prev,
         {
           id: Math.random().toString(36).substring(7),
           senderId: userId,
-          senderName: userId === user?.id ? "You" : "Remote User", // Ideally backend sends senderName
+          senderName,
           text: message,
           timestamp: new Date(),
         },
       ]);
-      // Show chat if closed
-      if (!isChatOpen) {
-        // We could show a notification here, but auto-opening might be intrusive.
-      }
     };
 
     videoCallHubService.on("ReceiveMessage", handleReceiveMessage);
     return () => {
       videoCallHubService.off("ReceiveMessage", handleReceiveMessage);
     };
-  }, [user?.id, isChatOpen]);
+  }, [user?.id]);
 
-  // Scroll to bottom of chat
+  // Scroll to bottom of chat on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isChatOpen]);
+  }, [messages]);
+
+  // Sync scroll to bottom when chat transition completes
+  useEffect(() => {
+    if (isChatOpen) {
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isChatOpen]);
 
   // Timer logic for 30 minutes limit
   useEffect(() => {
@@ -122,7 +185,10 @@ export default function VideoCallPage() {
           // 30 minutes = 1800 seconds
           if (next >= 1800) {
             clearInterval(interval);
-            handleEndCall();
+            cleanupCall();
+            const currentUser = userRef.current;
+            const isDoctor = currentUser?.activeRole === "Doctor" || currentUser?.roles?.some(r => r.toLowerCase() === "doctor");
+            navigate(isDoctor ? "/doctor-appointments" : "/patient-appointments");
           }
           
           return next;
@@ -130,11 +196,16 @@ export default function VideoCallPage() {
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [callState]);
+  }, [callState, cleanupCall, navigate]);
 
   const handleEndCall = () => {
+    if (parsedSessionId) {
+      videoCallHubService.endCall(parsedSessionId).catch(console.error);
+    }
     cleanupCall();
-    navigate(-1);
+    const currentUser = authService.getUser() || userRef.current;
+    const isDoctor = currentUser?.activeRole === "Doctor" || currentUser?.roles?.some(r => r.toLowerCase() === "doctor");
+    navigate(isDoctor ? "/doctor-appointments" : "/patient-appointments");
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -183,14 +254,20 @@ export default function VideoCallPage() {
       )}
 
       {/* Main Workspace */}
-      <div className="flex-1 flex relative">
+      <div className="flex-1 flex relative overflow-hidden">
         {/* Remote Video Container (Full Viewport) */}
-        <div className={`flex-1 relative bg-black/50 transition-all duration-300 ${isChatOpen ? 'mr-80' : ''}`}>
+        <div className="flex-1 relative bg-black/50">
           {callState !== "ACTIVE" && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-white/70">
               <div className="w-24 h-24 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-6"></div>
               <p className="text-xl font-light tracking-widest uppercase">
-                {callState === "CONNECTING" ? "Connecting..." : "Waiting for participant..."}
+                {callState === "RECONNECTING"
+                  ? "Reconnecting..."
+                  : callState === "DISCONNECTED"
+                  ? "Disconnected"
+                  : (callState === "CONNECTING" || peerJoined)
+                  ? "Connecting..."
+                  : "Waiting for participant..."}
               </p>
             </div>
           )}
@@ -201,6 +278,18 @@ export default function VideoCallPage() {
             playsInline
             className={`w-full h-full object-cover transition-opacity duration-1000 ${callState === "ACTIVE" ? 'opacity-100' : 'opacity-0'}`}
           />
+
+          {/* Voice-Only Overlay for Remote Peer */}
+          {callState === "ACTIVE" && isRemoteVideoOff && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-950 text-white/80 z-20">
+              <div className="relative flex items-center justify-center w-28 h-28 rounded-full bg-white/5 border border-white/10 shadow-2xl backdrop-blur-md animate-pulse">
+                <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping"></div>
+                <FaMicrophone className="text-primary-light text-5xl" />
+              </div>
+              <p className="mt-6 text-lg font-medium tracking-wide">Voice Only</p>
+              <p className="text-xs text-white/40 mt-1">Participant's camera is off or unavailable</p>
+            </div>
+          )}
 
           {/* Call Status Overlay */}
           <div className="absolute top-6 left-6 flex items-center gap-4">
@@ -217,7 +306,9 @@ export default function VideoCallPage() {
           </div>
 
           {/* Local Video PiP */}
-          <div className="absolute bottom-28 right-8 w-48 sm:w-64 aspect-video bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/10 hover:border-primary/50 transition-colors duration-300 group z-40">
+          <div className={`absolute bottom-28 transition-all duration-300 right-8 ${
+            isChatOpen ? 'sm:right-[352px]' : ''
+          } w-48 sm:w-64 aspect-video bg-gray-800 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/10 hover:border-primary/50 group z-40`}>
             <video
               ref={localVideoRef}
               autoPlay
@@ -237,17 +328,17 @@ export default function VideoCallPage() {
         </div>
 
         {/* Chat Drawer Sidebar */}
-        <div 
-          className={`absolute top-0 right-0 bottom-0 w-80 bg-white/10 backdrop-blur-xl border-l border-white/10 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col z-40 ${
-            isChatOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        >
+        <div className={`absolute top-0 right-0 bottom-0 w-full sm:w-80 bg-white/10 backdrop-blur-xl border-l border-white/10 shadow-2xl flex flex-col z-40 transition-transform duration-300 ease-out transform ${
+          isChatOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}>
           <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
             <h3 className="text-white font-bold tracking-wide flex items-center gap-2">
               <FaCommentDots className="text-primary-light" /> In-Call Chat
             </h3>
             <button 
+              type="button"
               onClick={() => setIsChatOpen(false)}
+              aria-label="Close chat"
               className="text-white/60 hover:text-white p-2 rounded-full hover:bg-white/10 transition-colors cursor-pointer"
             >
               <FaTimes />

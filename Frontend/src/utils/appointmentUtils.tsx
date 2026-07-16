@@ -43,6 +43,7 @@ export const STATUS_OPTIONS = [
 ] as const;
 
 export function getConsultationTypeLabel(type: string | number): string {
+  if (type === "VideoCall") return "Video";
   if (typeof type === "string" && type) return type;
   const labelMap = ["Chat", "Video", "Clinic"];
   return typeof type === "number" && type >= 0 && type < labelMap.length
@@ -63,7 +64,7 @@ export function isChatConsultation(type: string | number): boolean {
 }
 
 export function isVideoConsultation(type: string | number): boolean {
-  return type === "Video" || type === 1;
+  return type === "Video" || type === "VideoCall" || type === 1;
 }
 
 export function getConsultationTypeIcon(type: string | number, size = 13): ReactNode {

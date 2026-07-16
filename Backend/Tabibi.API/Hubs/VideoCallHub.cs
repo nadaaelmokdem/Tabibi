@@ -3,16 +3,16 @@ using Tabibi.Application.DTOs;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-
+using Microsoft.Extensions.DependencyInjection;
 using Tabibi.Application.Interfaces;
 
 namespace Tabibi.API.Hubs
 {
     [Authorize]
-    public class VideoCallHub(IChatService chatService) : Hub
+    public class VideoCallHub(IChatService chatService, IServiceProvider serviceProvider) : Hub
     {
         // SessionId -> (UserId -> ConnectionId)
-        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string>> _roomUsers = new();
+        public static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string>> RoomUsers = new();
 
         // Tracks whether both parties have successfully joined the call room
         public static readonly ConcurrentDictionary<long, bool> CallStarted = new();
@@ -37,7 +37,7 @@ namespace Tabibi.API.Hubs
             }
 
             var sessionIdStr = sessionId.ToString();
-            var room = _roomUsers.GetOrAdd(sessionIdStr, _ => new ConcurrentDictionary<string, string>());
+            var room = RoomUsers.GetOrAdd(sessionIdStr, _ => new ConcurrentDictionary<string, string>());
             room.AddOrUpdate(userId, Context.ConnectionId, (_, _) => Context.ConnectionId);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, sessionIdStr);
@@ -50,6 +50,13 @@ namespace Tabibi.API.Hubs
 
             // Notify others in the room that this user joined
             await Clients.GroupExcept(sessionIdStr, Context.ConnectionId).SendAsync("UserJoined", userId);
+
+            // Notify the joining user about other users already in the room
+            if (room.Count > 1)
+            {
+                var otherUsers = room.Keys.Where(id => id != userId).ToList();
+                await Clients.Caller.SendAsync("RoomPresence", otherUsers);
+            }
         }
 
         public async Task LeaveCall(long sessionId)
@@ -58,23 +65,63 @@ namespace Tabibi.API.Hubs
             if (string.IsNullOrEmpty(userId)) return;
 
             var sessionIdStr = sessionId.ToString();
-            if (_roomUsers.TryGetValue(sessionIdStr, out var room))
+            bool roomIsEmpty = true;
+            if (RoomUsers.TryGetValue(sessionIdStr, out var room))
             {
                 room.TryRemove(userId, out _);
+                roomIsEmpty = room.IsEmpty;
                 if (room.IsEmpty)
                 {
-                    _roomUsers.TryRemove(sessionIdStr, out _);
+                    RoomUsers.TryRemove(sessionIdStr, out _);
                 }
             }
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, sessionIdStr);
             await Clients.Group(sessionIdStr).SendAsync("UserLeft", userId);
 
-            // If the call had started and one party ends/leaves it, complete the session
-            if (CallStarted.TryRemove(sessionId, out _))
+            // Complete the call if:
+            // 1. Both parties have exited (room is empty) and the call had started, after a 2 minutes grace period
+            // 2. Or the scheduled time has passed
+            bool timePassed = await chatService.IsVideoCallTimePassedAsync(sessionId);
+
+            if (timePassed)
             {
+                CallStarted.TryRemove(sessionId, out _);
                 await chatService.CompleteVideoCallSessionAsync(sessionId);
             }
+            else if (roomIsEmpty && CallStarted.ContainsKey(sessionId))
+            {
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(TimeSpan.FromMinutes(2));
+
+                    // Verify if the room is still empty
+                    if (RoomUsers.TryGetValue(sessionIdStr, out var currentRoom) && !currentRoom.IsEmpty)
+                    {
+                        // Someone re-joined during the grace period!
+                        return;
+                    }
+
+                    using (var scope = serviceProvider.CreateScope())
+                    {
+                        var scopedChatService = scope.ServiceProvider.GetRequiredService<IChatService>();
+                        CallStarted.TryRemove(sessionId, out _);
+                        await scopedChatService.CompleteVideoCallSessionAsync(sessionId);
+                    }
+                });
+            }
+        }
+
+        public async Task EndCall(long sessionId)
+        {
+            var userId = Context.UserIdentifier;
+            if (string.IsNullOrEmpty(userId)) return;
+
+            var access = await chatService.ValidateVideoCallAccess(sessionId, userId);
+            if (!access.Allowed) return;
+
+            // Notify others in the room that the call was explicitly ended
+            await Clients.Group(sessionId.ToString()).SendAsync("CallEndedByPeer", userId);
         }
 
         public async Task NotifyUserReconnected(long sessionId)
@@ -103,7 +150,7 @@ namespace Tabibi.API.Hubs
 
             if (!string.IsNullOrEmpty(userId))
             {
-                foreach (var (sessionIdStr, room) in _roomUsers)
+                foreach (var (sessionIdStr, room) in RoomUsers)
                 {
                     if (room.TryGetValue(userId, out var storedConnectionId) && storedConnectionId == connectionId)
                     {
@@ -112,16 +159,39 @@ namespace Tabibi.API.Hubs
 
                         if (long.TryParse(sessionIdStr, out var sessionId))
                         {
-                            // If the call had started and someone disconnected, complete the session
-                            if (CallStarted.TryRemove(sessionId, out _))
+                            bool roomIsEmpty = room.IsEmpty;
+                            bool timePassed = await chatService.IsVideoCallTimePassedAsync(sessionId);
+
+                            if (timePassed)
                             {
+                                CallStarted.TryRemove(sessionId, out _);
                                 await chatService.CompleteVideoCallSessionAsync(sessionId);
+                            }
+                            else if (roomIsEmpty && CallStarted.ContainsKey(sessionId))
+                            {
+                                _ = Task.Run(async () =>
+                                {
+                                    await Task.Delay(TimeSpan.FromMinutes(2));
+
+                                    // Verify if the room is still empty
+                                    if (RoomUsers.TryGetValue(sessionIdStr, out var currentRoom) && !currentRoom.IsEmpty)
+                                    {
+                                        return;
+                                    }
+
+                                    using (var scope = serviceProvider.CreateScope())
+                                    {
+                                        var scopedChatService = scope.ServiceProvider.GetRequiredService<IChatService>();
+                                        CallStarted.TryRemove(sessionId, out _);
+                                        await scopedChatService.CompleteVideoCallSessionAsync(sessionId);
+                                    }
+                                });
                             }
                         }
 
                         if (room.IsEmpty)
                         {
-                            _roomUsers.TryRemove(sessionIdStr, out _);
+                            RoomUsers.TryRemove(sessionIdStr, out _);
                         }
                     }
                 }

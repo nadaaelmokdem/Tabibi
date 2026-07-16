@@ -184,34 +184,7 @@ public class AuthService(
         }
         else
         {
-            // Update existing user
-            if (req.Role.Equals(UserRoles.Doctor, StringComparison.CurrentCultureIgnoreCase))
-            {
-                if (!await userManager.IsInRoleAsync(user, UserRoles.Doctor))
-                {
-                    await userManager.AddToRoleAsync(user, UserRoles.Doctor);
-                }
-                var existingDoctorProfile = await unitOfWork.DoctorProfiles.FirstOrDefaultAsync(d => d.UserId == user.Id);
-                if (existingDoctorProfile == null)
-                {
-                    await unitOfWork.DoctorProfiles.AddAsync(new DoctorProfile { UserId = user.Id });
-                }
-            }
-            else if (req.Role.Equals(UserRoles.Patient, StringComparison.CurrentCultureIgnoreCase))
-            {
-                if (!await userManager.IsInRoleAsync(user, UserRoles.Patient))
-                {
-                    await userManager.AddToRoleAsync(user, UserRoles.Patient);
-                }
-                var existingPatientProfile = await unitOfWork.PatientProfiles.FirstOrDefaultAsync(p => p.UserId == user.Id);
-                if (existingPatientProfile == null)
-                {
-                    var patientProfile = new PatientProfile { UserId = user.Id };
-                    await unitOfWork.PatientProfiles.AddAsync(patientProfile);
-                    await unitOfWork.PatientQuotas.AddAsync(new PatientQuota { Patient = patientProfile });
-                }
-            }
-
+            // Update existing user properties but do not automatically add roles
             user.FullName = userInfo.Name;
             user.Email = userInfo.Email;
             await userManager.UpdateAsync(user);
@@ -423,10 +396,10 @@ public class AuthService(
             var tokenInfo = System.Text.Json.JsonSerializer.Deserialize<GoogleTokenInfo>(tokenInfoContent, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             
             var expectedClientId = configuration["GoogleAuth:ClientId"] ?? "";
-            if (tokenInfo == null || (tokenInfo.Audience != expectedClientId && tokenInfo.IssuedTo != expectedClientId))
+            if (tokenInfo == null || (tokenInfo.Audience != expectedClientId && tokenInfo.Azp != expectedClientId))
             {
-                logger.LogWarning("Google Token audience mismatch. Expected: {Expected}, Got: {Audience} / {IssuedTo}", 
-                    expectedClientId, tokenInfo?.Audience, tokenInfo?.IssuedTo);
+                logger.LogWarning("Google Token audience mismatch. Expected: {Expected}, Got: aud: {Audience} / azp: {Azp}", 
+                    expectedClientId, tokenInfo?.Audience, tokenInfo?.Azp);
                 return null;
             }
             
@@ -451,11 +424,11 @@ public class AuthService(
 
     private class GoogleTokenInfo
     {
-        [System.Text.Json.Serialization.JsonPropertyName("audience")]
+        [System.Text.Json.Serialization.JsonPropertyName("aud")]
         public string Audience { get; set; } = "";
         
-        [System.Text.Json.Serialization.JsonPropertyName("issued_to")]
-        public string IssuedTo { get; set; } = "";
+        [System.Text.Json.Serialization.JsonPropertyName("azp")]
+        public string Azp { get; set; } = "";
     }
 
     private class GoogleUserInfo

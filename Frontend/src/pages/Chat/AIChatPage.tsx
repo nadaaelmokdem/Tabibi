@@ -43,7 +43,7 @@ export default function AIChatPage() {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth >= 1024);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth >= 1024 || !sessionId);
   const [quota, setQuota] = useState<AiQuotaResponse | null>(null);
   const [topicDrift, setTopicDrift] = useState(false);
 
@@ -345,7 +345,7 @@ export default function AIChatPage() {
         recentSessions={recentSessions}
       />
 
-      <section className={`flex-1 flex flex-col bg-surface-bright relative min-w-0 ${!numericSessionId && recentSessions.length > 0 ? 'hidden md:flex' : 'flex'}`}>
+      <section className={`flex-1 flex flex-col bg-surface-bright relative min-w-0 ${((!numericSessionId && recentSessions.length > 0) || isSidebarOpen) ? 'hidden md:flex' : 'flex'}`}>
         <AIChatHeader 
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}

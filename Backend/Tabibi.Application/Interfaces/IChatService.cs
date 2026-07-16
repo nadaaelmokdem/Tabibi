@@ -17,5 +17,6 @@ public interface IChatService
     Task<bool> IsSessionPaidAsync(long sessionId);
     Task<bool> IsVideoCallSessionPaidAsync(long sessionId);
     Task<ServiceResult<InitiateFollowUpResponseDTO>> InitiateFollowUpAsync(long sessionId, string patientUserId);
+    Task<bool> IsVideoCallTimePassedAsync(long sessionId);
     Task CompleteVideoCallSessionAsync(long sessionId);
 }

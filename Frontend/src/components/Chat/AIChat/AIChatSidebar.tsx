@@ -19,11 +19,25 @@ export default function AIChatSidebar({
 }: AIChatSidebarProps) {
   const navigate = useNavigate();
 
+  const handleSessionClick = (sessionId: number) => {
+    navigate(`/ai-chat/${sessionId}`);
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  const handleNewChatClick = () => {
+    navigate("/ai-chat");
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+  };
+
   return (
     <aside className={`
       flex flex-col bg-white border-r border-surface-variant transition-all duration-300 ease-in-out shrink-0
       ${isSidebarOpen 
-        ? `w-full md:w-[350px] lg:w-[400px] translate-x-0 ${numericSessionId ? 'hidden md:flex' : 'flex'}`
+        ? `w-full md:w-[350px] lg:w-[400px] translate-x-0 flex`
         : `w-0 overflow-hidden border-none -translate-x-full md:translate-x-0 hidden md:flex`
       }
     `}>
@@ -34,14 +48,14 @@ export default function AIChatSidebar({
           </h2>
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="cursor-pointer p-2 -mr-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-dark rounded-lg transition-colors hidden md:block"
+            className="cursor-pointer p-2 -mr-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-dark rounded-lg transition-colors"
           >
             <TbLayoutSidebarLeftCollapse className="text-[20px]" />
           </button>
         </div>
         <button
           className="w-full bg-gradient-to-r from-primary-light to-primary text-white rounded-lg px-4 py-3 flex items-center justify-center gap-2 text-sm font-semibold hover:opacity-90 transition-opacity shadow-md cursor-pointer mb-2"
-          onClick={() => navigate("/ai-chat")}
+          onClick={handleNewChatClick}
         >
           <HiSparkles className="text-[18px]" />
           New AI Chat
@@ -55,7 +69,7 @@ export default function AIChatSidebar({
            recentSessions.map(session => (
               <div 
                 key={session.sessionId}
-                onClick={() => navigate(`/ai-chat/${session.sessionId}`)}
+                onClick={() => handleSessionClick(session.sessionId)}
                 className={`p-4 rounded-xl cursor-pointer transition-all border ${numericSessionId === session.sessionId ? 'bg-surface-container border-primary-light' : 'bg-white border-surface-container hover:border-primary-light hover:shadow-sm'}`}
               >
                 <div className="flex justify-between items-start mb-1.5 gap-2">

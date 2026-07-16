@@ -24,14 +24,16 @@ namespace Tabibi.Application.Services
             }
 
             // Determine if the same user is both patient and doctor in this session
-            var isDual = session.Doctor != null && session.Patient.UserId == userId && session.Doctor.UserId == userId;
+            var isDual = session.Doctor != null 
+                && session.Patient.UserId.Equals(userId, StringComparison.OrdinalIgnoreCase) 
+                && session.Doctor.UserId.Equals(userId, StringComparison.OrdinalIgnoreCase);
 
             if (isDual)
             {
                 return new ChatAccessResult { Allowed = false };
             }
 
-            if (session.Patient.UserId == userId)
+            if (session.Patient.UserId.Equals(userId, StringComparison.OrdinalIgnoreCase))
             {
                 return new ChatAccessResult
                 {
@@ -41,7 +43,7 @@ namespace Tabibi.Application.Services
                 };
             }
 
-            if (session.Doctor != null && session.Doctor.UserId == userId)
+            if (session.Doctor != null && session.Doctor.UserId.Equals(userId, StringComparison.OrdinalIgnoreCase))
             {
                 return new ChatAccessResult
                 {
@@ -83,14 +85,15 @@ namespace Tabibi.Application.Services
                 };
             }
 
-            var isDual = session.Patient.UserId == userId && session.Doctor.UserId == userId;
+            var isDual = session.Patient.UserId.Equals(userId, StringComparison.OrdinalIgnoreCase) 
+                && session.Doctor.UserId.Equals(userId, StringComparison.OrdinalIgnoreCase);
 
             if (isDual)
             {
                 return new ChatAccessResult { Allowed = false, ErrorMessage = "You cannot start a video call with yourself." };
             }
 
-            if (session.Patient.UserId == userId)
+            if (session.Patient.UserId.Equals(userId, StringComparison.OrdinalIgnoreCase))
             {
                 return new ChatAccessResult
                 {
@@ -100,7 +103,7 @@ namespace Tabibi.Application.Services
                 };
             }
 
-            if (session.Doctor.UserId == userId)
+            if (session.Doctor.UserId.Equals(userId, StringComparison.OrdinalIgnoreCase))
             {
                 return new ChatAccessResult
                 {
@@ -496,6 +499,22 @@ namespace Tabibi.Application.Services
                 await unitOfWork.CompleteAsync();
                 return ServiceResult<InitiateFollowUpResponseDTO>.Failure("Failed to generate payment link. Please try again.");
             }
+        }
+
+        public async Task<bool> IsVideoCallTimePassedAsync(long sessionId)
+        {
+            var session = await unitOfWork.VideoCallSessions.Query()
+                .Include(s => s.Appointment)
+                .FirstOrDefaultAsync(s => s.SessionId == sessionId);
+
+            if (session == null || session.Appointment == null)
+            {
+                return false;
+            }
+
+            var now = DateTime.UtcNow;
+            var endOfAppointment = session.Appointment.ScheduledAt.AddMinutes(session.Appointment.DurationMins);
+            return now >= endOfAppointment;
         }
 
         public async Task CompleteVideoCallSessionAsync(long sessionId)

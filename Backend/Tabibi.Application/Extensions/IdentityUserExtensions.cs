@@ -6,8 +6,8 @@ namespace Tabibi.Application.Extensions
     {
         public static string? GetId(this ClaimsPrincipal user)
         {
-            return user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? 
-                   user.FindFirst("sub")?.Value;
+            return (user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? 
+                    user.FindFirst("sub")?.Value)?.ToLowerInvariant();
         }
     }
 }

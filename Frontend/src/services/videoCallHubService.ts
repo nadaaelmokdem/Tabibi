@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || "http://localhost:5009/api";
-const HUB_URL = API_BASE.replace(/\/api\/?$/, "") + "/hubs/videocall";
+const HUB_URL = API_BASE.replace(/\/api\/?$/, "") + "/hubs/videoCall";
 
 type EventCallback = (...args: any[]) => void;
 
@@ -9,6 +9,8 @@ class VideoCallHubService {
   private connection: signalR.HubConnection | null = null;
   private listeners: Record<string, EventCallback[]> = {};
   private static instance: VideoCallHubService;
+  private activeSessionId: number | null = null;
+  private startPromise: Promise<signalR.HubConnection> | null = null;
 
   private constructor() {}
 
@@ -35,9 +37,19 @@ class VideoCallHubService {
       this.emit("reconnecting", error);
     });
 
-    this.connection.onreconnected((connectionId) => {
+    this.connection.onreconnected(async (connectionId) => {
       console.log("VideoCallHub reconnected. ConnectionId:", connectionId);
       this.emit("reconnected", connectionId);
+      if (this.activeSessionId) {
+        try {
+          await this.connection?.invoke("JoinCall", this.activeSessionId);
+          console.log("Rejoined video call session after SignalR reconnect:", this.activeSessionId);
+          await this.connection?.invoke("NotifyUserReconnected", this.activeSessionId);
+          console.log("Notified peer of reconnection:", this.activeSessionId);
+        } catch (err) {
+          console.error("Failed to rejoin video call session on reconnect:", err);
+        }
+      }
     });
 
     this.connection.onclose((error) => {
@@ -54,6 +66,10 @@ class VideoCallHubService {
       this.emit("UserLeft", userId);
     });
 
+    this.connection.on("UserLeftFallback", (userId: string) => {
+      this.emit("UserLeft", userId);
+    });
+
     this.connection.on("ReceiveSignal", (userId: string, signalData: any) => {
       this.emit("ReceiveSignal", userId, signalData);
     });
@@ -65,16 +81,44 @@ class VideoCallHubService {
     this.connection.on("ReceiveMessage", (userId: string, message: string) => {
       this.emit("ReceiveMessage", userId, message);
     });
+    
+    this.connection.on("RoomPresence", (userIds: string[]) => {
+      this.emit("RoomPresence", userIds);
+    });
+
+    this.connection.on("Unauthorized", (message: any) => {
+      this.emit("Unauthorized", message);
+    });
+
+    this.connection.on("CallEndedByPeer", (userId: string) => {
+      this.emit("CallEndedByPeer", userId);
+    });
 
     return this.connection;
   }
 
   public async startConnection(): Promise<signalR.HubConnection> {
     const conn = this.getConnection();
-    if (conn.state === signalR.HubConnectionState.Disconnected) {
-      await conn.start();
+    if (conn.state === signalR.HubConnectionState.Connected) {
+      return conn;
     }
-    return conn;
+
+    if (this.startPromise) {
+      return this.startPromise;
+    }
+
+    this.startPromise = (async () => {
+      try {
+        if (conn.state === signalR.HubConnectionState.Disconnected) {
+          await conn.start();
+        }
+        return conn;
+      } finally {
+        this.startPromise = null;
+      }
+    })();
+
+    return this.startPromise;
   }
 
   public async stopConnection(): Promise<void> {
@@ -105,13 +149,20 @@ class VideoCallHubService {
   }
 
   public async joinCall(sessionId: number): Promise<void> {
+    this.activeSessionId = sessionId;
     const conn = await this.startConnection();
     await conn.invoke("JoinCall", sessionId);
   }
 
   public async leaveCall(sessionId: number): Promise<void> {
+    this.activeSessionId = null;
     if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) return;
     await this.connection.invoke("LeaveCall", sessionId);
+  }
+
+  public async endCall(sessionId: number): Promise<void> {
+    if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) return;
+    await this.connection.invoke("EndCall", sessionId);
   }
 
   public async sendSignal(sessionId: number, targetUserId: string, signalData: any): Promise<void> {

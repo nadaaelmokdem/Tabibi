@@ -34,7 +34,7 @@ api.interceptors.response.use(
     }
 
     // If the error is 401 or 403
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if ((error.response?.status === 401 || error.response?.status === 403)) {
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
 

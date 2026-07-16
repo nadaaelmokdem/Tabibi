@@ -17,7 +17,7 @@ export default function DoctorChatPage() {
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [activeTab, setActiveTab] = useState<"contacts" | "recent">("recent");
   const [expandedContactId, setExpandedContactId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth >= 1024);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => window.innerWidth >= 1024 || !sessionId);
   const [includeAI, setIncludeAI] = useState(false);
 
   const numericSessionId = sessionId ? Number(sessionId) : undefined;
@@ -149,7 +149,7 @@ export default function DoctorChatPage() {
       />
 
       {/* Right Chat Pane */}
-      <section className={`flex-1 flex flex-col bg-surface-bright relative min-w-0 ${!numericSessionId ? 'hidden md:flex' : 'flex'}`}>
+      <section className={`flex-1 flex flex-col bg-surface-bright relative min-w-0 ${(!numericSessionId || isSidebarOpen) ? 'hidden md:flex' : 'flex'}`}>
         {numericSessionId ? (
           <ActiveChatPane 
             numericSessionId={numericSessionId} 

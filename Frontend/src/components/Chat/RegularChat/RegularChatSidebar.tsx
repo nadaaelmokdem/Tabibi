@@ -35,11 +35,18 @@ export default function RegularChatSidebar({
   setExpandedContactId,
   navigate
 }: RegularChatSidebarProps) {
+  const handleSessionClick = (sessionId: number) => {
+    navigate(`/chat/${sessionId}`);
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+  };
+
   return (
     <aside className={`
       flex flex-col bg-white border-r border-surface-variant transition-all duration-300 ease-in-out shrink-0
       ${isSidebarOpen 
-        ? `w-full md:w-[350px] lg:w-[400px] translate-x-0 ${numericSessionId ? 'hidden md:flex' : 'flex'}`
+        ? `w-full md:w-[350px] lg:w-[400px] translate-x-0 flex`
         : `w-0 overflow-hidden border-none -translate-x-full md:translate-x-0 hidden md:flex`
       }
     `}>
@@ -50,7 +57,7 @@ export default function RegularChatSidebar({
           </h2>
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="cursor-pointer p-2 -mr-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-dark rounded-lg transition-colors hidden md:block"
+            className="cursor-pointer p-2 -mr-2 text-on-surface-variant hover:bg-surface-container-high hover:text-primary-dark rounded-lg transition-colors"
           >
             <TbLayoutSidebarLeftCollapse className="text-[20px]" />
           </button>
@@ -97,7 +104,7 @@ export default function RegularChatSidebar({
             recentSessions.map(session => (
               <div 
                 key={session.sessionId}
-                onClick={() => navigate(`/chat/${session.sessionId}`)}
+                onClick={() => handleSessionClick(session.sessionId)}
                 className={`p-4 rounded-xl cursor-pointer transition-all border ${numericSessionId === session.sessionId ? 'bg-surface-container border-primary-light' : 'bg-white border-surface-container hover:border-primary-light hover:shadow-sm'}`}
               >
                 <div className="flex justify-between items-start mb-1.5 gap-2">
@@ -139,7 +146,7 @@ export default function RegularChatSidebar({
                     {contact.sessions.map((session, idx) => (
                       <div 
                         key={session.sessionId}
-                        onClick={() => navigate(`/chat/${session.sessionId}`)}
+                        onClick={() => handleSessionClick(session.sessionId)}
                         className={`p-3 rounded-lg cursor-pointer transition-colors border ${numericSessionId === session.sessionId ? 'bg-white border-primary shadow-sm' : 'bg-white border-surface-variant hover:border-primary-light'}`}
                       >
                         <div className="flex justify-between items-center mb-1">
