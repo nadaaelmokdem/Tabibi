@@ -1,0 +1,30 @@
+# Build outputs
+bin/
+obj/
+publish/
+[Oo]bj/
+[Bb]in/
+
+# Configuration files (Keep the template, ignore the secrets)
+appsettings.json
+# If you use development-specific secrets, ignore them like this:
+appsettings.Development.json
+appsettings.json
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json
+.vs/
+.idea/
+.DS_Store
+
+# User-specific or cache files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.ntvs*
+*.njsproj
+
+# Backup/Vim swap files
+*.sw?

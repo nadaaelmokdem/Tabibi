@@ -1,0 +1,107 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\My Files\\Tabibi\\Backend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{C2A255D4-FA33-DB26-0C5C-8A45517E6065}|Tabibi.Application\\Tabibi.Application.csproj|c:\\my files\\tabibi\\backend\\tabibi.application\\services\\appointmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C2A255D4-FA33-DB26-0C5C-8A45517E6065}|Tabibi.Application\\Tabibi.Application.csproj|solutionrelative:tabibi.application\\services\\appointmentservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E726FDC3-16EF-094F-8CBE-CA379B8CFC34}|Tabibi.API\\Tabibi.API.csproj|c:\\my files\\tabibi\\backend\\tabibi.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E726FDC3-16EF-094F-8CBE-CA379B8CFC34}|Tabibi.API\\Tabibi.API.csproj|solutionrelative:tabibi.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C2A255D4-FA33-DB26-0C5C-8A45517E6065}|Tabibi.Application\\Tabibi.Application.csproj|c:\\my files\\tabibi\\backend\\tabibi.application\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C2A255D4-FA33-DB26-0C5C-8A45517E6065}|Tabibi.Application\\Tabibi.Application.csproj|solutionrelative:tabibi.application\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E726FDC3-16EF-094F-8CBE-CA379B8CFC34}|Tabibi.API\\Tabibi.API.csproj|c:\\my files\\tabibi\\backend\\tabibi.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E726FDC3-16EF-094F-8CBE-CA379B8CFC34}|Tabibi.API\\Tabibi.API.csproj|solutionrelative:tabibi.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{78924CA6-075A-8FC5-5CBE-C7FBD829E83D}|Tabibi.Core\\Tabibi.Core.csproj|c:\\my files\\tabibi\\backend\\tabibi.core\\models\\appuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{78924CA6-075A-8FC5-5CBE-C7FBD829E83D}|Tabibi.Core\\Tabibi.Core.csproj|solutionrelative:tabibi.core\\models\\appuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AppointmentService.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Application\\Services\\AppointmentService.cs",
+              "RelativeDocumentMoniker": "Tabibi.Application\\Services\\AppointmentService.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Application\\Services\\AppointmentService.cs",
+              "RelativeToolTip": "Tabibi.Application\\Services\\AppointmentService.cs",
+              "ViewState": "AgIAAOcBAAAAAAAAAADwv/kBAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T21:46:21.423Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Tabibi.API\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Tabibi.API\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Tabibi.API\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Tabibi.API\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAkwGIAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T20:53:40.786Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Application\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "Tabibi.Application\\Services\\AuthService.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Application\\Services\\AuthService.cs",
+              "RelativeToolTip": "Tabibi.Application\\Services\\AuthService.cs",
+              "ViewState": "AgIAAI4AAAAAAAAAAAAawIAAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T18:23:42.589Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AppUser.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Core\\Models\\AppUser.cs",
+              "RelativeDocumentMoniker": "Tabibi.Core\\Models\\AppUser.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Core\\Models\\AppUser.cs",
+              "RelativeToolTip": "Tabibi.Core\\Models\\AppUser.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T15:36:38.594Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\My Files\\Tabibi\\Backend\\Tabibi.API\\Program.cs",
+              "RelativeDocumentMoniker": "Tabibi.API\\Program.cs",
+              "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Tabibi.API\\Program.cs",
+              "RelativeToolTip": "Tabibi.API\\Program.cs",
+              "ViewState": "AgIAALYAAAAAAAAAAAArwMYAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-15T11:05:44.179Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

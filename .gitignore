@@ -1,0 +1,10 @@
+# Ignore the top-level Tmp folder
+/Tmp/
+
+# Ignore the bin folder specifically inside the backend directory
+Backend/bin/
+
+# Ignore node_modules specifically inside the frontend directory
+Frontend/node_modules/
+
+Booking-Branch/
