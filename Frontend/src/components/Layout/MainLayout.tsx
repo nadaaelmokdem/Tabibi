@@ -4,8 +4,8 @@ import Navbar from "../navbar";
 import Sidebar from "../DashboardSidebar";
 import { useAuth } from "../../context/AuthContext";
 import { LuMenu } from "react-icons/lu";
-import { MdMedicalServices } from "react-icons/md";
 import { startConnection, stopConnection } from "../../services/chatHubService";
+import { FaStethoscope } from "react-icons/fa";
 
 /**
  * Layout wrapper that dynamically renders Navbar or Sidebar based on auth state.
@@ -49,9 +49,12 @@ export default function MainLayout() {
               to={isAdmin ? "/admin-dashboard" : isDoctor ? "/doctor-dashboard" : "/user-dashboard"}
               className="ml-3 font-bold text-primary text-lg flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <MdMedicalServices className="text-primary-light text-xl" />
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-primary to-primary-light">
+                <FaStethoscope size={15} className="text-white" />
+              </div>
               Tabibi
             </Link>
+            
           </header>
         )}
         
