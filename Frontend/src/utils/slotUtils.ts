@@ -1,5 +1,5 @@
 import type { DoctorListItem } from "../types/public";
-import type { AvailableSlot } from "../types/appointment";
+import type { AvailableSlot, ConsultationType } from "../types/appointment";
 import type { SlotWithMeta, WeekDay, SelectedSlot } from "../types/booking";
 import AppointmentService from "../services/appointmentService";
 import { USE_MOCK_DATA } from "../config/apiConfig";
@@ -170,6 +170,7 @@ export async function loadSlotsForDay(
   doctor: DoctorListItem,
   date: Date,
   bookedSlots: Set<string>,
+  type?: ConsultationType,
 ): Promise<SlotWithMeta[]> {
   const dateKey = formatDateKey(date);
 
@@ -177,6 +178,7 @@ export async function loadSlotsForDay(
     const apiSlots = await AppointmentService.getAvailableSlots(
       doctor.doctorId,
       dateKey,
+      type,
     );
     return apiSlots.map((s) => mapApiSlot(s, doctor.doctorId, bookedSlots));
   }

@@ -20,6 +20,47 @@ public class AppointmentService(
         DateOnly date,
         ConsultationType? consultationType = null)
     {
+        decimal? price = null;
+        if (consultationType.HasValue)
+        {
+            price = await pricingService.GetPriceAsync(doctorId, consultationType.Value);
+        }
+
+        if (consultationType == ConsultationType.Chat)
+        {
+            var chatSlots = new List<AvailableSlotDTO>();
+            var startHour = 9;
+            var endHour = 21;
+            var slotDuration = 30;
+
+            var current = TimeSpan.FromHours(startHour);
+            var limit = TimeSpan.FromHours(endHour);
+            var slotStep = TimeSpan.FromMinutes(slotDuration);
+
+            while (current + slotStep <= limit)
+            {
+                var startLocal = SlotService.TruncateToMinute(
+                    date.ToDateTime(TimeOnly.MinValue).Add(current));
+                var start = startLocal.ToUniversalTime();
+                var end = start.AddMinutes(slotDuration);
+
+                if (start > DateTime.UtcNow)
+                {
+                    chatSlots.Add(new AvailableSlotDTO
+                    {
+                        Start = start,
+                        End = end,
+                        IsAvailable = true,
+                        Price = price
+                    });
+                }
+
+                current += slotStep;
+            }
+
+            return chatSlots;
+        }
+
         var currentAvailabilities = await slotService.GetActiveAvailabilitiesAsync(
             doctorId,
             date);
@@ -38,12 +79,6 @@ public class AppointmentService(
         var blockingAppointments = await slotService.GetBlockingAppointmentsAsync(
             doctorId,
             date);
-
-        decimal? price = null;
-        if (consultationType.HasValue)
-        {
-            price = await pricingService.GetPriceAsync(doctorId, consultationType.Value);
-        }
 
         var slots = new List<AvailableSlotDTO>();
 
@@ -209,7 +244,8 @@ public class AppointmentService(
             var validation = await slotService.ValidateSlotAsync(
                 request.DoctorId,
                 normalizedScheduledAt,
-                durationMins);
+                durationMins,
+                request.Type);
 
             if (!validation.IsValid)
             {

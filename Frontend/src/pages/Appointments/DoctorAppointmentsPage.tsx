@@ -144,7 +144,9 @@ export default function DoctorAppointmentsPage() {
                           <div className="font-semibold text-primary-dark">{format(new Date(app.scheduledAt), "MMM d, yyyy")}</div>
                           <div className="text-xs text-outline-variant mt-0.5 flex items-center gap-1">
                             <MdAccessTime size={11} />
-                            {format(new Date(app.scheduledAt), "h:mm a")} · {app.durationMins} mins
+                            {isChatConsultation(app.consultationType)
+                              ? `Open till: ${format(new Date(new Date(app.scheduledAt).getTime() + 7 * 24 * 60 * 60 * 1000), "MMM d, yyyy")}`
+                              : `${format(new Date(app.scheduledAt), "h:mm a")} · ${app.durationMins} mins`}
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -242,7 +244,9 @@ export default function DoctorAppointmentsPage() {
                       </div>
                       <div className="text-outline-variant flex items-center gap-1.5 font-medium">
                         <MdAccessTime size={13} className="text-primary" />
-                        {format(new Date(app.scheduledAt), "h:mm a")} · {app.durationMins} mins
+                        {isChatConsultation(app.consultationType)
+                          ? `Open till: ${format(new Date(new Date(app.scheduledAt).getTime() + 7 * 24 * 60 * 60 * 1000), "MMM d, yyyy")}`
+                          : `${format(new Date(app.scheduledAt), "h:mm a")} · ${app.durationMins} mins`}
                       </div>
                     </div>
 

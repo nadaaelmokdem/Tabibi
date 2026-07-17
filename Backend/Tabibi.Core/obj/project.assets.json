@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
     "net10.0": {
       "Microsoft.AspNetCore.Cryptography.Internal/10.0.8": {
@@ -1061,23 +1061,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\nadaa\\.nuget\\packages\\": {},
+    "C:\\Users\\abdos\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "d:\\nadod\\MediConnect\\Backend\\Tabibi.Core\\Tabibi.Core.csproj",
+      "projectUniqueName": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Core\\Tabibi.Core.csproj",
       "projectName": "Tabibi.Core",
-      "projectPath": "d:\\nadod\\MediConnect\\Backend\\Tabibi.Core\\Tabibi.Core.csproj",
-      "packagesPath": "C:\\Users\\nadaa\\.nuget\\packages\\",
-      "outputPath": "d:\\nadod\\MediConnect\\Backend\\Tabibi.Core\\obj\\",
+      "projectPath": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Core\\Tabibi.Core.csproj",
+      "packagesPath": "C:\\Users\\abdos\\.nuget\\packages\\",
+      "outputPath": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Core\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\nadaa\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\abdos\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1086,11 +1086,11 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {}
         }
@@ -1105,10 +1105,11 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.200"
+      "SdkAnalysisLevel": "10.0.300"
     },
     "frameworks": {
       "net10.0": {
+        "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
@@ -1132,7 +1133,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.204/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

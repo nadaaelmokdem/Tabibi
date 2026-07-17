@@ -112,7 +112,7 @@
               "RelativeDocumentMoniker": "Tabibi.Application\\Services\\AuthService.cs",
               "ToolTip": "C:\\My Files\\Tabibi\\Backend\\Tabibi.Application\\Services\\AuthService.cs",
               "RelativeToolTip": "Tabibi.Application\\Services\\AuthService.cs",
-              "ViewState": "AgIAALABAAAAAAAAAAAqwK4BAAAWAAAAAAAAAA==",
+              "ViewState": "AgIAALABAAAAAAAAAAAqwLcBAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-07-15T18:23:42.589Z",
               "EditorCaption": ""
@@ -139,8 +139,7 @@
               "RelativeToolTip": "Tabibi.API\\Controllers\\AuthController.cs",
               "ViewState": "AgIAADcAAAAAAAAAAAAqwEYAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T20:53:40.786Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-15T20:53:40.786Z"
             },
             {
               "$type": "Document",
@@ -164,8 +163,7 @@
               "RelativeToolTip": "Tabibi.API\\Program.cs",
               "ViewState": "AgIAACYAAAAAAAAAAAArwI8AAABeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-15T11:05:44.179Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-15T11:05:44.179Z"
             },
             {
               "$type": "Document",

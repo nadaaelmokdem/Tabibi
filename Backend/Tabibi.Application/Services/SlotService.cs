@@ -162,6 +162,7 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
                 a.DoctorId == doctorId &&
                 a.ScheduledAt >= dayStart &&
                 a.ScheduledAt < dayEnd &&
+                a.ConsultationType != ConsultationType.Chat &&
                 BlockingStatuses.Contains(a.Status))
             .ToListAsync();
     }
@@ -192,8 +193,23 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
     public async Task<SlotValidationResult> ValidateSlotAsync(
         long doctorId,
         DateTime scheduledAt,
-        int durationMins = DefaultSlotDurationMins)
+        int durationMins = DefaultSlotDurationMins,
+        ConsultationType? type = null)
     {
+        if (type == ConsultationType.Chat)
+        {
+            var doc = await unitOfWork.DoctorProfiles.Query()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.DoctorId == doctorId);
+
+            if (doc == null)
+                return SlotValidationResult.Invalid("Doctor not found.");
+
+            if (!doc.IsVerified)
+                return SlotValidationResult.Invalid("Doctor is not verified.");
+
+            return SlotValidationResult.Valid(null);
+        }
         var normalized = TruncateToMinute(scheduledAt);
         var localNormalized = normalized.Kind == DateTimeKind.Utc 
             ? normalized.ToLocalTime() 

@@ -1,4 +1,5 @@
 using Tabibi.Core.Models;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -39,23 +40,40 @@ namespace Tabibi.API.Controllers
             // doctor or an Admin may fetch them, even though the caller is authenticated.
             if (objectKey.StartsWith("proofs/", StringComparison.OrdinalIgnoreCase))
             {
-                var userId = User.GetId();
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized();
-                }
+                // Check if this is a public profile picture for any doctor (stored in the proofs folder)
+                var isProfilePicture = await _unitOfWork.DoctorProfiles.Query()
+                    .AnyAsync(p => p.ProfilePictureUrl != null && p.ProfilePictureUrl.ToLower().EndsWith(objectKey.ToLower()));
 
-                if (!User.IsInRole(UserRoles.Admin))
+                if (!isProfilePicture)
                 {
-                    var fileUrl = $"/api/files/{objectKey}";
-                    var ownsFile = await _unitOfWork.DoctorProfiles.Query()
-                        .AnyAsync(p => p.UserId == userId &&
-                            (p.LicenseProofUrl == fileUrl || p.IdProofUrl == fileUrl || p.DegreeProofUrl == fileUrl ||
-                             p.OldLicenseProofUrl == fileUrl || p.OldIdProofUrl == fileUrl || p.OldDegreeProofUrl == fileUrl));
-
-                    if (!ownsFile)
+                    var userId = User.GetId();
+                    if (string.IsNullOrEmpty(userId))
                     {
-                        return Forbid();
+                        return Unauthorized();
+                    }
+
+                    var isAdmin = User.IsInRole(UserRoles.Admin) || 
+                                  User.HasClaim(c => (c.Type == ClaimTypes.Role || c.Type == "role") && 
+                                                     string.Equals(c.Value, UserRoles.Admin, StringComparison.OrdinalIgnoreCase));
+
+                    if (!isAdmin)
+                    {
+                        var lowerObjectKey = objectKey.ToLower();
+                        var lowerUserId = userId.ToLower();
+
+                        var ownsFile = await _unitOfWork.DoctorProfiles.Query()
+                            .AnyAsync(p => p.UserId.ToLower() == lowerUserId &&
+                                ((p.LicenseProofUrl != null && p.LicenseProofUrl.ToLower().EndsWith(lowerObjectKey)) ||
+                                 (p.IdProofUrl != null && p.IdProofUrl.ToLower().EndsWith(lowerObjectKey)) ||
+                                 (p.DegreeProofUrl != null && p.DegreeProofUrl.ToLower().EndsWith(lowerObjectKey)) ||
+                                 (p.OldLicenseProofUrl != null && p.OldLicenseProofUrl.ToLower().EndsWith(lowerObjectKey)) ||
+                                 (p.OldIdProofUrl != null && p.OldIdProofUrl.ToLower().EndsWith(lowerObjectKey)) ||
+                                 (p.OldDegreeProofUrl != null && p.OldDegreeProofUrl.ToLower().EndsWith(lowerObjectKey))));
+
+                        if (!ownsFile)
+                        {
+                            return Forbid();
+                        }
                     }
                 }
             }

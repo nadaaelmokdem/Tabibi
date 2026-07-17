@@ -67,7 +67,9 @@ export default function AppointmentDetailModal({
                 {format(new Date(appointment.scheduledAt), "MMM d, yyyy")}
                 <span className="block text-sm text-text-muted mt-0.5 flex items-center gap-1">
                   <MdAccessTime size={13} />
-                  {format(new Date(appointment.scheduledAt), "h:mm a")} · {appointment.durationMins} mins
+                  {isChatConsultation(appointment.consultationType)
+                    ? `Open till: ${format(new Date(new Date(appointment.scheduledAt).getTime() + 7 * 24 * 60 * 60 * 1000), "MMM d, yyyy")}`
+                    : `${format(new Date(appointment.scheduledAt), "h:mm a")} · ${appointment.durationMins} mins`}
                 </span>
               </>
             }

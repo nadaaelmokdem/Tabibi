@@ -9,6 +9,6 @@ public interface ISlotService
     Task<List<Appointment>> GetBlockingAppointmentsAsync(long doctorId, DateOnly date);
     bool IsBlockedByExistingAppointment(DateTime slotStart, int slotDurationMins, IReadOnlyList<Appointment> blockingAppointments);
     Task<bool> IsSlotAvailableAsync(long doctorId, DateTime scheduledAt, int durationMins = 30);
-    Task<SlotValidationResult> ValidateSlotAsync(long doctorId, DateTime scheduledAt, int durationMins = 30);
+    Task<SlotValidationResult> ValidateSlotAsync(long doctorId, DateTime scheduledAt, int durationMins = 30, ConsultationType? type = null);
 }
 

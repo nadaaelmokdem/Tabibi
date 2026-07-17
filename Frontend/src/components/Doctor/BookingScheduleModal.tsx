@@ -123,7 +123,9 @@ const BookingScheduleModal: React.FC<BookingScheduleModalProps> = ({
 
     setLoadingSlots(true);
     try {
-      const slots = await loadSlotsForDay(doctor, day.date, bookedSlots);
+      const typeMap: Record<string, number> = { chat: 0, video: 1, clinic: 2 };
+      const apiType = typeMap[consultType] ?? 2;
+      const slots = await loadSlotsForDay(doctor, day.date, bookedSlots, apiType as any);
       setDaySlots(slots);
     } catch {
       setFeedback({
