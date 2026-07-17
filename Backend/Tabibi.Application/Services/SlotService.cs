@@ -199,7 +199,9 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
             ? normalized.ToLocalTime() 
             : DateTime.SpecifyKind(normalized, DateTimeKind.Utc).ToLocalTime();
 
-        if (normalized.ToUniversalTime() <= DateTime.UtcNow)
+        var currentMinuteUtc = TruncateToMinute(DateTime.UtcNow);
+
+        if (normalized.ToUniversalTime() < currentMinuteUtc)
             return SlotValidationResult.Invalid("Cannot book a slot in the past.");
 
         var doctor = await unitOfWork.DoctorProfiles.Query()
