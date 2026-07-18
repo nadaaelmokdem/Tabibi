@@ -1,6 +1,6 @@
 # Tabibi (طبيبي) — Comprehensive Telehealth Platform
 
-Tabibi is a state-of-the-art, secure, and intuitive telehealth system designed to bridge the gap between patients and medical professionals. By combining the power of **Gemini Multimodal AI** for initial symptom triage and **WebRTC (PeerJS) + SignalR** for direct consultations, Tabibi ensures that medical intake is simple, diagnosis is collaborative, and payments are seamless.
+Tabibi is a state-of-the-art, secure, and intuitive telehealth system designed to bridge the gap between patients and medical professionals. By combining the power of **Gemini Multimodal AI** for initial symptom triage and **MiroTalk P2P (WebRTC) + SignalR** for direct consultations, Tabibi ensures that medical intake is simple, diagnosis is collaborative, and payments are seamless.
 
 ---
 
@@ -19,7 +19,7 @@ Tabibi is built using modern, enterprise-ready technologies separated across a d
 * **Language**: TypeScript (strongly typed client state and models)
 * **Styling**: Tailwind CSS v4 (providing sleek utility classes and premium design patterns)
 * **Real-time Comms**: `@microsoft/signalr` (websocket connection management)
-* **Video Consulting**: `peerjs` (WebRTC client wrapper for high-fidelity peer-to-peer audio/video calls)
+* **Video Consulting**: **MiroTalk P2P** (WebRTC-powered peer-to-peer video and audio consultations with in-room chat)
 * **Authentication**: Google OAuth integration (`@react-oauth/google`) & custom JWT handlers
 * **UI Utilities**: SweetAlert2 (premium interactive modals) & React Toastify (non-blocking notifications)
 * **Routing**: React Router DOM 7
@@ -31,7 +31,7 @@ Tabibi is built using modern, enterprise-ready technologies separated across a d
 * **Security & Auth**: ASP.NET Core Identity with custom JSON Web Tokens (JWT)
 * **AI Engine**: Google GenAI C# SDK (accessing Gemini 3.1 flash lite model)
 * **File Storage**: Amazon S3-compatible Backblaze B2 Storage (isolated file upload and streaming reverse proxy)
-* **Real-time Web Sockets**: ASP.NET Core SignalR (appointment updates, live text chats, and WebRTC signaling)
+* **Real-time Web Sockets**: ASP.NET Core SignalR (appointment updates, live text chats, and MiroTalk video call presence/completion syncing)
 * **Payment Gateway**: Geidea Payment SDK (supporting cards, wallets, and instant webhook transaction verifications)
 
 ---
@@ -87,8 +87,8 @@ graph TD
 * **Cancellation Policies**: Unpaid appointments are cleaned up by a backend background worker (`PendingAppointmentCleanupService`) if not paid within 15 minutes.
 
 ### 3. Consultation Delivery Channels
-* **SignalR Real-Time Chat**: Live messaging directly in the web app, allowing doctors and patients to exchange advice and clinical records.
-* **WebRTC Video Consultations**: Real-time peer-to-peer audio and video streaming powered by a custom SignalR signaling gateway and `peerjs`. High-definition video with in-call chat panels and mute/video toggle features.
+* **SignalR Real-Time Chat**: Live messaging directly in the web app, active for a flexible **7-day duration**. Since chat sessions operate asynchronously over a week, they bypass scheduling slot conflicts, allowing patients to easily exchange advice and clinical records with their doctor.
+* **WebRTC Video Consultations (MiroTalk P2P)**: High-definition, real-time peer-to-peer video and audio consultations powered by **MiroTalk P2P**. Video slots are fixed to **30-minute sessions** (featuring a 5-minute remaining warning banner and automatic backend session completion). Features include device toggle controls and in-lobby chat syncing.
 
 ### 4. Admin Verification & Doctor Security Log
 * **Doctor Approvals**: Newly registered doctors cannot accept bookings until they submit verification materials (Medical License, National ID) and are approved by an administrator.
