@@ -247,7 +247,7 @@ public class PaymentService(PaymentGatewayResolver paymentGatewayResolver, AppDb
             payment.ChatSession.IsFollowUp = true;
             payment.ChatSession.IsCompanyPaid = false;
             payment.ChatSession.Price = payment.Amount;
-            payment.ChatSession.StartedAt = DateTime.UtcNow; // reset the 24-hour clock
+            payment.ChatSession.StartedAt = DateTime.UtcNow; 
         }
 
         await dbContext.SaveChangesAsync();

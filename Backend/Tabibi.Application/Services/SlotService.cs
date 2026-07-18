@@ -115,34 +115,37 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
         DateOnly slotDate,
         TimeSpan slotTime,
         int durationMins,
-        DateOnly availabilityDate)
+        DateOnly availabilityDate,
+        ConsultationType? type = null)
     {
+        var slotDurationMins = availability.SlotDurationMins;
+        var actualDurationMins = (type == ConsultationType.VideoCall) ? 30 : availability.SlotDurationMins;
         if (availabilityDate == slotDate)
         {
             if (availability.StartTime < availability.EndTime)
             {
                 return slotTime >= availability.StartTime
-                       && slotTime.Add(TimeSpan.FromMinutes(durationMins)) <= availability.EndTime
-                       && (slotTime - availability.StartTime).TotalMinutes % availability.SlotDurationMins == 0;
+                       && slotTime.Add(TimeSpan.FromMinutes(actualDurationMins)) <= availability.EndTime
+                       && (slotTime - availability.StartTime).TotalMinutes % slotDurationMins == 0;
             }
             else
             {
-                var slotEnd = slotTime.Add(TimeSpan.FromMinutes(durationMins));
+                var slotEnd = slotTime.Add(TimeSpan.FromMinutes(actualDurationMins));
                 var limit = availability.EndTime.Add(TimeSpan.FromHours(24));
                 return slotTime >= availability.StartTime
                        && slotEnd <= limit
-                       && (slotTime - availability.StartTime).TotalMinutes % availability.SlotDurationMins == 0;
+                       && (slotTime - availability.StartTime).TotalMinutes % slotDurationMins == 0;
             }
         }
         else if (availabilityDate == slotDate.AddDays(-1))
         {
             if (availability.StartTime >= availability.EndTime)
             {
-                var slotEnd = slotTime.Add(TimeSpan.FromMinutes(durationMins));
+                var slotEnd = slotTime.Add(TimeSpan.FromMinutes(actualDurationMins));
                 if (slotEnd <= availability.EndTime)
                 {
                     var offsetMinutes = (slotTime + TimeSpan.FromHours(24) - availability.StartTime).TotalMinutes;
-                    return offsetMinutes % availability.SlotDurationMins == 0;
+                    return offsetMinutes % slotDurationMins == 0;
                 }
             }
         }
@@ -210,6 +213,11 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
 
             return SlotValidationResult.Valid(null);
         }
+        if (type == ConsultationType.VideoCall)
+        {
+            durationMins = 30;
+        }
+
         var normalized = TruncateToMinute(scheduledAt);
         var localNormalized = normalized.Kind == DateTimeKind.Utc 
             ? normalized.ToLocalTime() 
@@ -239,20 +247,22 @@ public class SlotService(IUnitOfWork unitOfWork) : Tabibi.Application.Interfaces
 
         var slotTime = localNormalized.TimeOfDay;
         var matchingAvailability = currentAvailabilities.FirstOrDefault(a =>
-            IsSlotWithinAvailability(a, date, slotTime, durationMins, date));
+            IsSlotWithinAvailability(a, date, slotTime, durationMins, date, type));
 
         if (matchingAvailability == null)
         {
             matchingAvailability = prevAvailabilities.FirstOrDefault(a =>
-                IsSlotWithinAvailability(a, date, slotTime, durationMins, date.AddDays(-1)));
+                IsSlotWithinAvailability(a, date, slotTime, durationMins, date.AddDays(-1), type));
         }
 
         if (matchingAvailability == null)
             return SlotValidationResult.Invalid("Selected time is outside doctor availability.");
 
+        var actualDurationMins = (type == ConsultationType.VideoCall) ? 30 : matchingAvailability.SlotDurationMins;
+
         var blockingAppointments = await GetBlockingAppointmentsAsync(doctorId, date);
 
-        if (IsBlockedByExistingAppointment(localNormalized, durationMins, blockingAppointments))
+        if (IsBlockedByExistingAppointment(localNormalized, actualDurationMins, blockingAppointments))
             return SlotValidationResult.Invalid("This slot is already booked.");
 
         return SlotValidationResult.Valid(matchingAvailability);

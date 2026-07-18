@@ -96,6 +96,47 @@ namespace Tabibi.API.Controllers
 
             return Ok();
         }
+
+        [HttpGet("session/{sessionId}")]
+        [Authorize]
+        public async Task<IActionResult> GetSessionDetails(long sessionId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var access = await chatService.ValidateVideoCallAccess(sessionId, userId);
+            if (!access.Allowed) return StatusCode(403, access.ErrorMessage ?? "Access denied.");
+
+            var linkResult = await chatService.GetOrCreateMeetingLinkAsync(sessionId);
+            if (!linkResult.IsSuccess)
+            {
+                return BadRequest(linkResult.ErrorMessage);
+            }
+
+            var sessionDetails = await chatService.GetVideoCallSessionDetailsAsync(sessionId);
+            if (sessionDetails == null) return NotFound("Video call session not found.");
+
+            return Ok(sessionDetails);
+        }
+
+        [HttpGet("meet-link/{sessionId}")]
+        [Authorize]
+        public async Task<IActionResult> GetMeetLink(long sessionId)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var access = await chatService.ValidateVideoCallAccess(sessionId, userId);
+            if (!access.Allowed) return StatusCode(403, access.ErrorMessage ?? "Access denied.");
+
+            var linkResult = await chatService.GetOrCreateMeetingLinkAsync(sessionId);
+            if (!linkResult.IsSuccess)
+            {
+                return BadRequest(linkResult.ErrorMessage);
+            }
+
+            return Ok(new { meetLink = linkResult.Data });
+        }
     }
 }
 

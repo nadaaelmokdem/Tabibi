@@ -195,10 +195,10 @@ export default function PatientDashboard() {
           </div>
         )}
 
-        {/* Upcoming Appointments */}
+        {/* Active Consultations */}
         <PatientDashboardAppointments 
-          upcomingAppointments={data.upcomingAppointments}
-          upcomingAppointmentsCount={data.upcomingAppointmentsCount}
+          activeConsultations={data.activeConsultations}
+          activeConsultationsCount={data.activeConsultationsCount}
         />
 
         {/* Recent Chats */}

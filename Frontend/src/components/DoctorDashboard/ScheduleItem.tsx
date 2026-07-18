@@ -5,7 +5,13 @@ import {
   MdChat,
   MdLocalHospital,
 } from "react-icons/md";
-import { getConsultationTypeLabel } from "../../utils/appointmentUtils";
+import { Link } from "react-router-dom";
+import { getFileUrl } from "../../utils/fileUtils";
+import {
+  getConsultationTypeLabel,
+  isChatConsultation,
+  isVideoConsultation,
+} from "../../utils/appointmentUtils";
 
 export interface ScheduleItem {
   id: number;
@@ -18,6 +24,8 @@ export interface ScheduleItem {
   initials: string;
   avatar?: string;
   paymentMethod?: string;
+  sessionId?: number;
+  scheduledAt?: string;
 }
 
 function BadgeIcon({ badge }: { badge: string }) {
@@ -46,6 +54,11 @@ export default function ScheduleItemComponent({
   onCancel: (id: number) => void;
   cancelling?: boolean;
 }) {
+  const isChat = isChatConsultation(item.badge);
+  const isVideo = isVideoConsultation(item.badge);
+  const isClinic = item.badge === "Clinic" || item.badge === "2";
+  const isVideoJoinable = isVideo && item.sessionId && new Date() >= new Date(item.scheduledAt || "");
+
   return (
     <div className="group flex items-center justify-between p-4 rounded-lg hover:bg-surface-container-low transition-colors border border-transparent hover:border-surface-variant/30">
       <div className="flex items-center gap-4 min-w-0">
@@ -56,12 +69,12 @@ export default function ScheduleItemComponent({
           </div>
         </div>
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+          <div className="w-12 h-12 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-sm shadow-sm shrink-0 overflow-hidden">
             {item.avatar ? (
               <img
-                src={item.avatar}
+                src={getFileUrl(item.avatar)}
                 alt={item.name}
-                className="w-full h-full object-cover rounded-full"
+                className="w-full h-full object-cover"
               />
             ) : (
               item.initials
@@ -73,11 +86,46 @@ export default function ScheduleItemComponent({
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="flex items-center gap-1.5 text-[11px] font-bold bg-surface-container-low border border-surface-variant/30 text-on-surface-variant px-3 py-1.5 rounded-lg">
-          <BadgeIcon badge={item.badge} />
-          {getConsultationTypeLabel(item.badge)}
-        </span>
+      <div className="flex items-center gap-3 shrink-0">
+        {isChat && item.sessionId ? (
+          <Link
+            to={`/chat/${item.sessionId}`}
+            className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary-dark transition-colors shadow-sm"
+          >
+            <MdChat className="text-sm" />
+            Open Chat
+          </Link>
+        ) : isVideo && item.sessionId ? (
+          isVideoJoinable ? (
+            <Link
+              to={`/video-call/${item.sessionId}`}
+              className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-full text-xs font-semibold hover:bg-primary-dark transition-colors shadow-sm"
+            >
+              <MdVideocam className="text-base" />
+              Join Call
+            </Link>
+          ) : (
+            <button
+              disabled
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary/20 text-primary/50 cursor-not-allowed rounded-full text-xs font-semibold"
+              title={`This call will be available at ${item.time}`}
+            >
+              <MdVideocam className="text-base" />
+              Join Call
+            </button>
+          )
+        ) : isClinic ? (
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-700 border border-green-200 text-[10px] font-semibold rounded-full uppercase tracking-wider">
+            <MdLocalHospital className="text-xs" />
+            Upcoming Clinic
+          </span>
+        ) : (
+          <span className="flex items-center gap-1.5 text-[11px] font-bold bg-surface-container-low border border-surface-variant/30 text-on-surface-variant px-3 py-1.5 rounded-lg">
+            <BadgeIcon badge={item.badge} />
+            {getConsultationTypeLabel(item.badge)}
+          </span>
+        )}
+
         {item.paymentMethod === "OnSite" && (
           <button
             onClick={() => onCancel(item.id)}

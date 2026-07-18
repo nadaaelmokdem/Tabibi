@@ -916,6 +916,10 @@
               "target": "Package",
               "version": "[4.0.100.3, )"
             },
+            "Google.Apis.Calendar.v3": {
+              "target": "Package",
+              "version": "[1.75.0.4206, )"
+            },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
               "version": "[10.0.8, )"

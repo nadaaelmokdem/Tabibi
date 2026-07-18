@@ -94,10 +94,10 @@ export default function Dashboard() {
       if (dashboardData) {
         setDashboardData({
           ...dashboardData,
-          todaysAppointments: dashboardData.todaysAppointments.filter(
+          activeConsultations: dashboardData.activeConsultations.filter(
             (a) => a.appointmentId !== id,
           ),
-          todaysAppointmentsCount: Math.max(0, (dashboardData.todaysAppointmentsCount || 0) - 1),
+          activeConsultationsCount: Math.max(0, (dashboardData.activeConsultationsCount || 0) - 1),
         });
       }
       setAllAppointments((prev) => prev.filter((a) => a.appointmentId !== id));
@@ -139,9 +139,8 @@ export default function Dashboard() {
     day: "numeric",
     year: "numeric",
   });
-
   const mappedSchedule =
-    dashboardData?.todaysAppointments.map((app) => {
+    dashboardData?.activeConsultations.map((app) => {
       const d = new Date(app.scheduledAt);
       return {
         id: app.appointmentId,
@@ -153,9 +152,11 @@ export default function Dashboard() {
         date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
         initials: (app.patientName || "P").charAt(0).toUpperCase() || "P",
         paymentMethod: app.paymentMethod,
+        avatar: app.doctorProfilePictureUrl,
+        sessionId: app.sessionId,
+        scheduledAt: app.scheduledAt,
       } as ScheduleItem;
     }) || [];
-
   const calendarSchedule =
     allAppointments.map((app) => {
       const d = new Date(app.scheduledAt);

@@ -333,7 +333,7 @@ const DoctorsPage: React.FC = () => {
                     className="w-full text-left p-4 rounded-xl border-2 border-green-100 hover:border-green-500 bg-green-50 hover:bg-green-100 transition-all group"
                   >
                     <div className="font-bold text-green-700 mb-1 flex justify-between items-center">
-                      <span>Free Company-Paid Session</span>
+                      <span>Free Chat Session</span>
                       <span className="text-xs px-2 py-1 rounded-full transition-colors bg-green-200 text-green-800 group-hover:bg-green-500 group-hover:text-white">{freeGpMessages} left</span>
                     </div>
                     <p className="text-sm text-green-600 leading-snug">Use one of your monthly free GP messages. One initial message.</p>
@@ -346,7 +346,7 @@ const DoctorsPage: React.FC = () => {
                       <span>Paid Chat Session</span>
                       <span className="text-primary font-extrabold">{selectedDoctorForChat.chatPrice} EGP</span>
                     </div>
-                    <p className="text-sm text-primary/80 leading-snug">Start a standard 24-hour consultation session with unlimited messages.</p>
+                    <p className="text-sm text-primary/80 leading-snug">Start a standard 7-day consultation session with unlimited messages.</p>
                   </button>
                 </div>
               </>

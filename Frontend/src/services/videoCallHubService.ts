@@ -199,6 +199,16 @@ class VideoCallHubService {
     if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) return;
     await this.connection.invoke("SendMessage", sessionId, message);
   }
+
+  public async joinVideoSpace(sessionId: number): Promise<void> {
+    if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) return;
+    await this.connection.invoke("JoinVideoSpace", sessionId);
+  }
+
+  public async leaveVideoSpace(sessionId: number): Promise<void> {
+    if (!this.connection || this.connection.state !== signalR.HubConnectionState.Connected) return;
+    await this.connection.invoke("LeaveVideoSpace", sessionId);
+  }
 }
 
 export const videoCallHubService = VideoCallHubService.getInstance();

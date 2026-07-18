@@ -40,6 +40,7 @@ export default function PatientDashboardMessages({
           </div>
         ) : (
           recentChats.map((session, i) => (
+            formatMessagePreview(session.lastMessage) == "" ? null : (
             <div key={session.sessionId}>
               <div className="flex items-center gap-4 p-4 rounded-lg hover:bg-surface-container-low transition-colors border border-transparent hover:border-surface-variant/60 cursor-pointer" onClick={() => navigate(session.otherPartyUserId === 'AI' ? `/ai-chat/${session.sessionId}` : `/chat/${session.sessionId}`)}>
                 <div className="relative shrink-0">
@@ -69,6 +70,7 @@ export default function PatientDashboardMessages({
               </div>
               {i < recentChats.length - 1 && <hr className="border-surface-variant/60 mt-4" />}
             </div>
+          )
           ))
         )}
       </div>

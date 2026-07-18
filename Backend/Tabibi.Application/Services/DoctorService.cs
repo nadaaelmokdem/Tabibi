@@ -554,9 +554,13 @@ namespace Tabibi.Application.Services
                 .ToListAsync();
 
 
-            var todaysAppointments = await unitOfWork.Appointments.Query()
+            var activeConsultations = await unitOfWork.Appointments.Query()
                 .Include(a => a.Patient).ThenInclude(p => p.User)
-                .Where(a => a.DoctorId == doctor.DoctorId && a.ScheduledAt >= todayStart && a.ScheduledAt < todayEnd)
+                .Where(a => a.DoctorId == doctor.DoctorId 
+                         && a.Status == AppointmentStatus.Confirmed
+                         && (a.ConsultationType == ConsultationType.Chat 
+                             || a.ConsultationType == ConsultationType.VideoCall 
+                             || (a.ConsultationType == ConsultationType.Clinic && a.ScheduledAt >= DateTime.UtcNow)))
                 .OrderBy(a => a.ScheduledAt)
                 .Select(a => new UpcomingAppointmentDTO
                 {
@@ -564,9 +568,11 @@ namespace Tabibi.Application.Services
                     DoctorName = doctor.User.FullName,
                     PatientName = a.Patient.User.FullName,
                     ScheduledAt = a.ScheduledAt,
+                    DoctorProfilePictureUrl = a.Patient.ProfilePictureUrl,
                     ConsultationType = a.ConsultationType.ToString(),
                     Status = a.Status.ToString(),
-                    PaymentMethod = a.PaymentMethod.ToString()
+                    PaymentMethod = a.PaymentMethod.ToString(),
+                    SessionId = a.ConsultationType == ConsultationType.VideoCall ? a.VideoCallSessionId : a.SessionId
                 })
                 .ToListAsync();
 
@@ -583,10 +589,10 @@ namespace Tabibi.Application.Services
                 VerificationStatus = doctor.VerificationStatus.ToString(),
                 AdminComment = doctor.AdminComment,
                 ChatSessionsCount = chatSessions.Count,
-                TodaysAppointmentsCount = todaysAppointments.Count,
+                ActiveConsultationsCount = activeConsultations.Count,
                 TotalPatientsSeen = totalPatientsSeen,
                 ChatSessions = chatSessions,
-                TodaysAppointments = todaysAppointments
+                ActiveConsultations = activeConsultations
             };
         }
 

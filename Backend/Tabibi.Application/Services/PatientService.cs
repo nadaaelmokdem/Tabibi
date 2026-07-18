@@ -225,9 +225,13 @@ namespace Tabibi.Application.Services
             }
             if (changed) await unitOfWork.CompleteAsync();
 
-            var upcomingAppointments = await unitOfWork.Appointments.Query()
+            var activeConsultations = await unitOfWork.Appointments.Query()
                 .Include(a => a.Doctor).ThenInclude(d => d.User)
-                .Where(a => a.PatientId == patient.PatientId && a.ScheduledAt >= DateTime.UtcNow)
+                .Where(a => a.PatientId == patient.PatientId 
+                         && a.Status == AppointmentStatus.Confirmed
+                         && (a.ConsultationType == ConsultationType.Chat 
+                             || a.ConsultationType == ConsultationType.VideoCall 
+                             || (a.ConsultationType == ConsultationType.Clinic && a.ScheduledAt >= DateTime.UtcNow)))
                 .OrderBy(a => a.ScheduledAt)
                 .Take(5)
                 .Select(a => new UpcomingAppointmentDTO
@@ -238,7 +242,8 @@ namespace Tabibi.Application.Services
                     DoctorProfilePictureUrl = a.Doctor.ProfilePictureUrl,
                     ConsultationType = a.ConsultationType.ToString(),
                     Status = a.Status.ToString(),
-                    PaymentMethod = a.PaymentMethod.ToString()
+                    PaymentMethod = a.PaymentMethod.ToString(),
+                    SessionId = a.ConsultationType == ConsultationType.VideoCall ? a.VideoCallSessionId : a.SessionId
                 })
                 .ToListAsync();
 
@@ -265,9 +270,9 @@ namespace Tabibi.Application.Services
             return new PatientDashboardDTO
             {
                 FullName = patient.User.FullName,
-                UpcomingAppointmentsCount = upcomingAppointments.Count,
+                ActiveConsultationsCount = activeConsultations.Count,
                 ChatSessionsCount = chatSessionsCount,
-                UpcomingAppointments = upcomingAppointments,
+                ActiveConsultations = activeConsultations,
                 UnreviewedAppointments = unreviewedAppointments
             };
         }

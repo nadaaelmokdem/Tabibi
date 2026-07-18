@@ -14,6 +14,12 @@ namespace Tabibi.API.Hubs
         // SessionId -> (UserId -> ConnectionId)
         public static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, string>> RoomUsers = new();
 
+        // SessionId -> (UserId -> true)
+        public static readonly ConcurrentDictionary<long, ConcurrentDictionary<string, byte>> VideoSpaceUsers = new();
+
+        // SessionId -> (UserId -> true)
+        public static readonly ConcurrentDictionary<long, ConcurrentDictionary<string, byte>> VideoSpaceJoinedOnce = new();
+
         // Tracks whether both parties have successfully joined the call room
         public static readonly ConcurrentDictionary<long, bool> CallStarted = new();
 
@@ -51,6 +57,36 @@ namespace Tabibi.API.Hubs
             if (room.Count >= 2)
             {
                 CallStarted[sessionId] = true;
+                await chatService.RecordVideoCallStartAsync(sessionId);
+
+                // Enforce the 30-minute time limit programmatically
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(30));
+
+                        using (var scope = serviceProvider.CreateScope())
+                        {
+                            var scopedChatService = scope.ServiceProvider.GetRequiredService<IChatService>();
+                            var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<VideoCallHub>>();
+
+                            // Complete the video call session
+                            await scopedChatService.CompleteVideoCallSessionAsync(sessionId);
+
+                            // Send a SignalR message to both clients in the group that call time has expired
+                            await hubContext.Clients.Group(sessionId.ToString()).SendAsync("CallTimeExpired");
+
+                            // Cleanup active dictionaries
+                            CallStarted.TryRemove(sessionId, out _);
+                            RoomUsers.TryRemove(sessionId.ToString(), out _);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Deferred automatic video call completion failed for session {SessionId}", sessionId);
+                    }
+                });
             }
 
             // Notify others in the room that this user joined
@@ -175,6 +211,60 @@ namespace Tabibi.API.Hubs
             await Clients.Group(sessionId.ToString()).SendAsync("ReceiveMessage", userId, message);
         }
 
+        public async Task JoinVideoSpace(long sessionId)
+        {
+            var userId = Context.UserIdentifier;
+            if (string.IsNullOrEmpty(userId)) return;
+
+            var activeUsers = VideoSpaceUsers.GetOrAdd(sessionId, _ => new ConcurrentDictionary<string, byte>());
+            activeUsers[userId] = 1;
+
+            var joinedOnce = VideoSpaceJoinedOnce.GetOrAdd(sessionId, _ => new ConcurrentDictionary<string, byte>());
+            joinedOnce[userId] = 1;
+
+            logger.LogInformation("User {UserId} joined MiroTalk video space for session {SessionId}. Active users: {Count}", userId, sessionId, activeUsers.Count);
+            await Task.CompletedTask;
+        }
+
+        public async Task LeaveVideoSpace(long sessionId)
+        {
+            var userId = Context.UserIdentifier;
+            if (string.IsNullOrEmpty(userId)) return;
+
+            logger.LogInformation("User {UserId} left MiroTalk video space for session {SessionId}.", userId, sessionId);
+            await HandleLeaveVideoSpace(sessionId, userId);
+        }
+
+        private async Task HandleLeaveVideoSpace(long sessionId, string userId)
+        {
+            if (VideoSpaceUsers.TryGetValue(sessionId, out var activeUsers))
+            {
+                activeUsers.TryRemove(userId, out _);
+
+                var joinedOnce = VideoSpaceJoinedOnce.GetOrAdd(sessionId, _ => new ConcurrentDictionary<string, byte>());
+
+                // Check if both users joined the MiroTalk video call at some point, and now the room is empty
+                if (joinedOnce.Count >= 2 && activeUsers.IsEmpty && CallStarted.ContainsKey(sessionId))
+                {
+                    logger.LogInformation("MiroTalk video room is empty after both users joined. Auto-completing session {SessionId}.", sessionId);
+                    
+                    CallStarted.TryRemove(sessionId, out _);
+                    VideoSpaceUsers.TryRemove(sessionId, out _);
+                    VideoSpaceJoinedOnce.TryRemove(sessionId, out _);
+
+                    using (var scope = serviceProvider.CreateScope())
+                    {
+                        var scopedChatService = scope.ServiceProvider.GetRequiredService<IChatService>();
+                        var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<VideoCallHub>>();
+
+                        await scopedChatService.CompleteVideoCallSessionAsync(sessionId);
+                        await hubContext.Clients.Group(sessionId.ToString()).SendAsync("CallEndedByPeer");
+                    }
+                }
+            }
+            await Task.CompletedTask;
+        }
+
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = Context.UserIdentifier;
@@ -191,6 +281,8 @@ namespace Tabibi.API.Hubs
 
                         if (long.TryParse(sessionIdStr, out var sessionId))
                         {
+                            await HandleLeaveVideoSpace(sessionId, userId);
+
                             bool roomIsEmpty = room.IsEmpty;
                             bool timePassed = await chatService.IsVideoCallTimePassedAsync(sessionId);
 

@@ -26,41 +26,6 @@ public class AppointmentService(
             price = await pricingService.GetPriceAsync(doctorId, consultationType.Value);
         }
 
-        if (consultationType == ConsultationType.Chat)
-        {
-            var chatSlots = new List<AvailableSlotDTO>();
-            var startHour = 9;
-            var endHour = 21;
-            var slotDuration = 30;
-
-            var current = TimeSpan.FromHours(startHour);
-            var limit = TimeSpan.FromHours(endHour);
-            var slotStep = TimeSpan.FromMinutes(slotDuration);
-
-            while (current + slotStep <= limit)
-            {
-                var startLocal = SlotService.TruncateToMinute(
-                    date.ToDateTime(TimeOnly.MinValue).Add(current));
-                var start = startLocal.ToUniversalTime();
-                var end = start.AddMinutes(slotDuration);
-
-                if (start > DateTime.UtcNow)
-                {
-                    chatSlots.Add(new AvailableSlotDTO
-                    {
-                        Start = start,
-                        End = end,
-                        IsAvailable = true,
-                        Price = price
-                    });
-                }
-
-                current += slotStep;
-            }
-
-            return chatSlots;
-        }
-
         var currentAvailabilities = await slotService.GetActiveAvailabilitiesAsync(
             doctorId,
             date);
@@ -85,23 +50,29 @@ public class AppointmentService(
         // Generate slots from current day's availabilities
         foreach (var availability in currentAvailabilities)
         {
+            var startInterval = availability.SlotDurationMins;
+            var sessionDuration = (consultationType == ConsultationType.VideoCall) ? 30 : availability.SlotDurationMins;
             var current = availability.StartTime;
-            var slotStep = TimeSpan.FromMinutes(availability.SlotDurationMins);
+            var slotStep = TimeSpan.FromMinutes(startInterval);
+            var durationLimit = TimeSpan.FromMinutes(sessionDuration);
 
             if (availability.StartTime < availability.EndTime)
             {
-                while (current + slotStep <= availability.EndTime)
+                while (current + durationLimit <= availability.EndTime)
                 {
                     var startLocal = SlotService.TruncateToMinute(
                         date.ToDateTime(TimeOnly.MinValue).Add(current));
                     var start = startLocal.ToUniversalTime();
 
-                    var end = start.AddMinutes(availability.SlotDurationMins);
+                    var end = (consultationType == ConsultationType.Chat) 
+                        ? start.AddDays(7) 
+                        : start.AddMinutes(sessionDuration);
 
-                    var isAvailable = !slotService.IsBlockedByExistingAppointment(
-                        start,
-                        availability.SlotDurationMins,
-                        blockingAppointments);
+                    var isAvailable = (consultationType == ConsultationType.Chat)
+                        || !slotService.IsBlockedByExistingAppointment(
+                            start,
+                            sessionDuration,
+                            blockingAppointments);
 
                     if (start > DateTime.UtcNow)
                     {
@@ -120,18 +91,21 @@ public class AppointmentService(
             else
             {
                 var limit = availability.EndTime.Add(TimeSpan.FromHours(24));
-                while (current < TimeSpan.FromHours(24) && (current + slotStep <= limit))
+                while (current < TimeSpan.FromHours(24) && (current + durationLimit <= limit))
                 {
                     var startLocal = SlotService.TruncateToMinute(
                         date.ToDateTime(TimeOnly.MinValue).Add(current));
                     var start = startLocal.ToUniversalTime();
 
-                    var end = start.AddMinutes(availability.SlotDurationMins);
+                    var end = (consultationType == ConsultationType.Chat)
+                        ? start.AddDays(7)
+                        : start.AddMinutes(sessionDuration);
 
-                    var isAvailable = !slotService.IsBlockedByExistingAppointment(
-                        start,
-                        availability.SlotDurationMins,
-                        blockingAppointments);
+                    var isAvailable = (consultationType == ConsultationType.Chat)
+                        || !slotService.IsBlockedByExistingAppointment(
+                            start,
+                            sessionDuration,
+                            blockingAppointments);
 
                     if (start > DateTime.UtcNow)
                     {
@@ -152,7 +126,10 @@ public class AppointmentService(
         // Generate slots from previous day's overnight availabilities
         foreach (var availability in overnightPrevAvailabilities)
         {
-            var slotStep = TimeSpan.FromMinutes(availability.SlotDurationMins);
+            var startInterval = availability.SlotDurationMins;
+            var sessionDuration = (consultationType == ConsultationType.VideoCall) ? 30 : availability.SlotDurationMins;
+            var slotStep = TimeSpan.FromMinutes(startInterval);
+            var durationLimit = TimeSpan.FromMinutes(sessionDuration);
             var current = availability.StartTime;
 
             while (current < TimeSpan.FromHours(24))
@@ -161,19 +138,22 @@ public class AppointmentService(
             }
 
             var limit = availability.EndTime.Add(TimeSpan.FromHours(24));
-            while (current + slotStep <= limit)
+            while (current + durationLimit <= limit)
             {
                 var todayTime = current - TimeSpan.FromHours(24);
                 var startLocal = SlotService.TruncateToMinute(
                     date.ToDateTime(TimeOnly.MinValue).Add(todayTime));
                 var start = startLocal.ToUniversalTime();
 
-                var end = start.AddMinutes(availability.SlotDurationMins);
+                var end = (consultationType == ConsultationType.Chat)
+                    ? start.AddDays(7)
+                    : start.AddMinutes(sessionDuration);
 
-                var isAvailable = !slotService.IsBlockedByExistingAppointment(
-                    start,
-                    availability.SlotDurationMins,
-                    blockingAppointments);
+                var isAvailable = (consultationType == ConsultationType.Chat)
+                    || !slotService.IsBlockedByExistingAppointment(
+                        start,
+                        sessionDuration,
+                        blockingAppointments);
 
                 if (start > DateTime.UtcNow)
                 {
@@ -215,7 +195,12 @@ public class AppointmentService(
             return ServiceResult<AppointmentBookedDTO>.Failure("Patient profile not found.");
 
         var normalizedScheduledAt = SlotService.TruncateToMinute(request.ScheduledAt);
-        var durationMins = SlotService.DefaultSlotDurationMins;
+        var durationMins = request.Type switch
+        {
+            ConsultationType.VideoCall => 30,
+            ConsultationType.Chat => 7 * 24 * 60,
+            _ => SlotService.DefaultSlotDurationMins
+        };
 
         var price = await pricingService.GetPriceAsync(request.DoctorId, request.Type);
         if (!price.HasValue)
@@ -259,13 +244,21 @@ public class AppointmentService(
                 return ServiceResult<AppointmentBookedDTO>.Failure("Online payment is required for remote consultations (Chat / Video).");
             }
 
+            var actualDurationMins = request.Type switch
+            {
+                ConsultationType.VideoCall => 30,
+                ConsultationType.Chat => 7 * 24 * 60,
+                ConsultationType.Clinic => validation.Availability?.SlotDurationMins ?? SlotService.DefaultSlotDurationMins,
+                _ => SlotService.DefaultSlotDurationMins
+            };
+
             var appointment = new Appointment
             {
                 PatientId = patient.PatientId,
                 Patient = patient,
                 DoctorId = request.DoctorId,
                 ScheduledAt = normalizedScheduledAt,
-                DurationMins = durationMins,
+                DurationMins = actualDurationMins,
                 ConsultationType = request.Type,
                 Status = request.PaymentMethod == PaymentMethod.Online ? AppointmentStatus.Pending : AppointmentStatus.Confirmed,
                 Price = price.Value,

@@ -26,10 +26,10 @@ export default function DoctorDashboardSchedule({
     <div className="col-span-1 md:col-span-6 bg-surface-container-lowest rounded-xl p-6 shadow-[0_12px_24px_-4px_rgba(42,36,85,0.08),0_4px_12px_-2px_rgba(42,36,85,0.04)] border border-surface-variant/30 flex flex-col">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-semibold text-on-surface">Daily Schedule</h2>
-          {(dashboardData?.todaysAppointmentsCount ?? 0) > 0 && (
+          <h2 className="text-xl font-semibold text-on-surface">Active Consultations</h2>
+          {(dashboardData?.activeConsultationsCount ?? 0) > 0 && (
             <span className="text-sm font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full">
-              {dashboardData?.todaysAppointmentsCount} today
+              {dashboardData?.activeConsultationsCount} active
             </span>
           )}
         </div>
@@ -68,7 +68,7 @@ export default function DoctorDashboardSchedule({
             <MdEventBusy className="text-4xl text-on-surface-variant/30 mb-2" />
             <p className="text-sm text-on-surface-variant/80 text-center mb-4">
               {isVerified
-                ? "No appointments for today."
+                ? "No active consultations."
                 : "Appointments will appear here once your profile is verified."}
             </p>
             <button

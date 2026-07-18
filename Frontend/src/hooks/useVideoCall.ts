@@ -7,6 +7,54 @@ import { toast } from "react-toastify";
 
 export type CallState = "IDLE" | "CONNECTING" | "ACTIVE" | "RECONNECTING" | "DISCONNECTED";
 
+const createSilentAudioTrack = (): MediaStreamTrack | null => {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = ctx.createOscillator();
+    const dst = ctx.createMediaStreamDestination();
+    oscillator.connect(dst);
+    oscillator.start();
+    const track = dst.stream.getAudioTracks()[0];
+    if (track) {
+      track.enabled = false;
+      return track;
+    }
+    return null;
+  } catch (e) {
+    console.error("Failed to create silent audio track:", e);
+    return null;
+  }
+};
+
+const createBlankVideoTrack = (width = 640, height = 480): MediaStreamTrack | null => {
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, width, height);
+    }
+    const stream = (canvas as any).captureStream 
+      ? (canvas as any).captureStream(30) 
+      : (canvas as any).mozCaptureStream 
+        ? (canvas as any).mozCaptureStream(30) 
+        : null;
+    if (stream) {
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        track.enabled = false;
+        return track;
+      }
+    }
+    return null;
+  } catch (e) {
+    console.error("Failed to create blank video track:", e);
+    return null;
+  }
+};
+
 interface UseVideoCallProps {
   sessionId?: number;
   onRemoteStream?: (stream: MediaStream) => void;
@@ -231,58 +279,87 @@ export const useVideoCall = ({ sessionId, onRemoteStream, onCallEnded }: UseVide
       return localStreamRef.current;
     }
 
-    let stream: MediaStream | null = null;
-    let hasVideo = true;
-    let hasAudio = true;
+    let audioTrack: MediaStreamTrack | null = null;
+    let videoTrack: MediaStreamTrack | null = null;
+    let hasRealAudio = false;
+    let hasRealVideo = false;
 
+    // 1. Try to get both video and audio
     try {
-      // 1. Try to get both video and audio
-      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      audioTrack = stream.getAudioTracks()[0] || null;
+      videoTrack = stream.getVideoTracks()[0] || null;
+      hasRealAudio = !!audioTrack;
+      hasRealVideo = !!videoTrack;
     } catch (err) {
-      console.warn("Failed to get both video and audio, trying fallback...", err);
+      console.warn("Failed to get both video and audio, attempting fallback combinations...", err);
       
-      // 2. Fallback to audio-only
+      // Try audio-only
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
-        hasVideo = false;
+        const audioStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+        audioTrack = audioStream.getAudioTracks()[0] || null;
+        hasRealAudio = !!audioTrack;
         toast.warn("Camera could not be accessed. Audio-only mode enabled.");
       } catch (audioErr) {
-        console.warn("Failed to get audio stream, trying video-only...", audioErr);
-        
-        // 3. Fallback to video-only
+        console.warn("Microphone not accessible:", audioErr);
+      }
+
+      // Try video-only (if audio failed or wasn't fetched yet)
+      if (!videoTrack) {
         try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          hasAudio = false;
+          const videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          videoTrack = videoStream.getVideoTracks()[0] || null;
+          hasRealVideo = !!videoTrack;
           toast.warn("Microphone could not be accessed. Video-only mode enabled.");
         } catch (videoErr) {
-          console.error("No camera or mic devices found or accessible. Creating empty stream.", videoErr);
-          toast.error("Could not access camera or microphone. Please check permissions.");
-          
-          // 4. Return an empty MediaStream so WebRTC signaling does not crash
-          stream = new MediaStream();
-          hasVideo = false;
-          hasAudio = false;
+          console.warn("Camera not accessible:", videoErr);
         }
       }
     }
 
+    // 2. Generate fallback tracks if hardware/permission is absent
+    if (!audioTrack) {
+      console.log("No real microphone accessible. Creating silent audio track fallback.");
+      const mockAudioTrack = createSilentAudioTrack();
+      if (mockAudioTrack) {
+        audioTrack = mockAudioTrack;
+      }
+    }
+
+    if (!videoTrack) {
+      console.log("No real camera accessible. Creating blank video track fallback.");
+      const mockVideoTrack = createBlankVideoTrack();
+      if (mockVideoTrack) {
+        videoTrack = mockVideoTrack;
+      }
+    }
+
+    const tracks: MediaStreamTrack[] = [];
+    if (audioTrack) tracks.push(audioTrack);
+    if (videoTrack) tracks.push(videoTrack);
+
+    const stream = new MediaStream(tracks);
     localStreamRef.current = stream;
     setLocalStream(stream);
 
-    // Camera off by default, mic on by default (if available)
-    if (hasVideo) {
-      stream.getVideoTracks().forEach((track) => {
-        track.enabled = false;
-      });
+    // Setup initial state: camera is off by default, microphone is muted if it's mock
+    if (videoTrack) {
+      videoTrack.enabled = false; // Camera starts off
       setIsVideoOff(true);
     } else {
       setIsVideoOff(true);
     }
 
-    if (hasAudio) {
-      setIsMuted(false);
+    if (audioTrack) {
+      // If it's a real microphone, unmute it; if mock, mute it.
+      audioTrack.enabled = hasRealAudio;
+      setIsMuted(!hasRealAudio);
     } else {
       setIsMuted(true);
+    }
+
+    if (!hasRealAudio || !hasRealVideo) {
+      toast.info("Connected to call. Note: Microphone or camera access was restricted or not found.");
     }
 
     return stream;

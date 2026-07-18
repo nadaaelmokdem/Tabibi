@@ -3,9 +3,9 @@ namespace Tabibi.Application.DTOs
     public class PatientDashboardDTO
     {
         public string FullName { get; set; } = string.Empty;
-        public int UpcomingAppointmentsCount { get; set; }
+        public int ActiveConsultationsCount { get; set; }
         public int ChatSessionsCount { get; set; }
-        public List<UpcomingAppointmentDTO> UpcomingAppointments { get; set; } = new();
+        public List<UpcomingAppointmentDTO> ActiveConsultations { get; set; } = new();
         public List<UnreviewedAppointmentDTO> UnreviewedAppointments { get; set; } = new();
     }
 
@@ -19,6 +19,7 @@ namespace Tabibi.Application.DTOs
         public string ConsultationType { get; set; } = string.Empty; 
         public string Status { get; set; } = string.Empty; 
         public string PaymentMethod { get; set; } = string.Empty;
+        public long? SessionId { get; set; }
     }
 
     public class UnreviewedAppointmentDTO
@@ -37,10 +38,10 @@ namespace Tabibi.Application.DTOs
         public string VerificationStatus { get; set; } = "Pending";
         public string? AdminComment { get; set; }
         public int ChatSessionsCount { get; set; }
-        public int TodaysAppointmentsCount { get; set; }
+        public int ActiveConsultationsCount { get; set; }
         public int TotalPatientsSeen { get; set; }
         public List<ChatSessionDTO> ChatSessions { get; set; } = new();
-        public List<UpcomingAppointmentDTO> TodaysAppointments { get; set; } = new();
+        public List<UpcomingAppointmentDTO> ActiveConsultations { get; set; } = new();
     }
 
     public class ChatSessionDTO

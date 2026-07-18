@@ -16,11 +16,14 @@ namespace Tabibi.Core.Models
 
         public DateTime StartedAt { get; set; } = DateTime.UtcNow;
         public DateTime? EndedAt { get; set; }
+        public DateTime? ActualStartedAt { get; set; }
 
         public SessionStatus Status { get; set; } = SessionStatus.Active;
 
         [Column(TypeName = "decimal(10,2)")]
         public decimal Price { get; set; }
+
+        public string? MeetingLink { get; set; }
 
         // Navigation
         [ForeignKey(nameof(PatientId))]

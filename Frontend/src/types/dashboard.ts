@@ -7,6 +7,7 @@ export interface UpcomingAppointment {
   consultationType: string;
   status: string;
   paymentMethod?: string;
+  sessionId?: number;
 }
 
 export interface RecentPrescription {
@@ -26,9 +27,9 @@ export interface UnreviewedAppointment {
 
 export interface PatientDashboardData {
   fullName: string;
-  upcomingAppointmentsCount: number;
+  activeConsultationsCount: number;
   chatSessionsCount: number;
-  upcomingAppointments: UpcomingAppointment[];
+  activeConsultations: UpcomingAppointment[];
   recentPrescriptions: RecentPrescription[];
   unreviewedAppointments: UnreviewedAppointment[];
 }
@@ -46,10 +47,10 @@ export interface DoctorDashboardData {
   verificationStatus?: "Pending" | "Approved" | "Rejected" | "NeedsChanges";
   adminComment?: string;
   chatSessionsCount: number;
-  todaysAppointmentsCount: number;
+  activeConsultationsCount: number;
   totalPatientsSeen: number;
   chatSessions: ChatSession[];
-  todaysAppointments: UpcomingAppointment[];
+  activeConsultations: UpcomingAppointment[];
 }
 
 export interface PendingDoctor {

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Tabibi.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Tabibi.Infrastructure.Data;
 namespace Tabibi.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260718091815_AddGoogleMeetLink")]
+    partial class AddGoogleMeetLink
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -858,7 +861,7 @@ namespace Tabibi.Infrastructure.Migrations
                     b.Property<DateTime?>("EndedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("MeetingLink")
+                    b.Property<string>("GoogleMeetLink")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("PatientId")

@@ -176,7 +176,7 @@ export default function ActiveChatPane({
           </div>
         )}
 
-        {sessionDetails && new Date(sessionDetails.startedAt).getTime() < now - 24 * 60 * 60 * 1000 && (
+        {sessionDetails && new Date(sessionDetails.startedAt).getTime() < now - 7 * 24 * 60 * 60 * 1000 && (
           <div className="bg-surface-container-low border border-surface-variant p-6 rounded-2xl text-center shadow-md max-w-md mx-auto my-4 flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shadow-sm">
               <MdOutlineHourglassDisabled className="text-2xl" />
@@ -184,7 +184,7 @@ export default function ActiveChatPane({
             <div>
               <h4 className="text-base font-extrabold text-on-surface">Consultation Expired</h4>
               <p className="text-xs font-medium text-on-surface-variant mt-1 leading-relaxed">
-                This 24-hour consultation session has expired. {isDoctor ? "The patient must initiate a follow-up to resume." : "You can resume this session by paying a follow-up fee."}
+                This 7-day consultation session has expired. {isDoctor ? "The patient must initiate a follow-up to resume." : "You can resume this session by paying a follow-up fee."}
               </p>
             </div>
             {!isDoctor && (

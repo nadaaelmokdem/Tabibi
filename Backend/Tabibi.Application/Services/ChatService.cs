@@ -225,7 +225,7 @@ namespace Tabibi.Application.Services
                     PatientUserId = s.Patient.UserId,
                     PatientProfilePictureUrl = (string?)null,
                     LastMessage = unitOfWork.ChatMessages.Query()
-                        .Where(m => m.SessionId == s.SessionId && !m.Content.StartsWith("Clinical Assessment:"))
+                        .Where(m => m.SessionId == s.SessionId)
                         .OrderByDescending(m => m.SentAt)
                         .FirstOrDefault()
                 })
@@ -252,8 +252,7 @@ namespace Tabibi.Application.Services
             var session = await unitOfWork.ChatSessions.Query().FirstOrDefaultAsync(s => s.SessionId == sessionId);
             if (session == null) throw new Exception("Session not found");
 
-            // 24-hour expiry check
-            if (DateTime.UtcNow - session.StartedAt > TimeSpan.FromDays(1))
+            if (DateTime.UtcNow - session.StartedAt > TimeSpan.FromDays(7))
             {
                 throw new Exception("Session has expired. Please follow up or start a new session.");
             }
@@ -512,9 +511,26 @@ namespace Tabibi.Application.Services
                 return false;
             }
 
+            if (session.ActualStartedAt == null)
+            {
+                return false;
+            }
+
             var now = DateTime.UtcNow;
-            var endOfAppointment = session.Appointment.ScheduledAt.AddMinutes(session.Appointment.DurationMins);
+            var endOfAppointment = session.ActualStartedAt.Value.AddMinutes(30); // Hardcoded to 30 minutes
             return now >= endOfAppointment;
+        }
+
+        public async Task RecordVideoCallStartAsync(long sessionId)
+        {
+            var session = await unitOfWork.VideoCallSessions.Query()
+                .FirstOrDefaultAsync(s => s.SessionId == sessionId);
+
+            if (session != null && session.ActualStartedAt == null)
+            {
+                session.ActualStartedAt = DateTime.UtcNow;
+                await unitOfWork.CompleteAsync();
+            }
         }
 
         public async Task CompleteVideoCallSessionAsync(long sessionId)
@@ -535,6 +551,54 @@ namespace Tabibi.Application.Services
 
                 await unitOfWork.CompleteAsync();
             }
+        }
+
+        public async Task<ServiceResult<string>> GetOrCreateMeetingLinkAsync(long sessionId)
+        {
+            var session = await unitOfWork.VideoCallSessions.Query()
+                .FirstOrDefaultAsync(s => s.SessionId == sessionId);
+
+            if (session == null)
+            {
+                return ServiceResult<string>.Failure("Video call session not found.");
+            }
+
+            if (!string.IsNullOrEmpty(session.MeetingLink))
+            {
+                return ServiceResult<string>.Success(session.MeetingLink);
+            }
+
+            var meetLink = $"https://p2p.mirotalk.com/join?room=TabibiConsultationSession_{sessionId}";
+            session.MeetingLink = meetLink;
+            await unitOfWork.CompleteAsync();
+
+            return ServiceResult<string>.Success(meetLink);
+        }
+
+        public async Task<VideoCallSessionDetailsDTO?> GetVideoCallSessionDetailsAsync(long sessionId)
+        {
+            var session = await unitOfWork.VideoCallSessions.Query()
+                .Include(s => s.Patient).ThenInclude(p => p.User)
+                .Include(s => s.Doctor).ThenInclude(d => d!.User)
+                .Include(s => s.Doctor.DoctorSpecialties).ThenInclude(ds => ds.Specialty)
+                .Include(s => s.Appointment)
+                .FirstOrDefaultAsync(s => s.SessionId == sessionId);
+
+            if (session == null) return null;
+
+            var specialtyName = session.Doctor.DoctorSpecialties?.FirstOrDefault()?.Specialty?.Name ?? "General Practice";
+
+            return new VideoCallSessionDetailsDTO
+            {
+                SessionId = session.SessionId,
+                PatientName = session.Patient.User.FullName,
+                DoctorName = session.Doctor.User.FullName,
+                DoctorSpecialty = specialtyName,
+                MeetingLink = session.MeetingLink,
+                ScheduledAt = session.Appointment?.ScheduledAt ?? session.StartedAt,
+                ActualStartedAt = session.ActualStartedAt,
+                Status = session.Status.ToString()
+            };
         }
     }
 }
